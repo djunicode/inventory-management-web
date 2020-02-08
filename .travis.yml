@@ -16,6 +16,3 @@ install:
 before_script:
  - python3 src/manage.py makemigrations
  - python3 src/manage.py migrate
-
-script:
- - black --check src/inventory_management/
