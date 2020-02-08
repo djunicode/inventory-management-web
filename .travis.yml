@@ -7,7 +7,7 @@ env:
  - DJANGO=2.1.4
 
 before_install:
- - export DJANGO_SETTINGS_MODULE=src.inventory_management.settings
+ - export DJANGO_SETTINGS_MODULE=inventory_management.settings
 
 install:
  - pip3 install -r requirements.txt
