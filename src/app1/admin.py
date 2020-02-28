@@ -1,5 +1,12 @@
 from django.contrib import admin
+
 from .models import *
 
 admin.site.register(User)
-# Register your models here.
+
+from .models import Product_Transaction, Products, Bill, Items
+
+admin.site.register(Product_Transaction)
+admin.site.register(Products)
+admin.site.register(Bill)
+admin.site.register(Items)
