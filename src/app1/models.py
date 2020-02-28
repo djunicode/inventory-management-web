@@ -4,6 +4,7 @@ from django.contrib.auth.base_user import BaseUserManager, AbstractBaseUser
 from django.contrib.auth.models import PermissionsMixin
 from django.conf import settings
 from django.core.validators import RegexValidator
+from datetime import datetime
 
 
 class UserManager(BaseUserManager):
@@ -55,10 +56,6 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     def __str__(self):
         return self.email
-=======
-from django.db import models
-from datetime import datetime
-
 
 class Products(models.Model):
     name = models.CharField(max_length=100)
@@ -78,7 +75,7 @@ class Items(models.Model):
     def __str__(self):
         return self.product
 
-
+    
 class Product_Transaction(models.Model):
     product = models.ForeignKey(Products, on_delete=models.CASCADE)
 
