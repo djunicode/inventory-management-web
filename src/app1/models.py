@@ -28,7 +28,7 @@ class UserManager(BaseUserManager):
 
 
 class User(AbstractBaseUser, PermissionsMixin):
-    GENDER = [("M", "M"), ("F", "F"), ("Transgender", "Transgender")]
+    GENDER = [("M", "M"), ("F", "F"), ("Other", "Other")]
 
     email = models.EmailField(unique=True)
     first_name = models.CharField(max_length=20)
@@ -57,6 +57,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     def __str__(self):
         return self.email
 
+
 class Products(models.Model):
     name = models.CharField(max_length=100)
     quantity = models.IntegerField()
@@ -75,20 +76,22 @@ class Items(models.Model):
     def __str__(self):
         return self.product
 
+
 class Bill(models.Model):
     person = models.CharField(max_length=100)
     date_time = models.DateTimeField(auto_now_add=True)
     taxes = models.FloatField()
-    Choices = (
+    choices = (
         ("In", "In"),
         ("Out", "Out"),
     )
 
-    in_or_out = models.CharField(max_length=20, choices=Choices,)
+    in_or_out = models.CharField(max_length=20, choices=choices)
 
     def __str__(self):
         return self.person
-    
+
+
 class Product_Transaction(models.Model):
     product = models.ForeignKey(Products, on_delete=models.CASCADE)
 
@@ -98,4 +101,3 @@ class Product_Transaction(models.Model):
 
     def __str__(self):
         return self.product
-

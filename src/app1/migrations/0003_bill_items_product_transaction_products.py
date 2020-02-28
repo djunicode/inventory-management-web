@@ -7,47 +7,99 @@ import django.db.models.deletion
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('app1', '0002_auto_20200224_1901'),
+        ("app1", "0002_auto_20200224_1901"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='Bill',
+            name="Bill",
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('person', models.CharField(max_length=100)),
-                ('date_time', models.DateTimeField(auto_now_add=True)),
-                ('taxes', models.FloatField()),
-                ('in_or_out', models.CharField(choices=[('In', 'In'), ('Out', 'Out')], max_length=20)),
+                (
+                    "id",
+                    models.AutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("person", models.CharField(max_length=100)),
+                ("date_time", models.DateTimeField(auto_now_add=True)),
+                ("taxes", models.FloatField()),
+                (
+                    "in_or_out",
+                    models.CharField(
+                        choices=[("In", "In"), ("Out", "Out")], max_length=20
+                    ),
+                ),
             ],
         ),
         migrations.CreateModel(
-            name='Products',
+            name="Products",
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(max_length=100)),
-                ('quantity', models.IntegerField()),
-                ('avg_cost_price', models.FloatField()),
-                ('loose', models.BooleanField()),
+                (
+                    "id",
+                    models.AutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("name", models.CharField(max_length=100)),
+                ("quantity", models.IntegerField()),
+                ("avg_cost_price", models.FloatField()),
+                ("loose", models.BooleanField()),
             ],
         ),
         migrations.CreateModel(
-            name='Product_Transaction',
+            name="Product_Transaction",
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('quantity', models.IntegerField()),
-                ('rate', models.FloatField()),
-                ('bill', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='app1.Bill')),
-                ('product', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='app1.Products')),
+                (
+                    "id",
+                    models.AutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("quantity", models.IntegerField()),
+                ("rate", models.FloatField()),
+                (
+                    "bill",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE, to="app1.Bill"
+                    ),
+                ),
+                (
+                    "product",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE, to="app1.Products"
+                    ),
+                ),
             ],
         ),
         migrations.CreateModel(
-            name='Items',
+            name="Items",
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('barcode', models.CharField(max_length=100)),
-                ('expiry', models.DateTimeField()),
-                ('product', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='app1.Products')),
+                (
+                    "id",
+                    models.AutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("barcode", models.CharField(max_length=100)),
+                ("expiry", models.DateTimeField()),
+                (
+                    "product",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE, to="app1.Products"
+                    ),
+                ),
             ],
         ),
     ]

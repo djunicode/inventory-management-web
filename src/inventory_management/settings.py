@@ -38,8 +38,18 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "app1.apps.App1Config",
-    "djoser"
+    "rest_framework",
+    "rest_framework.authtoken",
+    "djoser",
 ]
+
+REST_FRAMEWORK = {
+    "DEFAULT_AUTHENTICATION_CLASSES": (
+        "rest_framework.authentication.TokenAuthentication",
+    )
+}
+
+DJOSER = {"LOGIN_FIELD": "email"}
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
