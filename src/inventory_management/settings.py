@@ -49,7 +49,12 @@ REST_FRAMEWORK = {
     )
 }
 
-DJOSER = {"LOGIN_FIELD": "email"}
+DJOSER = {
+    "LOGIN_FIELD": "email",
+    "PERMISSIONS": {
+        "user_create": ["rest_framework.permissions.IsAdminUser"]
+    }
+}
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
