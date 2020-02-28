@@ -51,9 +51,7 @@ REST_FRAMEWORK = {
 
 DJOSER = {
     "LOGIN_FIELD": "email",
-    "PERMISSIONS": {
-        "user_create": ["rest_framework.permissions.IsAdminUser"]
-    }
+    "PERMISSIONS": {"user_create": ["rest_framework.permissions.IsAdminUser"]},
 }
 
 MIDDLEWARE = [
