@@ -75,18 +75,6 @@ class Items(models.Model):
     def __str__(self):
         return self.product
 
-    
-class Product_Transaction(models.Model):
-    product = models.ForeignKey(Products, on_delete=models.CASCADE)
-
-    quantity = models.IntegerField()
-    rate = models.FloatField()
-    bill = models.ForeignKey(Bill, on_delete=models.CASCADE)
-
-    def __str__(self):
-        return self.product
-
-
 class Bill(models.Model):
     person = models.CharField(max_length=100)
     date_time = models.DateTimeField(auto_now_add=True)
@@ -100,3 +88,14 @@ class Bill(models.Model):
 
     def __str__(self):
         return self.person
+    
+class Product_Transaction(models.Model):
+    product = models.ForeignKey(Products, on_delete=models.CASCADE)
+
+    quantity = models.IntegerField()
+    rate = models.FloatField()
+    bill = models.ForeignKey(Bill, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return self.product
+
