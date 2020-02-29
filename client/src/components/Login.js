@@ -7,10 +7,10 @@ import {
   Button,
   InputAdornment,
   IconButton,
+  Hidden,
 } from '@material-ui/core';
 import Visibility from '@material-ui/icons/Visibility';
 import VisibilityOff from '@material-ui/icons/VisibilityOff';
-import { Link } from 'react-router-dom';
 import illustration from '../images/Login.svg';
 
 const useStyles = makeStyles(theme => ({
@@ -21,40 +21,63 @@ const useStyles = makeStyles(theme => ({
     height: 'calc(100vh - 6rem)',
   },
   formContainer: {
-    width: '30rem',
+    flex: '1 1 30rem',
     height: '26rem',
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
   },
   form: {
+    width: '100%',
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
+    marginTop: theme.spacing(2),
+    padding: theme.spacing(0, 5),
+    [theme.breakpoints.down('sm')]: {
+      padding: theme.spacing(0, 2),
+    },
     '& .MuiTextField-root': {
       marginTop: theme.spacing(1),
-      width: '20rem',
+      width: '100%',
+      maxWidth: '20rem',
+      [theme.breakpoints.down('xs')]: {
+        maxWidth: '15rem',
+      },
     },
   },
   paper: {
-    width: '70rem',
+    maxWidth: '70rem',
     height: '35rem',
+    margin: theme.spacing(2),
+    padding: theme.spacing(2),
     display: 'flex',
     justifyContent: 'center',
     alignItems: 'center',
     borderRadius: '10px',
     boxShadow: '4px 4px 20px rgba(0,0,0,0.1)',
+    overflow: 'hidden',
+    [theme.breakpoints.down('xs')]: {
+      width: '30rem',
+      height: '38rem',
+      alignItems: 'flex-start',
+    },
   },
   img: {
-    width: '35rem',
+    flex: '1 1 35rem',
     marginRight: theme.spacing(2),
+    [theme.breakpoints.down('xs')]: {
+      width: '15rem',
+      marginBottom: theme.spacing(2),
+    },
   },
   heading: {
     fontWeight: '700',
-    marginBottom: theme.spacing(6),
+    marginBottom: theme.spacing(4),
   },
   button: {
-    width: '18rem',
+    width: '100%',
+    maxWidth: '18rem',
     height: '3rem',
     borderRadius: '2rem',
     fontSize: '1.5rem',
@@ -62,9 +85,12 @@ const useStyles = makeStyles(theme => ({
     marginTop: theme.spacing(1.5),
     textTransform: 'capitalize',
     boxShadow: '0 5px 65px rgba(0,0,0,0.1)',
+    [theme.breakpoints.down('xs')]: {
+      maxWidth: '12rem',
+    },
   },
-  footer: {
-    marginTop: 'auto',
+  invalid: {
+    display: isInvalidCred => (isInvalidCred ? 'block' : 'none'),
   },
 }));
 
@@ -77,18 +103,22 @@ const Login = () => {
     email: ' ',
     password: ' ',
   });
+  const [isInvalidCred, setIsInvalidCred] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const classes = useStyles();
+  const classes = useStyles(isInvalidCred);
 
   // useEffect Hook to check if there are any errors after any change in the error state
   // It runs only after each time the form is submitted
   // Using this method as setState Hook doesnt support second callback argument
   useEffect(() => {
-    if (!error.errors) {
+    if (!error.errors && isSubmitting) {
+      console.log('useeffect');
+      setIsInvalidCred(true);
       setPassword('');
       setEmail('');
     }
-  }, [error]);
+  }, [error, isSubmitting]);
 
   const toggleShowPassword = () => {
     setShowPassword(prevState => !prevState);
@@ -125,6 +155,7 @@ const Login = () => {
   const handleSubmit = e => {
     e.preventDefault();
     validateInputs();
+    setIsSubmitting(true);
   };
 
   const handleChange = e => {
@@ -135,16 +166,26 @@ const Login = () => {
   return (
     <div className={classes.root}>
       <Paper className={classes.paper}>
-        <div>
+        <Hidden xsDown>
           <img
             src={illustration}
             alt='Login illustration'
             className={classes.img}
           />
-        </div>
+        </Hidden>
         <div className={classes.formContainer}>
           <Typography variant='h3' className={classes.heading}>
             Login
+          </Typography>
+          <Hidden smUp>
+            <img
+              src={illustration}
+              alt='Login illustration'
+              className={classes.img}
+            />
+          </Hidden>
+          <Typography variant='h6' color='error' className={classes.invalid}>
+            Invalid email or password. Please try again
           </Typography>
           <form
             noValidate
@@ -194,24 +235,6 @@ const Login = () => {
               Login
             </Button>
           </form>
-          <div className={classes.footer}>
-            <Typography
-              variant='h6'
-              component='span'
-              style={{ color: '#828282' }}
-            >
-              New User?{'   '}
-            </Typography>
-            <Link to='/register'>
-              <Typography
-                variant='h6'
-                component='span'
-                style={{ color: '#495D69', textDecoration: 'underline' }}
-              >
-                Register
-              </Typography>
-            </Link>
-          </div>
         </div>
       </Paper>
     </div>

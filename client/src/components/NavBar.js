@@ -8,13 +8,14 @@ import {
   makeStyles,
 } from '@material-ui/core';
 import MenuIcon from '@material-ui/icons/Menu';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 
 const useStyles = makeStyles(theme => ({
   root: {
     flexGrow: 1,
   },
   menuButton: {
+    display: isLogin => (isLogin ? 'none' : 'block'),
     marginRight: theme.spacing(2),
   },
   title: {
@@ -27,7 +28,9 @@ const useStyles = makeStyles(theme => ({
 }));
 
 const NavBar = () => {
-  const classes = useStyles();
+  const location = useLocation();
+  const isLogin = location.pathname === '/login';
+  const classes = useStyles(isLogin);
 
   return (
     <div className={classes.root}>
