@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import {
   Paper,
   Typography,
@@ -11,7 +11,8 @@ import {
 } from '@material-ui/core';
 import Visibility from '@material-ui/icons/Visibility';
 import VisibilityOff from '@material-ui/icons/VisibilityOff';
-import illustration from '../images/Login.svg';
+import illustration from '../../images/Login.svg';
+import useForm from './useForm';
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -95,73 +96,44 @@ const useStyles = makeStyles(theme => ({
 }));
 
 const Login = () => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [showPassword, setShowPassword] = useState(false);
-  const [error, setError] = useState({
-    errors: false,
-    email: ' ',
-    password: ' ',
-  });
-  const [isInvalidCred, setIsInvalidCred] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-
-  const classes = useStyles(isInvalidCred);
-
-  // useEffect Hook to check if there are any errors after any change in the error state
-  // It runs only after each time the form is submitted
-  // Using this method as setState Hook doesnt support second callback argument
-  useEffect(() => {
-    if (!error.errors && isSubmitting) {
-      console.log('useeffect');
-      setIsInvalidCred(true);
-      setPassword('');
-      setEmail('');
-    }
-  }, [error, isSubmitting]);
-
-  const toggleShowPassword = () => {
-    setShowPassword(prevState => !prevState);
-  };
-
-  const validateInputs = () => {
+  const validateInputs = values => {
     let errors1 = false;
     let password1 = ' ';
     let email1 = ' ';
 
-    if (email === '') {
+    if (values.email === '') {
       errors1 = true;
       email1 = 'Please fill out this field';
-    } else if (!/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i.test(email)) {
+    } else if (!/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i.test(values.email)) {
       errors1 = true;
       email1 = 'Please enter a valid email';
     }
-    if (password === '') {
+    if (values.password === '') {
       errors1 = true;
       password1 = 'Please fill out this field';
-    } else if (password.length < 8) {
+    } else if (values.password.length < 8) {
       errors1 = true;
       password1 = 'Password should have more than 8 characters';
     }
 
-    setError(prevState => ({
-      ...prevState,
+    return {
       errors: errors1,
       email: email1,
       password: password1,
-    }));
+    };
   };
 
-  const handleSubmit = e => {
-    e.preventDefault();
-    validateInputs();
-    setIsSubmitting(true);
-  };
+  const {
+    handleChange,
+    handleSubmit,
+    error,
+    isInvalidCred,
+    values,
+    showPassword,
+    toggleShowPassword,
+  } = useForm(validateInputs);
 
-  const handleChange = e => {
-    const setItem = e.target.name === 'email' ? setEmail : setPassword;
-    setItem(e.target.value);
-  };
+  const classes = useStyles(isInvalidCred);
 
   return (
     <div className={classes.root}>
@@ -200,7 +172,7 @@ const Login = () => {
               name='email'
               type='email'
               label='Email'
-              value={email}
+              value={values.email}
               onChange={handleChange}
               error={!(error.email === ' ')}
               helperText={error.email}
@@ -212,7 +184,7 @@ const Login = () => {
               name='password'
               type={showPassword ? 'text' : 'password'}
               label='Password'
-              value={password}
+              value={values.password}
               onChange={handleChange}
               error={!(error.password === ' ')}
               helperText={error.password}
