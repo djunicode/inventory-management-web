@@ -35,6 +35,7 @@ const useForm = validateInputs => {
           console.log(response);
           setIsInvalidCred(true);
         });
+      setIsSubmitting(false);
       setValues(prevState => ({ ...prevState, email: '', password: '' }));
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps

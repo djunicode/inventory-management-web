@@ -66,6 +66,7 @@ const useStyles = makeStyles(theme => ({
   },
   img: {
     flex: '1 1 35rem',
+    maxWidth: '50%',
     marginRight: theme.spacing(2),
     [theme.breakpoints.down('xs')]: {
       width: '15rem',
@@ -111,9 +112,9 @@ const Login = () => {
     if (values.password === '') {
       errors1 = true;
       password1 = 'Please fill out this field';
-    } else if (values.password.length < 8) {
+    } else if (values.password.length < 5) {
       errors1 = true;
-      password1 = 'Password should have more than 8 characters';
+      password1 = 'Password should have more than 5 characters';
     }
 
     return {

@@ -35,23 +35,19 @@ const NavBar = () => {
   const isLoggedIn = location.pathname !== '/login';
   const classes = useStyles(isLoggedIn);
 
-  const handleClick = () => {
+  const handleClick = async () => {
     if (isLoggedIn) {
-      const token = localStorage.getItem('token');
-      axios({
-        method: 'POST',
-        url: '/auth/token/logout',
-        headers: { Authorization: `Token ${token}` },
-      })
-        .then(({ data }) => {
-          // handle success
-          localStorage.removeItem('token');
-          console.log(data);
-        })
-        .catch(error => {
-          // handle error
-          console.log(error);
+      try {
+        const token = localStorage.getItem('token');
+        await axios({
+          method: 'POST',
+          url: '/auth/token/logout',
+          headers: { Authorization: `Token ${token}` },
         });
+        localStorage.removeItem('token');
+      } catch (error) {
+        console.log(error);
+      }
     }
     history.push('/login');
   };
