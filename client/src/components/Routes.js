@@ -26,30 +26,6 @@ const Routes = () => {
   );
 };
 
-/* const PrivateRoute = ({ children, ...rest }) => {
-  const tokenExists = !!localStorage.getItem('token');
-
-  return (
-    <Route
-      // eslint-disable-next-line react/jsx-props-no-spreading
-      {...rest}
-      render={({ location }) =>
-        tokenExists ? (
-          children
-        ) : (
-          <Redirect
-            to={{
-              pathname: '/login',
-              state: { from: location },
-            }}
-          />
-        )
-      }
-    />
-  );
-};
- */
-
 const PrivateRoute = ({ children, path, ...rest }) => {
   const tokenExists = !!localStorage.getItem('token');
   if (path === '/') {
