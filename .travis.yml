@@ -18,4 +18,5 @@ before_script:
  - python3 src/manage.py migrate
 
 script:
+ - black --check src/
  - python3 src/manage.py test
