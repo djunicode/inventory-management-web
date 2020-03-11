@@ -204,6 +204,7 @@ const Login = () => {
               color='primary'
               variant='contained'
               className={classes.button}
+              data-testid='submit'
             >
               Login
             </Button>
