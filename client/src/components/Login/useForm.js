@@ -15,26 +15,23 @@ const useForm = validateInputs => {
 
   const history = useHistory();
 
+  const apiFetch = async formData => {
+    try {
+      const response = await axios.post('/auth/token/login', formData);
+      const { data } = response;
+      localStorage.setItem('token', data.auth_token);
+      history.push('/');
+    } catch (e) {
+      setIsInvalidCred(true);
+    }
+  };
+
   useEffect(() => {
     if (!error.errors && isSubmitting) {
       const formData = new FormData();
       formData.append('email', values.email);
       formData.append('password', values.password);
-      axios({
-        method: 'POST',
-        url: '/auth/token/login',
-        data: formData,
-      })
-        .then(({ data }) => {
-          // handle success
-          localStorage.setItem('token', data.auth_token);
-          history.push('/');
-        })
-        .catch(response => {
-          // handle error
-          console.log(response);
-          setIsInvalidCred(true);
-        });
+      apiFetch(formData);
       setIsSubmitting(false);
       setValues(prevState => ({ ...prevState, email: '', password: '' }));
     }

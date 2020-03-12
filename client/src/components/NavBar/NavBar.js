@@ -38,12 +38,10 @@ const NavBar = () => {
   const handleClick = async () => {
     if (isLoggedIn) {
       try {
+        const data = '';
         const token = localStorage.getItem('token');
-        await axios({
-          method: 'POST',
-          url: '/auth/token/logout',
-          headers: { Authorization: `Token ${token}` },
-        });
+        const config = { headers: { Authorization: `Token ${token}` } };
+        await axios.post('/auth/token/logout', data, config);
         localStorage.removeItem('token');
       } catch (error) {
         console.log(error);
