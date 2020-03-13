@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     "rest_framework",
     "rest_framework.authtoken",
     "djoser",
+    "corsheaders",
 ]
 
 REST_FRAMEWORK = {
@@ -49,12 +50,17 @@ REST_FRAMEWORK = {
     )
 }
 
-DJOSER = {"LOGIN_FIELD": "email"}
+DJOSER = {
+    "LOGIN_FIELD": "email",
+    "PERMISSIONS": {"user_create": ["rest_framework.permissions.IsAdminUser"]},
+}
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
-    "django.contrib.sessions.middleware.SessionMiddleware",
+    "corsheaders.middleware.CorsMiddleware",
+    "django.middleware.common.BrokenLinkEmailsMiddleware",
     "django.middleware.common.CommonMiddleware",
+    "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
@@ -126,3 +132,5 @@ USE_TZ = True
 STATIC_URL = "/static/"
 
 AUTH_USER_MODEL = "app1.User"
+
+CORS_ORIGIN_ALLOW_ALL = True
