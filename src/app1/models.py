@@ -19,8 +19,8 @@ class UserManager(BaseUserManager):
         user.save()
         return user
 
-    def create_superuser(self, email, password):
-        user = self.create_user(email, password)
+    def create_superuser(self, email, password, **extra_fields):
+        user = self.create_user(email, password, **extra_fields)
         user.is_staff = True
         user.is_superuser = True
         user.save()
@@ -34,23 +34,14 @@ class User(AbstractBaseUser, PermissionsMixin):
     first_name = models.CharField(max_length=20)
     last_name = models.CharField(max_length=20)
     age = models.IntegerField(default=0)
-    gender = models.CharField(blank=True, null=True, choices=GENDER, max_length=15)
-    phone_regex = RegexValidator(
-        regex=r"^\+?1?\d{9,10}$", message="Phone number must be valid"
-    )
-    phone = models.CharField(
-        validators=[phone_regex], max_length=10, blank=True, null=True, default=None
-    )
-    date_joined = models.DateTimeField(auto_now_add=True)
-    position = models.CharField(max_length=50)
-    salary = models.IntegerField(blank=True, null=True, default=None)
-    shift_time_start = models.TimeField(blank=True, null=True)
-    shift_time_end = models.TimeField(blank=True, null=True)
+    gender = models.CharField(choices=GENDER, max_length=15)
     is_staff = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
     is_superuser = models.BooleanField(default=False)
 
     objects = UserManager()
+
+    REQUIRED_FIELDS = ["first_name", "last_name", "age", "gender", "is_staff"]
 
     USERNAME_FIELD = "email"
 
