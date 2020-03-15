@@ -54,6 +54,7 @@ class Products(models.Model):
     quantity = models.IntegerField()
     avg_cost_price = models.FloatField()
     loose = models.BooleanField()
+    min_qty = models.IntegerField(blank=True)
 
     def __str__(self):
         return self.name
