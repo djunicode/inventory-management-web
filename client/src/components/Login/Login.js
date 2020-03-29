@@ -92,11 +92,12 @@ const useStyles = makeStyles(theme => ({
     },
   },
   invalid: {
-    display: isInvalidCred => (isInvalidCred ? 'block' : 'none'),
+    display: props => (props.invalid ? 'block' : 'none'),
   },
 }));
 
 const Login = () => {
+  // function to validate inputs, returns the error statements
   const validateInputs = values => {
     let errors1 = false;
     let password1 = ' ';
@@ -124,6 +125,7 @@ const Login = () => {
     };
   };
 
+  // Use custom hook for form state management
   const {
     handleChange,
     handleSubmit,
@@ -134,7 +136,7 @@ const Login = () => {
     toggleShowPassword,
   } = useForm(validateInputs);
 
-  const classes = useStyles(isInvalidCred);
+  const classes = useStyles({ invalid: isInvalidCred });
 
   return (
     <div className={classes.root}>
