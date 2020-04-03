@@ -97,34 +97,6 @@ const useStyles = makeStyles(theme => ({
 }));
 
 const Login = () => {
-  // function to validate inputs, returns the error statements
-  const validateInputs = values => {
-    let errors1 = false;
-    let password1 = ' ';
-    let email1 = ' ';
-
-    if (values.email === '') {
-      errors1 = true;
-      email1 = 'Please fill out this field';
-    } else if (!/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i.test(values.email)) {
-      errors1 = true;
-      email1 = 'Please enter a valid email';
-    }
-    if (values.password === '') {
-      errors1 = true;
-      password1 = 'Please fill out this field';
-    } else if (values.password.length < 5) {
-      errors1 = true;
-      password1 = 'Password should have more than 5 characters';
-    }
-
-    return {
-      errors: errors1,
-      email: email1,
-      password: password1,
-    };
-  };
-
   // Use custom hook for form state management
   const {
     handleChange,
@@ -134,7 +106,7 @@ const Login = () => {
     values,
     showPassword,
     toggleShowPassword,
-  } = useForm(validateInputs);
+  } = useForm();
 
   const classes = useStyles({ invalid: isInvalidCred });
 

@@ -3,7 +3,35 @@ import { useHistory } from 'react-router-dom';
 import axios from 'axios';
 
 // custom hook for form state management
-const useForm = validateInputs => {
+const useForm = () => {
+  // function to validate inputs, returns the error statements
+  const validateInputs = values => {
+    let errors1 = false;
+    let password1 = ' ';
+    let email1 = ' ';
+
+    if (values.email === '') {
+      errors1 = true;
+      email1 = 'Please fill out this field';
+    } else if (!/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i.test(values.email)) {
+      errors1 = true;
+      email1 = 'Please enter a valid email';
+    }
+    if (values.password === '') {
+      errors1 = true;
+      password1 = 'Please fill out this field';
+    } else if (values.password.length < 5) {
+      errors1 = true;
+      password1 = 'Password should have more than 5 characters';
+    }
+
+    return {
+      errors: errors1,
+      email: email1,
+      password: password1,
+    };
+  };
+
   // values of email and password
   const [values, setValues] = useState({ email: '', password: '' });
 
@@ -69,6 +97,7 @@ const useForm = validateInputs => {
   };
   // function to handle any change in inputs
   const handleChange = event => {
+    // Use event.persist() to stop event pooling done by react
     event.persist();
     setValues(prevState => ({
       ...prevState,
@@ -81,10 +110,8 @@ const useForm = validateInputs => {
     handleSubmit,
     error,
     isInvalidCred,
-    setIsInvalidCred,
     values,
     showPassword,
-    setError,
     toggleShowPassword,
   };
 };
