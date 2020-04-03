@@ -74,7 +74,7 @@ const NavBar = ({ mobileOpen, setMobileOpen, tabletOpen, setTabletOpen }) => {
 
   return (
     <div className={classes.root}>
-      <AppBar position='static'>
+      <AppBar position='fixed'>
         <Toolbar>
           <Hidden mdUp>
             <IconButton

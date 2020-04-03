@@ -11,6 +11,8 @@ const drawerWidth = 230;
 
 const useStyles = makeStyles(theme => ({
   container: {
+    padding: theme.spacing(5),
+    paddingTop: theme.spacing(13),
     marginLeft: drawerWidth,
     [theme.breakpoints.only('sm')]: {
       marginLeft: props => (props.tab ? drawerWidth : '4.5rem'),
