@@ -72,7 +72,7 @@ ROOT_URLCONF = "inventory_management.urls"
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [],
+        "DIRS": [os.path.join(BASE_DIR, 'frontend')],
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
@@ -134,3 +134,8 @@ STATIC_URL = "/static/"
 AUTH_USER_MODEL = "app1.User"
 
 CORS_ORIGIN_ALLOW_ALL = True
+
+
+STATICFILES_DIRS = (
+    os.path.join(BASE_DIR, 'frontend', "build", "static"),  # update the STATICFILES_DIRS
+)
