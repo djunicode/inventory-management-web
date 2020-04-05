@@ -12,8 +12,7 @@ from django.conf.urls import url
 
 urlpatterns = [
     path("auth/user_delete/", csrf_exempt(user_delete), name="user_delete"),
-    path("auth/", include("djoser.urls")),
-    # path("auth/", include("djoser.urls")),
+    path("auth/", include("djoser.urls")),    
     path("auth/", include("djoser.urls.authtoken")),
     path("login/", login, name="login"),
     url(r"^api/bill/$", BillListView.as_view()),
