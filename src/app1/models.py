@@ -54,6 +54,7 @@ class Products(models.Model):
     quantity = models.IntegerField()
     avg_cost_price = models.FloatField()
     loose = models.BooleanField()
+    selling_price=models.IntegerField()
 
     def __str__(self):
         return self.name
@@ -65,7 +66,7 @@ class Items(models.Model):
     expiry = models.DateTimeField()
 
     def __str__(self):
-        return self.product
+        return self.product.name
 
 
 class Bill(models.Model):
@@ -85,10 +86,10 @@ class Bill(models.Model):
 
 class Product_Transaction(models.Model):
     product = models.ForeignKey(Products, on_delete=models.CASCADE)
-
+    bill = models.ForeignKey(Bill, on_delete=models.CASCADE,related_name='transaction')
     quantity = models.IntegerField()
     rate = models.FloatField()
-    bill = models.ForeignKey(Bill, on_delete=models.CASCADE)
+    
 
     def __str__(self):
-        return self.product
+        return self.product.name
