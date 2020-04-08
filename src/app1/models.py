@@ -71,7 +71,7 @@ class Items(models.Model):
 
 class Bill(models.Model):
     customer = models.CharField(max_length=100)
-    employee=models.OneToOneField(User,on_delete=models.CASCADE, blank=True)
+    employee=models.ForeignKey(User,on_delete=models.CASCADE, blank=True)
     date_time = models.DateTimeField(auto_now_add=True)
     taxes = models.FloatField()
     choices = (
