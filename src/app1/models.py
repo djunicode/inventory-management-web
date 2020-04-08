@@ -46,7 +46,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     USERNAME_FIELD = "email"
 
     def __str__(self):
-        return self.email
+        return self.first_name
 
 
 class Products(models.Model):
@@ -70,7 +70,8 @@ class Items(models.Model):
 
 
 class Bill(models.Model):
-    person = models.CharField(max_length=100)
+    customer = models.CharField(max_length=100)
+    employee=models.OneToOneField(User,on_delete=models.CASCADE, blank=True)
     date_time = models.DateTimeField(auto_now_add=True)
     taxes = models.FloatField()
     choices = (
@@ -81,7 +82,7 @@ class Bill(models.Model):
     in_or_out = models.CharField(max_length=20, choices=choices)
 
     def __str__(self):
-        return self.person
+        return self.customer
 
 
 class Product_Transaction(models.Model):

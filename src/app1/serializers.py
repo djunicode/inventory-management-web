@@ -12,10 +12,10 @@ class TransactionSerializer(serializers.ModelSerializer):
 
 class BillSerializer(serializers.ModelSerializer):
     transaction = TransactionSerializer(read_only=True, many=True)
-
+    name = serializers.CharField(source="employee.first_name", read_only=True)
     class Meta:
         model = Bill
-        fields = ["id", "person", "date_time", "in_or_out", "transaction"]
+        fields = ["id","customer","name","date_time", "in_or_out", "transaction"]
 
 
 class ProductListSerializer(serializers.ModelSerializer):
