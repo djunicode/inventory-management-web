@@ -26,7 +26,9 @@ const theme = createMuiTheme({
   spacing: factor => `${0.5 * factor}rem`,
   text: {
     color: {
-      veryDark: '#122E40',
+      veryDark: '#122e40',
+      dark: '#495d69',
+      darkGray: '#333',
     },
   },
 });
