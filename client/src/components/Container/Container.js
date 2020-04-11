@@ -1,11 +1,12 @@
 import React from 'react';
 import { makeStyles } from '@material-ui/core/styles';
-import { Route, Switch } from 'react-router-dom';
+import { Route, Switch, Redirect } from 'react-router-dom';
 import { PropTypes } from 'prop-types';
 import Home from '../Home/Home';
 import Employee from '../Employee/Employee';
 import Transaction from '../Transactions/Transaction';
 import Inventory from '../Inventory/Inventory';
+import Register from '../Register/Register';
 
 const drawerWidth = 230;
 
@@ -19,6 +20,8 @@ const useStyles = makeStyles(theme => ({
     },
     [theme.breakpoints.only('xs')]: {
       marginLeft: 0,
+      paddingLeft: theme.spacing(3),
+      paddingRight: theme.spacing(3),
     },
   },
 }));
@@ -32,18 +35,54 @@ const Container = ({ tabletOpen }) => {
         <Route exact path='/'>
           <Home />
         </Route>
-        <Route path='/employee'>
+        <AdminRoute path='/employee'>
           <Employee />
-        </Route>
+        </AdminRoute>
         <Route path='/transaction'>
           <Transaction />
         </Route>
         <Route path='/inventory'>
           <Inventory />
         </Route>
+        <AdminRoute path='/addemployee'>
+          <Register />
+        </AdminRoute>
       </Switch>
     </div>
   );
+};
+
+// Admin Route Component
+const AdminRoute = ({ children, path, ...rest }) => {
+  const isAdmin = localStorage.getItem('isStaff');
+
+  // User cannot directly open respective page if user is not an admin.
+  // It also redirects the user to home page
+
+  return (
+    <Route
+      path={path}
+      // eslint-disable-next-line react/jsx-props-no-spreading
+      {...rest}
+      render={
+        ({ location }) =>
+          isAdmin ? (
+            children
+          ) : (
+            <Redirect to={{ pathname: '/', state: { from: location } }} />
+          )
+        // eslint-disable-next-line react/jsx-curly-newline
+      }
+    />
+  );
+};
+
+AdminRoute.propTypes = {
+  children: PropTypes.oneOfType([
+    PropTypes.element.isRequired,
+    PropTypes.arrayOf(PropTypes.element).isRequired,
+  ]).isRequired,
+  path: PropTypes.string.isRequired,
 };
 
 Container.propTypes = {
