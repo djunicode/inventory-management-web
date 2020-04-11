@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Drawer,
   Hidden,
@@ -82,6 +82,12 @@ const useStyles = makeStyles(theme => ({
 function NavDrawer({ mobileOpen, setMobileOpen, tabletOpen }) {
   const classes = useStyles({ tab: tabletOpen });
 
+  // links and labels for each link in drawer
+  const [list, setList] = useState({
+    links: ['/', '/inventory', '/transaction'],
+    labels: ['Home', 'Inventory', 'Transactions'],
+  });
+
   // function to handle drawer state on mobile
   const handleDrawerToggle = () => {
     setMobileOpen(!mobileOpen);
@@ -94,17 +100,22 @@ function NavDrawer({ mobileOpen, setMobileOpen, tabletOpen }) {
     <ReceiptIcon className={classes.icons} />,
   ];
 
-  // array of drawer labels
-  const listLabels = ['Home', 'Inventory', 'Employees', 'Transactions'];
-
-  // array of drawer links
-  const listLinks = ['/', '/inventory', '/employee', '/transaction'];
+  useEffect(() => {
+    // Add Admin protected links to the list only if isStaff is true
+    const isAdmin = localStorage.getItem('isStaff');
+    if (isAdmin === 'true') {
+      setList({
+        labels: ['Home', 'Inventory', 'Employees', 'Transactions'],
+        links: ['/', '/inventory', '/employee', '/transaction'],
+      });
+    }
+  }, []);
 
   const drawer = (
     <div>
       <List>
-        {listLabels.map((text, index) => (
-          <Link to={listLinks[index]} className={classes.link}>
+        {list.labels.map((text, index) => (
+          <Link to={list.links[index]} className={classes.link} key={text}>
             <ListItem button key={text}>
               <ListItemIcon className={classes.listIcon}>
                 {listIcons[index]}
