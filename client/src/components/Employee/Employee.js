@@ -77,7 +77,7 @@ export default function Employee() {
   // list of employees got from API
   const [employeeList, setEmployeeList] = useState([]);
   // contains the index of the row, if delete is used
-  const [deletedRow, setDeletedRow] = useState('');
+  const [deletedRow, setDeletedRow] = useState([]);
 
   const history = useHistory();
 
@@ -123,7 +123,7 @@ export default function Employee() {
   // handle user delete
   const handleDelete = async row => {
     const { email } = row;
-    setDeletedRow(employeeList.indexOf(row));
+    setDeletedRow(prevState => [...prevState, employeeList.indexOf(row)]);
     try {
       const formData = new FormData();
       formData.append('email', email);
@@ -155,7 +155,7 @@ export default function Employee() {
                 <TableRow
                   key={row.name}
                   hover
-                  className={index === deletedRow ? 'delete' : ''}
+                  className={deletedRow.includes(index) ? 'delete' : ''}
                 >
                   <TableCell className={classes.firstColumn}>
                     <Hidden xsDown>
