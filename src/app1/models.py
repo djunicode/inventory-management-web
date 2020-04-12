@@ -52,9 +52,9 @@ class User(AbstractBaseUser, PermissionsMixin):
 class Products(models.Model):
     name = models.CharField(max_length=100)
     quantity = models.IntegerField()
-    avg_cost_price = models.FloatField()
+    avg_cost_price = models.FloatField(blank=True, null=True)
     loose = models.BooleanField()
-    selling_price = models.IntegerField()
+    mrp = models.IntegerField(blank=True, null=True)
 
     def __str__(self):
         return self.name
@@ -62,8 +62,8 @@ class Products(models.Model):
 
 class Items(models.Model):
     product = models.ForeignKey(Products, on_delete=models.CASCADE)
-    barcode = models.CharField(max_length=100)
-    expiry = models.DateTimeField()
+    barcode = models.CharField(max_length=100, blank=True, null=True)
+    expiry = models.DateTimeField(blank=True, null=True)
 
     def __str__(self):
         return self.product.name
@@ -71,7 +71,7 @@ class Items(models.Model):
 
 class Bill(models.Model):
     customer = models.CharField(max_length=100)
-    employee=models.ForeignKey(User,on_delete=models.CASCADE, blank=True)
+    employee = models.ForeignKey(User, on_delete=models.CASCADE, blank=True)
     date_time = models.DateTimeField(auto_now_add=True)
     taxes = models.FloatField()
     choices = (
@@ -87,9 +87,14 @@ class Bill(models.Model):
 
 class Product_Transaction(models.Model):
     product = models.ForeignKey(Products, on_delete=models.CASCADE)
-    bill = models.ForeignKey(Bill, on_delete=models.CASCADE, related_name="transaction")
+    bill = models.ForeignKey(Bill, on_delete=models.CASCADE, related_name="transaction", blank=True, null=True)
     quantity = models.IntegerField()
     rate = models.FloatField()
+    choices = (
+        ("In", "In"),
+        ("Out", "Out"),
+    )
+    in_or_out = models.CharField(max_length=20, choices=choices)
 
     def __str__(self):
         return self.product.name
