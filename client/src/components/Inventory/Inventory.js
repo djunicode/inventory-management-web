@@ -9,12 +9,10 @@ import {
   TableContainer,
   TableHead,
   TableRow,
-  Fab,
   IconButton,
   Hidden,
 } from '@material-ui/core';
 import DeleteIcon from '@material-ui/icons/Delete';
-import AddIcon from '@material-ui/icons/Add';
 import EditIcon from '@material-ui/icons/Edit';
 import axios from 'axios';
 import MobileEditMenu from '../MobileEditMenu';
@@ -57,11 +55,6 @@ const useStyles = makeStyles(theme => ({
     fontWeight: '700',
     marginBottom: theme.spacing(5),
   },
-  fab: {
-    position: 'fixed',
-    bottom: theme.spacing(4),
-    right: theme.spacing(4),
-  },
   firstColumn: {
     width: '7rem',
     paddingRight: 0,
@@ -76,7 +69,7 @@ export default function Inventory() {
   // list of inventory got from API
   const [inventoryList, setInventoryList] = useState([]);
   // contains the index of the row, if delete is used
-  const [deletedRow, setDeletedRow] = useState('');
+  const [deletedRow, setDeletedRow] = useState([]);
 
   const apiFetch = async () => {
     try {
@@ -101,17 +94,10 @@ export default function Inventory() {
 
   const classes = useStyles();
 
-  // handle click on the FAB
-  const handleFabClick = () => {
-    // TODO implement this when endpoint is ready
-    // open the create product form
-    // add a route for addproduct
-  };
-
   // handle product delete
   const handleDelete = async row => {
     const { id } = row;
-    setDeletedRow(inventoryList.indexOf(row));
+    setDeletedRow(prevState => [...prevState, inventoryList.indexOf(row)]);
     try {
       await axios.delete(`/api/productlist/${id}`);
     } catch (e) {
@@ -147,7 +133,7 @@ export default function Inventory() {
                 <TableRow
                   key={row.name}
                   hover
-                  className={index === deletedRow ? 'delete' : ''}
+                  className={deletedRow.includes(index) ? 'delete' : ''}
                 >
                   <TableCell className={classes.firstColumn}>
                     <Hidden xsDown>
@@ -183,14 +169,6 @@ export default function Inventory() {
           </Table>
         </TableContainer>
       </Paper>
-      <Fab
-        color='primary'
-        aria-label='add'
-        className={classes.fab}
-        onClick={handleFabClick}
-      >
-        <AddIcon />
-      </Fab>
     </>
   );
 }
