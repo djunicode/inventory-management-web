@@ -254,9 +254,13 @@ const Register = () => {
               onChange={handleChange}
               className={classes.radio}
             >
-              <FormControlLabel value control={<Radio />} label='Manager' />
               <FormControlLabel
-                value={false}
+                value='true'
+                control={<Radio />}
+                label='Manager'
+              />
+              <FormControlLabel
+                value='false'
                 control={<Radio />}
                 label='Employee'
               />

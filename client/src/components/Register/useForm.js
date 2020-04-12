@@ -48,7 +48,7 @@ const useForm = () => {
     confirmPassword: '',
     age: '',
     gender: 'M',
-    isStaff: true,
+    isStaff: 'true',
   });
   // toggle to show password on password input
   const [showPassword, setShowPassword] = useState(false);
@@ -79,9 +79,7 @@ const useForm = () => {
     try {
       const token = localStorage.getItem('token');
       const config = { headers: { Authorization: `Token ${token}` } };
-      const response = await axios.post('/auth/users/', formData, config);
-      const { data } = response;
-      console.log(data);
+      await axios.post('/auth/users/', formData, config);
       history.push('/employee');
     } catch (e) {
       console.log(e.response);
@@ -116,7 +114,7 @@ const useForm = () => {
         confirmPassword: '',
         age: '',
         gender: 'M',
-        isStaff: true,
+        isStaff: 'true',
       }));
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
