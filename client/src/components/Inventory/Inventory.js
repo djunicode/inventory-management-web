@@ -15,6 +15,7 @@ import {
 import DeleteIcon from '@material-ui/icons/Delete';
 import EditIcon from '@material-ui/icons/Edit';
 import axios from 'axios';
+import { useHistory } from 'react-router-dom';
 import MobileEditMenu from '../MobileEditMenu';
 
 const useStyles = makeStyles(theme => ({
@@ -71,6 +72,8 @@ export default function Inventory() {
   // contains the index of the row, if delete is used
   const [deletedRow, setDeletedRow] = useState([]);
 
+  const history = useHistory();
+
   const apiFetch = async () => {
     try {
       const response = await axios.get('/api/productlist');
@@ -78,7 +81,8 @@ export default function Inventory() {
       const list = data.map(val => ({
         name: val.name,
         quantity: val.quantity,
-        price: val.selling_price,
+        mrp: val.mrp,
+        loose: val.loose,
         id: val.id,
       }));
       setInventoryList(list);
@@ -107,9 +111,12 @@ export default function Inventory() {
 
   // handle product edit
   const handleEdit = row => {
-    console.log(row);
-    // TODO implement this when endpoint is ready
-    // open the create product form and pass the data as props
+    history.push('/updateproduct', {
+      name: row.name,
+      mrp: row.mrp,
+      loose: row.loose,
+      id: row.id,
+    });
   };
 
   return (
@@ -162,7 +169,7 @@ export default function Inventory() {
                   </TableCell>
                   <TableCell>{row.name}</TableCell>
                   <TableCell align='right'>{row.quantity}</TableCell>
-                  <TableCell align='right'>{row.price}</TableCell>
+                  <TableCell align='right'>{row.mrp}</TableCell>
                 </TableRow>
               ))}
             </TableBody>
