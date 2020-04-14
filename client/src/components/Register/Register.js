@@ -17,7 +17,7 @@ import {
 } from '@material-ui/core';
 import Visibility from '@material-ui/icons/Visibility';
 import VisibilityOff from '@material-ui/icons/VisibilityOff';
-import useForm from './useForm';
+import useForm from './useRegisterForm';
 
 const useStyles = makeStyles(theme => ({
   paper: {
@@ -188,7 +188,7 @@ const Register = () => {
             InputProps={{
               endAdornment: (
                 <InputAdornment position='end'>
-                  <IconButton onClick={toggleShowPassword}>
+                  <IconButton onClick={toggleShowPassword} tabIndex='-1'>
                     {showPassword ? <Visibility /> : <VisibilityOff />}
                   </IconButton>
                 </InputAdornment>
@@ -209,7 +209,7 @@ const Register = () => {
             InputProps={{
               endAdornment: (
                 <InputAdornment position='end'>
-                  <IconButton onClick={toggleShowconfirmPassword}>
+                  <IconButton onClick={toggleShowconfirmPassword} tabIndex='-1'>
                     {showConfirmPassword ? <Visibility /> : <VisibilityOff />}
                   </IconButton>
                 </InputAdornment>
@@ -241,6 +241,11 @@ const Register = () => {
             name='age'
             type='number'
             label='Employee Age'
+            InputProps={{
+              inputProps: {
+                min: 0,
+              },
+            }}
             value={values.age}
             onChange={handleChange}
             error={!(error.age === ' ')}
