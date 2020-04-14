@@ -7,6 +7,7 @@ import Employee from '../Employee/Employee';
 import Transaction from '../Transactions/Transaction';
 import Inventory from '../Inventory/Inventory';
 import Register from '../Register/Register';
+import UpdateProduct from '../UpdateProduct/UpdateProductForm';
 
 const drawerWidth = 230;
 
@@ -43,6 +44,9 @@ const Container = ({ tabletOpen }) => {
         </Route>
         <Route path='/inventory'>
           <Inventory />
+        </Route>
+        <Route path='/updateproduct'>
+          <UpdateProduct />
         </Route>
         <AdminRoute path='/addemployee'>
           <Register />
