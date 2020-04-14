@@ -10,7 +10,7 @@ import {
 import AddIcon from '@material-ui/icons/Add';
 import { makeStyles } from '@material-ui/core/styles';
 import { PropTypes } from 'prop-types';
-import useTransactionForm from './useTransactionForm';
+import useForm from './useTransactionForm';
 
 const useStyles = makeStyles(theme => ({
   paper: {
@@ -52,9 +52,6 @@ const useStyles = makeStyles(theme => ({
     '& > :first-child': {
       marginTop: 0,
     },
-  },
-  priceInput: {
-    display: props => (props.buy === 'Buy' ? 'flex' : 'none'),
   },
   addProduct: {
     width: theme.typography.pxToRem(165),
@@ -113,9 +110,7 @@ const Form = ({ type }) => {
     handleSubmit,
     productsList,
     handleAddProduct,
-    price,
-    priceErr,
-  } = useTransactionForm(type);
+  } = useForm(type);
 
   return (
     <div>
@@ -137,24 +132,39 @@ const Form = ({ type }) => {
                 Product {values.length > 1 ? index + 1 : ''}
               </Typography>
               <div className={classes.form}>
-                <TextField
-                  required
-                  variant='filled'
-                  id='product-input'
-                  name='productName'
-                  select
-                  label='Product Name'
-                  value={value.productName}
-                  onChange={event => handleChange(event, index)}
-                  error={!(error[index].product === ' ')}
-                  helperText={error[index].product}
-                >
-                  {productsList.map(option => (
-                    <MenuItem key={option.name} value={option.name}>
-                      {option.name}
-                    </MenuItem>
-                  ))}
-                </TextField>
+                {type === 'Buy' ? (
+                  <TextField
+                    required
+                    variant='filled'
+                    id='product-input'
+                    name='productName'
+                    label='Product Name'
+                    value={value.productName}
+                    onChange={event => handleChange(event, index)}
+                    error={!(error[index].product === ' ')}
+                    helperText={error[index].product}
+                  />
+                ) : (
+                  <TextField
+                    required
+                    variant='filled'
+                    id='product-input'
+                    name='productName'
+                    select
+                    label='Product Name'
+                    value={value.productName}
+                    onChange={event => handleChange(event, index)}
+                    error={!(error[index].product === ' ')}
+                    helperText={error[index].product}
+                  >
+                    {productsList.map(option => (
+                      <MenuItem key={option.name} value={option.name}>
+                        {option.name}
+                      </MenuItem>
+                    ))}
+                  </TextField>
+                )}
+
                 <TextField
                   required
                   variant='filled'
@@ -167,11 +177,10 @@ const Form = ({ type }) => {
                       min: 0,
                     },
                   }}
-                  value={price[index]}
+                  value={value.price}
                   onChange={event => handleChange(event, index)}
-                  error={!(priceErr[index] === ' ')}
-                  helperText={priceErr[index]}
-                  className={classes.priceInput}
+                  error={!(error[index].price === ' ')}
+                  helperText={error[index].price}
                 />
                 <TextField
                   required
