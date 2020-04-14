@@ -96,11 +96,11 @@ const useStyles = makeStyles(theme => ({
 const UpdateProduct = () => {
   // get state from location
   const location = useLocation();
-  const { name, mrp, id, loose } = location.state;
+  const { name, sellingPrice, id, loose } = location.state;
   // Use custom hook for form state management
   const { handleChange, handleSubmit, error, values } = useForm({
     name,
-    mrp,
+    sellingPrice,
     loose,
     id,
   });
@@ -137,19 +137,19 @@ const UpdateProduct = () => {
           <TextField
             required
             variant='filled'
-            id='mrp-input'
+            id='sellingPrice-input'
             type='number'
-            name='mrp'
-            label='MRP'
+            name='sellingPrice'
+            label='Selling Price'
             InputProps={{
               inputProps: {
                 min: 0,
               },
             }}
-            value={values.mrp}
+            value={values.sellingPrice}
             onChange={handleChange}
-            error={!(error.mrp === ' ')}
-            helperText={error.mrp}
+            error={!(error.sellingPrice === ' ')}
+            helperText={error.sellingPrice}
           />
           <FormControl component='fieldset'>
             <FormLabel component='legend'>Type</FormLabel>

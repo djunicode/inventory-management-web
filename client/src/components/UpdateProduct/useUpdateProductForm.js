@@ -3,18 +3,18 @@ import { useHistory } from 'react-router-dom';
 import axios from 'axios';
 
 // custom hook for form state management
-const useForm = ({ name, mrp, loose, id }) => {
+const useForm = ({ name, sellingPrice, loose, id }) => {
   // function to validate inputs, returns the error statements
   const validateInputs = values => {
     const err = {
       errors: false,
       name: ' ',
-      mrp: ' ',
-      loose: 'true',
+      sellingPrice: ' ',
+      loose: ' ',
     };
 
-    if (values.mrp === '0') {
-      err.mrp = 'MRP cannot be 0';
+    if (values.sellingPrice === '0') {
+      err.sellingPrice = 'Selling Price cannot be 0';
       err.errors = true;
     }
 
@@ -28,11 +28,11 @@ const useForm = ({ name, mrp, loose, id }) => {
     return err;
   };
 
-  // values for name , mrp and loose
+  // values for name , selling price and loose
   // got from location state
   const [values, setValues] = useState({
     name,
-    mrp,
+    sellingPrice,
     loose: loose === true ? 'true' : 'false',
   });
 
@@ -40,8 +40,8 @@ const useForm = ({ name, mrp, loose, id }) => {
   const [error, setError] = useState({
     errors: false,
     name: ' ',
-    mrp: ' ',
-    loose: 'true',
+    sellingPrice: ' ',
+    loose: ' ',
   });
 
   // true only if submit button is pressed
@@ -53,12 +53,7 @@ const useForm = ({ name, mrp, loose, id }) => {
   //  if credentials are invalid then invalidcred is set to appropriate errors got from API
   const apiFetch = async formData => {
     try {
-      const config = {
-        headers: {
-          'X-CSRFToken': `KKuuRqgKGizqqBjN5TtIbMQm2nMPvrcutbVyWxPOehpgf1ZJMxX8eVkubO7bLkGO`,
-        },
-      };
-      await axios.put(`/api/productlist/${id}/`, formData, config);
+      await axios.post(`/api/update/${id}/`, formData);
       history.push('/inventory');
     } catch (e) {
       console.log(e.response);
@@ -71,8 +66,9 @@ const useForm = ({ name, mrp, loose, id }) => {
     if (!error.errors && isSubmitting) {
       const formData = new FormData();
       formData.append('name', values.name);
-      formData.append('mrp', values.mrp);
-      formData.append('loose', values.loose);
+      formData.append('latest_selling_price', values.sellingPrice);
+      const looseVal = values.loose === 'true' ? 'True' : 'False';
+      formData.append('loose', looseVal);
       // post data to server
       apiFetch(formData);
       setIsSubmitting(false);
@@ -80,7 +76,7 @@ const useForm = ({ name, mrp, loose, id }) => {
       setValues(prevState => ({
         ...prevState,
         name: ' ',
-        mrp: ' ',
+        sellingPrice: ' ',
         loose: 'true',
       }));
     }

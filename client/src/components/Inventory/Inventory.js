@@ -81,7 +81,7 @@ export default function Inventory() {
       const list = data.map(val => ({
         name: val.name,
         quantity: val.quantity,
-        mrp: val.mrp,
+        sellingPrice: val.latest_selling_price,
         loose: val.loose,
         id: val.id,
       }));
@@ -113,7 +113,7 @@ export default function Inventory() {
   const handleEdit = row => {
     history.push('/updateproduct', {
       name: row.name,
-      mrp: row.mrp,
+      sellingPrice: row.sellingPrice,
       loose: row.loose,
       id: row.id,
     });
@@ -169,7 +169,9 @@ export default function Inventory() {
                   </TableCell>
                   <TableCell>{row.name}</TableCell>
                   <TableCell align='right'>{row.quantity}</TableCell>
-                  <TableCell align='right'>{row.mrp}</TableCell>
+                  <TableCell align='right'>
+                    {row.sellingPrice ? row.sellingPrice : 'Not Set'}
+                  </TableCell>
                 </TableRow>
               ))}
             </TableBody>
