@@ -35,13 +35,43 @@ class BillListView(generics.ListAPIView):
 
 
 class ProductListView(generics.ListCreateAPIView):
+
     queryset = Products.objects.all()
     serializer_class = ProductListSerializer
 
 
-class ProductUpdateView(generics.RetrieveUpdateDestroyAPIView):
+class ProductDeleteView(generics.DestroyAPIView):
     queryset = Products.objects.all()
-    serializer_class = ProductUpdateSerializer
+    serializer_class = ProductDeleteSerializer
+
+
+def product_update(request, pid):
+
+    if request.method == 'POST':
+        pr = Products.objects.get(id=pid)
+        pname = pr.name
+        pr.name = request.POST['name']
+        pr.latest_selling_price = request.POST['latest_selling_price']
+
+        if ((pr.loose == True and (request.POST['loose']) == "False")):
+
+            for i in range(1, int(pr.quantity) + 1):
+                itobj = Items(product=pr)
+                itobj.save()
+
+            pr.loose = False
+        elif ((pr.loose == False and (request.POST['loose'] == "True"))):
+            ito = Items.objects.filter(product__name=pname)
+            for i in ito:
+                i.delete()
+
+            pr.loose = True
+        else:
+            pr.loose = request.POST['loose']
+        pr.save()
+        dict_obj = model_to_dict(pr)
+        serialized = json.dumps(dict_obj)
+        return HttpResponse(serialized)
 
 
 def buy(request):
@@ -55,27 +85,30 @@ def buy(request):
                                   (int(request.POST['avg_cost_price']) * int(request.POST['quantity']))) / (int(request.POST['quantity']) + re.quantity))
             re.quantity = re.quantity + int(request.POST['quantity'])
             re.save()
-            for i in range(1, int(request.POST['quantity']) + 1):
-                itobj = Items(product=re)
-                itobj.save()
-                trobj = Product_Transaction(product=re, quantity=int(
-                    request.POST['quantity']), rate=int(request.POST['avg_cost_price']), in_or_out="In")
+
+            if re.loose == False:
+                for i in range(1, int(request.POST['quantity']) + 1):
+                    itobj = Items(product=re)
+                    itobj.save()
+            trobj = Product_Transaction(product=re, quantity=int(
+                request.POST['quantity']), rate=int(request.POST['avg_cost_price']), in_or_out="In")
             trobj.save()
             tr = Products.objects.get(name=request.POST['name'])
             created = {"created": False}
             dict_obj = model_to_dict(tr)
             dict_obj.update(created)
             serialized = json.dumps(dict_obj)
+            return HttpResponse(serialized)
 
         except Products.DoesNotExist:
 
             name = request.POST['name']
             quant = request.POST['quantity']
-            mrp = request.POST['mrp']
+
             avg_cost_price = request.POST['avg_cost_price']
-            loose = request.POST['loose']
-            pdt = Products(name=name, quantity=quant, mrp=mrp,
-                           avg_cost_price=avg_cost_price, loose=loose)
+
+            pdt = Products(name=name, quantity=quant,
+                           avg_cost_price=avg_cost_price)
             pdt.save()
             for i in range(1, int(request.POST['quantity']) + 1):
                 itobj = Items(product=pdt)
@@ -93,8 +126,7 @@ def buy(request):
 
 
 def sell(request):
-    d = Items.objects.filter(product__name="Lays")
-    print(d)
+
     if request.method == 'POST':
 
         re = get_object_or_404(Products, name=request.POST['name'])
@@ -102,30 +134,23 @@ def sell(request):
         if (re.quantity - int(request.POST['quantity']) >= 0):
 
             re.quantity = re.quantity - int(request.POST['quantity'])
+            if re.loose == True:
+                re.latest_selling_price = request.POST['latest_selling_price']
             re.save()
 
-            if (re.loose == True):
-                pt = Product_Transaction.objects.filter(product__name=re.name)
-                if(len(pt) != 0):
-                    rt = pt[len(pt) - 1].rate
+        trobj = Product_Transaction(product=re, quantity=int(
+            request.POST['quantity']), rate=request.POST['latest_selling_price'], in_or_out="Out")
+        trobj.save()
 
-                else:
-
-                    rt = None  # Default value
-
-            else:
-                rt = re.mrp
-            trobj = Product_Transaction(product=re, quantity=int(
-                request.POST['quantity']), rate=rt, in_or_out="Out")
-            trobj.save()
+        if re.loose == False:
 
             it = Items.objects.filter(product__name=re.name)
             for i in range(0, int(request.POST['quantity'])):
                 it[i].delete()
 
-            tr = Products.objects.get(name=request.POST['name'])
-            created = {"created": False}
-            dict_obj = model_to_dict(tr)
-            dict_obj.update(created)
-            serialized = json.dumps(dict_obj)
-            return HttpResponse(serialized)
+        tr = Products.objects.get(name=request.POST['name'])
+        created = {"created": False}
+        dict_obj = model_to_dict(tr)
+        dict_obj.update(created)
+        serialized = json.dumps(dict_obj)
+        return HttpResponse(serialized)

@@ -6,8 +6,8 @@ from .views import (
     TransactionListView,
     BillListView,
     ProductListView,
-    ProductUpdateView,
-    buy, sell,
+    ProductDeleteView,
+    buy, sell, product_update,
 )
 
 from django.conf.urls import url
@@ -19,9 +19,10 @@ urlpatterns = [
     path("login/", login, name="login"),
     url(r"^api/bill/$", BillListView.as_view()),
     url(r"^api/productlist/$", ProductListView.as_view()),
-    url(r"^api/productlist/(?P<pk>\d+)/$", ProductUpdateView.as_view()),
+    url(r"^api/productlist/(?P<pk>\d+)/$", ProductDeleteView.as_view()),
     url("api/buy/", csrf_exempt(buy)),
     url("api/sell/", csrf_exempt(sell)),
+    url(r"api/update/(?P<pid>\d+)/$", csrf_exempt(product_update)),
     # Might be useless
     url(r"api/transactions/$", TransactionListView.as_view()),
 ]

@@ -53,8 +53,8 @@ class Products(models.Model):
     name = models.CharField(max_length=100)
     quantity = models.IntegerField()
     avg_cost_price = models.FloatField(blank=True, null=True)
-    loose = models.BooleanField()
-    mrp = models.IntegerField(blank=True, null=True)
+    loose = models.BooleanField(default=False)
+    latest_selling_price = models.IntegerField(blank=True, null=True)
 
     def __str__(self):
         return self.name
