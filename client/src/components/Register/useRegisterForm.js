@@ -30,6 +30,11 @@ const useForm = () => {
       err.errors = true;
     }
 
+    if (values.age === '0') {
+      err.age = 'Age cannot be 0';
+      err.errors = true;
+    }
+
     Object.keys(values).forEach(key => {
       if (values[key] === '') {
         err[key] = 'Please fill out this field';
