@@ -19,7 +19,7 @@ const useStyles = makeStyles(theme => ({
     display: 'flex',
     justifyContent: 'center',
     alignItems: 'center',
-    height: 'calc(100vh - 6rem)',
+    minHeight: '100vh',
   },
   formContainer: {
     flex: '1 1 30rem',
@@ -51,6 +51,7 @@ const useStyles = makeStyles(theme => ({
     maxWidth: '70rem',
     height: '35rem',
     margin: theme.spacing(2),
+    marginTop: '6rem',
     padding: theme.spacing(2),
     display: 'flex',
     justifyContent: 'center',
@@ -166,7 +167,7 @@ const Login = () => {
               InputProps={{
                 endAdornment: (
                   <InputAdornment position='end'>
-                    <IconButton onClick={toggleShowPassword}>
+                    <IconButton onClick={toggleShowPassword} tabIndex='-1'>
                       {showPassword ? <Visibility /> : <VisibilityOff />}
                     </IconButton>
                   </InputAdornment>
