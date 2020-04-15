@@ -115,7 +115,12 @@ function NavDrawer({ mobileOpen, setMobileOpen, tabletOpen }) {
     <div>
       <List>
         {list.labels.map((text, index) => (
-          <Link to={list.links[index]} className={classes.link} key={text}>
+          <Link
+            to={list.links[index]}
+            className={classes.link}
+            key={text}
+            onClick={handleDrawerToggle}
+          >
             <ListItem button key={text}>
               <ListItemIcon className={classes.listIcon}>
                 {listIcons[index]}
