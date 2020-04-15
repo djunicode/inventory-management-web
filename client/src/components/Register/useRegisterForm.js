@@ -109,18 +109,6 @@ const useForm = () => {
       // post data to server
       apiFetch(formData);
       setIsSubmitting(false);
-      // reset inputs
-      setValues(prevState => ({
-        ...prevState,
-        firstName: '',
-        lastName: '',
-        email: '',
-        password: '',
-        confirmPassword: '',
-        age: '',
-        gender: 'M',
-        isStaff: 'true',
-      }));
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [error, isSubmitting]);

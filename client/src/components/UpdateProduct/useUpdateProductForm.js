@@ -72,13 +72,6 @@ const useForm = ({ name, sellingPrice, loose, id }) => {
       // post data to server
       apiFetch(formData);
       setIsSubmitting(false);
-      // reset inputs
-      setValues(prevState => ({
-        ...prevState,
-        name: ' ',
-        sellingPrice: ' ',
-        loose: 'true',
-      }));
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [error, isSubmitting]);
