@@ -8,6 +8,8 @@ import Transaction from '../Transactions/Transaction';
 import Inventory from '../Inventory/Inventory';
 import Register from '../Register/Register';
 import UpdateProduct from '../UpdateProduct/UpdateProductForm';
+import SimpleSnackbar from '../SnackBar/Snackbar';
+import SnackContextProvider from '../SnackBar/SnackContext';
 
 const drawerWidth = 230;
 
@@ -32,26 +34,29 @@ const Container = ({ tabletOpen }) => {
 
   return (
     <div className={classes.container}>
-      <Switch>
-        <Route exact path='/'>
-          <Home />
-        </Route>
-        <AdminRoute path='/employee'>
-          <Employee />
-        </AdminRoute>
-        <Route path='/transaction'>
-          <Transaction />
-        </Route>
-        <Route path='/inventory'>
-          <Inventory />
-        </Route>
-        <Route path='/updateproduct'>
-          <UpdateProduct />
-        </Route>
-        <AdminRoute path='/addemployee'>
-          <Register />
-        </AdminRoute>
-      </Switch>
+      <SnackContextProvider>
+        <Switch>
+          <Route exact path='/'>
+            <Home />
+          </Route>
+          <AdminRoute path='/employee'>
+            <Employee />
+          </AdminRoute>
+          <Route path='/transaction'>
+            <Transaction />
+          </Route>
+          <Route path='/inventory'>
+            <Inventory />
+          </Route>
+          <Route path='/updateproduct'>
+            <UpdateProduct />
+          </Route>
+          <AdminRoute path='/addemployee'>
+            <Register />
+          </AdminRoute>
+        </Switch>
+        <SimpleSnackbar />
+      </SnackContextProvider>
     </div>
   );
 };
