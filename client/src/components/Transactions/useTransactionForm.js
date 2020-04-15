@@ -1,5 +1,7 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useContext } from 'react';
 import axios from 'axios';
+
+import { SnackContext } from '../SnackBar/SnackContext';
 
 const useForm = type => {
   // function to validate inputs, returns the error statements
@@ -59,7 +61,7 @@ const useForm = type => {
       const list = data.map(val => ({
         name: val.name,
         quantity: val.quantity,
-        price: val.mrp,
+        price: val.latest_selling_price,
         id: val.id,
       }));
       setProductsList(list);
@@ -72,16 +74,40 @@ const useForm = type => {
     apiFetch();
   }, []);
 
+  const { setSnack } = useContext(SnackContext);
   // post data to API
-  /* const apiPost = async formData => {
+  const apiPost = async formData => {
+    const products = [];
     try {
-      const response = await axios.post('/api/buy/');
-      const { data } = response;
-      // TODO add logic for snackbar and use set timeout for first 5 products returned
+      if (type === 'Buy') {
+        const response = await axios.post('/api/buy/', formData);
+        const { data } = response;
+        console.log('Here is response', data);
+        if (data.created) {
+          products.push(data);
+        }
+      } else {
+        const response = await axios.post('/api/sell/', formData);
+        const { data } = response;
+        console.log('Here is response', data);
+      }
+      if (products.length) {
+        setSnack({
+          open: true,
+          message: `Added ${products[0].name}`,
+          action: 'EDIT',
+          actionParams: {
+            name: products[0].name,
+            sellingPrice: products[0].latest_selling_price,
+            loose: products[0].loose,
+            id: products[0].id,
+          },
+        });
+      }
     } catch (e) {
       console.log(e);
     }
-  }; */
+  };
 
   useEffect(() => {
     const noErr = error.every(val => Object.values(val).every(v => v === ' '));
@@ -92,9 +118,14 @@ const useForm = type => {
         const formData = new FormData();
         formData.append('name', val.productName);
         formData.append('quantity', val.quantity);
-        formData.append('price', val.price);
+        if (type === 'Buy') {
+          formData.append('avg_cost_price', val.price);
+        } else {
+          formData.append('latest_selling_price', val.price);
+        }
         // post data to server
         console.log(...formData);
+        apiPost(formData);
       });
       setIsSubmitting(false);
       // reset inputs
@@ -128,14 +159,25 @@ const useForm = type => {
       const { price } = productsList.find(
         product => product.name === event.target.value
       );
-      setValues(prevState => {
-        const temp = [...prevState];
-        temp[index] = {
-          ...temp[index],
-          price,
-        };
-        return temp;
-      });
+      if (price) {
+        setValues(prevState => {
+          const temp = [...prevState];
+          temp[index] = {
+            ...temp[index],
+            price,
+          };
+          return temp;
+        });
+      } else {
+        setValues(prevState => {
+          const temp = [...prevState];
+          temp[index] = {
+            ...temp[index],
+            price: '',
+          };
+          return temp;
+        });
+      }
     }
   };
 
