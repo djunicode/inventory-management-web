@@ -170,7 +170,7 @@ export default function Inventory() {
                   <TableCell>{row.name}</TableCell>
                   <TableCell align='right'>{row.quantity}</TableCell>
                   <TableCell align='right'>
-                    {row.sellingPrice ? row.sellingPrice : 'Not Set'}
+                    {row.sellingPrice || 'Not Set'}
                   </TableCell>
                 </TableRow>
               ))}

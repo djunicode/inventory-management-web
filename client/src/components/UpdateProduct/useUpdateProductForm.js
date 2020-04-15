@@ -32,7 +32,7 @@ const useForm = ({ name, sellingPrice, loose, id }) => {
   // got from location state
   const [values, setValues] = useState({
     name,
-    sellingPrice,
+    sellingPrice: sellingPrice || '',
     loose: loose === true ? 'true' : 'false',
   });
 
