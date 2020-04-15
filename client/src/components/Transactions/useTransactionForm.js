@@ -4,6 +4,9 @@ import axios from 'axios';
 import { SnackContext } from '../SnackBar/SnackContext';
 
 const useForm = type => {
+  // list of all products got from API
+  const [productsList, setProductsList] = useState([]);
+
   // function to validate inputs, returns the error statements
   const validateInputs = values => {
     let errors = [];
@@ -15,6 +18,10 @@ const useForm = type => {
       let quantityErr = ' ';
       let priceErr = ' ';
 
+      const { quantity } = productsList.find(
+        product => product.name === value.productName
+      );
+
       if (value.productName === '') {
         productErr = 'Please fill out this field';
       }
@@ -23,6 +30,8 @@ const useForm = type => {
         quantityErr = 'Please fill out this field';
       } else if (value.quantity === '0') {
         quantityErr = 'Quantity cannot be 0';
+      } else if (Number(value.quantity) > Number(quantity)) {
+        quantityErr = `Quantity cannot be greater than current stock : - ${quantity}`;
       }
 
       if (value.price === '') {
@@ -50,8 +59,6 @@ const useForm = type => {
   ]);
   // true only if submit button is pressed
   const [isSubmitting, setIsSubmitting] = useState(false);
-  // list of all products got from API
-  const [productsList, setProductsList] = useState([]);
 
   // fetch the products list from API
   const apiFetch = async () => {
@@ -102,6 +109,20 @@ const useForm = type => {
             loose: products[0].loose,
             id: products[0].id,
           },
+        });
+      } else if (type === 'Buy') {
+        setSnack({
+          open: true,
+          message: `Succesfully bought items`,
+          action: '',
+          actionParams: '',
+        });
+      } else if (type === 'Sell') {
+        setSnack({
+          open: true,
+          message: `Succesfully sold items`,
+          action: '',
+          actionParams: '',
         });
       }
     } catch (e) {
