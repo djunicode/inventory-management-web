@@ -19,7 +19,7 @@ const useStyles = makeStyles(theme => ({
     display: 'flex',
     justifyContent: 'center',
     alignItems: 'center',
-    height: 'calc(100vh - 6rem)',
+    minHeight: '100vh',
   },
   formContainer: {
     flex: '1 1 30rem',
@@ -51,6 +51,7 @@ const useStyles = makeStyles(theme => ({
     maxWidth: '70rem',
     height: '35rem',
     margin: theme.spacing(2),
+    marginTop: '6rem',
     padding: theme.spacing(2),
     display: 'flex',
     justifyContent: 'center',
@@ -92,38 +93,12 @@ const useStyles = makeStyles(theme => ({
     },
   },
   invalid: {
-    display: isInvalidCred => (isInvalidCred ? 'block' : 'none'),
+    display: props => (props.invalid ? 'block' : 'none'),
   },
 }));
 
 const Login = () => {
-  const validateInputs = values => {
-    let errors1 = false;
-    let password1 = ' ';
-    let email1 = ' ';
-
-    if (values.email === '') {
-      errors1 = true;
-      email1 = 'Please fill out this field';
-    } else if (!/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i.test(values.email)) {
-      errors1 = true;
-      email1 = 'Please enter a valid email';
-    }
-    if (values.password === '') {
-      errors1 = true;
-      password1 = 'Please fill out this field';
-    } else if (values.password.length < 5) {
-      errors1 = true;
-      password1 = 'Password should have more than 5 characters';
-    }
-
-    return {
-      errors: errors1,
-      email: email1,
-      password: password1,
-    };
-  };
-
+  // Use custom hook for form state management
   const {
     handleChange,
     handleSubmit,
@@ -132,9 +107,9 @@ const Login = () => {
     values,
     showPassword,
     toggleShowPassword,
-  } = useForm(validateInputs);
+  } = useForm();
 
-  const classes = useStyles(isInvalidCred);
+  const classes = useStyles({ invalid: isInvalidCred });
 
   return (
     <div className={classes.root}>
@@ -192,7 +167,7 @@ const Login = () => {
               InputProps={{
                 endAdornment: (
                   <InputAdornment position='end'>
-                    <IconButton onClick={toggleShowPassword}>
+                    <IconButton onClick={toggleShowPassword} tabIndex='-1'>
                       {showPassword ? <Visibility /> : <VisibilityOff />}
                     </IconButton>
                   </InputAdornment>
