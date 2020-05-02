@@ -87,7 +87,13 @@ class Bill(models.Model):
 
 class Product_Transaction(models.Model):
     product = models.ForeignKey(Products, on_delete=models.CASCADE)
-    bill = models.ForeignKey(Bill, on_delete=models.CASCADE, related_name="transaction", blank=True, null=True)
+    bill = models.ForeignKey(
+        Bill,
+        on_delete=models.CASCADE,
+        related_name="transaction",
+        blank=True,
+        null=True,
+    )
     quantity = models.IntegerField()
     rate = models.FloatField()
     choices = (

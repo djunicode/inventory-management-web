@@ -24,10 +24,24 @@ class BillSerializer(serializers.ModelSerializer):
 class ProductListSerializer(serializers.ModelSerializer):
     class Meta:
         model = Products
-        fields = ["id", "name", "quantity", "avg_cost_price", "latest_selling_price", "loose"]
+        fields = [
+            "id",
+            "name",
+            "quantity",
+            "avg_cost_price",
+            "latest_selling_price",
+            "loose",
+        ]
 
 
 class ProductDeleteSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Products
-        fields = ["id","name", "latest_selling_price", "loose","avg_cost_price","quantity"]
+        fields = [
+            "id",
+            "name",
+            "latest_selling_price",
+            "loose",
+            "avg_cost_price",
+            "quantity",
+        ]

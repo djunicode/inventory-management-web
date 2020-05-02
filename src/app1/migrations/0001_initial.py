@@ -10,79 +10,179 @@ class Migration(migrations.Migration):
     initial = True
 
     dependencies = [
-        ('auth', '0009_alter_user_last_name_max_length'),
+        ("auth", "0009_alter_user_last_name_max_length"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='User',
+            name="User",
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('password', models.CharField(max_length=128, verbose_name='password')),
-                ('last_login', models.DateTimeField(blank=True, null=True, verbose_name='last login')),
-                ('email', models.EmailField(max_length=254, unique=True)),
-                ('first_name', models.CharField(max_length=20)),
-                ('last_name', models.CharField(max_length=20)),
-                ('age', models.IntegerField(default=0)),
-                ('gender', models.CharField(choices=[('M', 'M'), ('F', 'F'), ('Other', 'Other')], default='M', max_length=15)),
-                ('is_staff', models.BooleanField(default=False)),
-                ('is_active', models.BooleanField(default=True)),
-                ('is_superuser', models.BooleanField(default=False)),
-                ('groups', models.ManyToManyField(blank=True, help_text='The groups this user belongs to. A user will get all permissions granted to each of their groups.', related_name='user_set', related_query_name='user', to='auth.Group', verbose_name='groups')),
-                ('user_permissions', models.ManyToManyField(blank=True, help_text='Specific permissions for this user.', related_name='user_set', related_query_name='user', to='auth.Permission', verbose_name='user permissions')),
+                (
+                    "id",
+                    models.AutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("password", models.CharField(max_length=128, verbose_name="password")),
+                (
+                    "last_login",
+                    models.DateTimeField(
+                        blank=True, null=True, verbose_name="last login"
+                    ),
+                ),
+                ("email", models.EmailField(max_length=254, unique=True)),
+                ("first_name", models.CharField(max_length=20)),
+                ("last_name", models.CharField(max_length=20)),
+                ("age", models.IntegerField(default=0)),
+                (
+                    "gender",
+                    models.CharField(
+                        choices=[("M", "M"), ("F", "F"), ("Other", "Other")],
+                        default="M",
+                        max_length=15,
+                    ),
+                ),
+                ("is_staff", models.BooleanField(default=False)),
+                ("is_active", models.BooleanField(default=True)),
+                ("is_superuser", models.BooleanField(default=False)),
+                (
+                    "groups",
+                    models.ManyToManyField(
+                        blank=True,
+                        help_text="The groups this user belongs to. A user will get all permissions granted to each of their groups.",
+                        related_name="user_set",
+                        related_query_name="user",
+                        to="auth.Group",
+                        verbose_name="groups",
+                    ),
+                ),
+                (
+                    "user_permissions",
+                    models.ManyToManyField(
+                        blank=True,
+                        help_text="Specific permissions for this user.",
+                        related_name="user_set",
+                        related_query_name="user",
+                        to="auth.Permission",
+                        verbose_name="user permissions",
+                    ),
+                ),
             ],
-            options={
-                'abstract': False,
-            },
+            options={"abstract": False,},
         ),
         migrations.CreateModel(
-            name='Bill',
+            name="Bill",
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('customer', models.CharField(max_length=100)),
-                ('date_time', models.DateTimeField(auto_now_add=True)),
-                ('taxes', models.FloatField()),
-                ('in_or_out', models.CharField(choices=[('In', 'In'), ('Out', 'Out')], max_length=20)),
-                ('employee', models.ForeignKey(blank=True, on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),
+                (
+                    "id",
+                    models.AutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("customer", models.CharField(max_length=100)),
+                ("date_time", models.DateTimeField(auto_now_add=True)),
+                ("taxes", models.FloatField()),
+                (
+                    "in_or_out",
+                    models.CharField(
+                        choices=[("In", "In"), ("Out", "Out")], max_length=20
+                    ),
+                ),
+                (
+                    "employee",
+                    models.ForeignKey(
+                        blank=True,
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
             ],
         ),
         migrations.CreateModel(
-            name='Items',
+            name="Items",
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('barcode', models.CharField(blank=True, max_length=100, null=True)),
-                ('expiry', models.DateTimeField(blank=True, null=True)),
+                (
+                    "id",
+                    models.AutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("barcode", models.CharField(blank=True, max_length=100, null=True)),
+                ("expiry", models.DateTimeField(blank=True, null=True)),
             ],
         ),
         migrations.CreateModel(
-            name='Product_Transaction',
+            name="Product_Transaction",
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('quantity', models.IntegerField()),
-                ('rate', models.FloatField()),
-                ('in_or_out', models.CharField(choices=[('In', 'In'), ('Out', 'Out')], max_length=20)),
-                ('bill', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='transaction', to='app1.Bill')),
+                (
+                    "id",
+                    models.AutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("quantity", models.IntegerField()),
+                ("rate", models.FloatField()),
+                (
+                    "in_or_out",
+                    models.CharField(
+                        choices=[("In", "In"), ("Out", "Out")], max_length=20
+                    ),
+                ),
+                (
+                    "bill",
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="transaction",
+                        to="app1.Bill",
+                    ),
+                ),
             ],
         ),
         migrations.CreateModel(
-            name='Products',
+            name="Products",
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(max_length=100)),
-                ('quantity', models.IntegerField()),
-                ('avg_cost_price', models.FloatField(blank=True, null=True)),
-                ('loose', models.BooleanField()),
-                ('selling_price', models.IntegerField(blank=True, null=True)),
+                (
+                    "id",
+                    models.AutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("name", models.CharField(max_length=100)),
+                ("quantity", models.IntegerField()),
+                ("avg_cost_price", models.FloatField(blank=True, null=True)),
+                ("loose", models.BooleanField()),
+                ("selling_price", models.IntegerField(blank=True, null=True)),
             ],
         ),
         migrations.AddField(
-            model_name='product_transaction',
-            name='product',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='app1.Products'),
+            model_name="product_transaction",
+            name="product",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE, to="app1.Products"
+            ),
         ),
         migrations.AddField(
-            model_name='items',
-            name='product',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='app1.Products'),
+            model_name="items",
+            name="product",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE, to="app1.Products"
+            ),
         ),
     ]

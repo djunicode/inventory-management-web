@@ -6,18 +6,16 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('app1', '0002_auto_20200413_2022'),
+        ("app1", "0002_auto_20200413_2022"),
     ]
 
     operations = [
         migrations.RenameField(
-            model_name='products',
-            old_name='mrp',
-            new_name='latest_selling_price',
+            model_name="products", old_name="mrp", new_name="latest_selling_price",
         ),
         migrations.AlterField(
-            model_name='products',
-            name='loose',
+            model_name="products",
+            name="loose",
             field=models.BooleanField(default=False),
         ),
     ]

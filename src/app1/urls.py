@@ -7,7 +7,9 @@ from .views import (
     BillListView,
     ProductListView,
     ProductDeleteView,
-    buy, sell, product_update,
+    buy,
+    sell,
+    product_update,
 )
 
 from django.conf.urls import url
