@@ -5,6 +5,6 @@ from rest_framework import routers
 
 
 urlpatterns = [
-    path("admin/", admin.site.urls),
     path("", include("app1.urls")),
+    path("admin/", admin.site.urls),
 ]
