@@ -34,3 +34,7 @@ class ProductListSerializer(serializers.ModelSerializer):
         ]
 
 
+class ProfitSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Product_Transaction
+        fields = '_all_'

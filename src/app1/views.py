@@ -289,3 +289,44 @@ def sell(request):
         dict_obj.update(created)
         serialized = json.dumps(dict_obj)
         return HttpResponse(serialized)
+
+
+class Profit(generics.GenericAPIView):
+	def get(self, request, *args, **kwargs):
+		serializer_class = ProfitSerializer
+		products = Products.objects.all()
+		result={}
+		#final_profit = {}
+
+		for i in products:
+			product_profit= Product_Transaction.objects.filter(product=i)
+			for j in product_profit:
+				month = str(j.date.strftime("%Y-%m"))
+				result[month] = 0
+
+			result['Total'] = 0
+			cp_total = 0
+			q_cp_total = 0
+			sp_total = 0
+			q_sp_total = 0
+			for m in result:
+				if m!='Total':
+					profit_product_monthly= product_profit.filter(date_year=m.split("-")[0], date_month= m.split("-")[1])
+					cp=0
+					q_cp = 0
+					sp=0
+					q_sp = 0
+					for transaction in profit_product_monthly:
+						if transaction.in_or_out == "In":
+							cp= cp + transaction.quantity * transaction.rate
+							q_cp += transaction.quantity
+						else:
+							sp = sp + transaction.quantity * transaction.rate
+							q_sp += transaction.quantity
+					if q_cp and q_sp:
+						result[m]= {'earned': sp, 'spent':cp, 'sold':q_sp,'bought':q_cp} #total earned and spent, and total items bought and sold every month
+						cp_total += cp
+						sp_total += sp
+						q_cp_total += q_cp
+						q_sp_total += q_sp
+		result['Total'] = {'earned':sp_total, 'sold':q_sp_total, 'spent':cp_total, 'bought':q_cp_total}
