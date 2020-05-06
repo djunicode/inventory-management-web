@@ -24,35 +24,67 @@ def login(request):
     return render(request, "app1/index.html")
 
 
+
+''' View to Display all transactions irrespective of Bill '''
+
 class TransactionListView(generics.ListAPIView):
     queryset = Product_Transaction.objects.all()
     serializer_class = TransactionSerializer
 
+''' View to Display all Bills '''
 
 class BillListView(generics.ListAPIView):
     queryset = Bill.objects.all()
     serializer_class = BillSerializer
 
+''' View to Display all Products '''
 
 class ProductListView(generics.ListCreateAPIView):
 
     queryset = Products.objects.all()
     serializer_class = ProductListSerializer
 
+''' View to Delete specific product from database using product id '''
 
 class ProductDeleteView(generics.DestroyAPIView):
     queryset = Products.objects.all()
-    serializer_class = ProductDeleteSerializer
+    serializer_class = ProductListSerializer
+
+
+''' View to Update attributes of a specific product from database using product id (pid) '''
 
 
 def product_update(request, pid):
 
+    ''' Parameters
+        ------------
+        product id(pid)
+        (POST) from user: name , latest selling price and loose (Boolean Value)
+        ------------
+
+        Here, user can change name of product, its latest selling price and make the product loose or not loose(packaged)
+
+        For name change, we get the product using its id, store its name in a variable pname and then change product's name 
+        as requested by user
+        Similarly, latest selling price of the product is directly updated.
+
+        For loose, if loose attriibute remains unchanged, then no changes occur 
+        However, if loose product is to be made packaged, i.e. loose = False, Items of that particular product are added in the
+        database according to product quantity.
+        If packaged product is to be made loose, items of that particular product are deleted from database.
+        addition and deletion of items is done using the pname variable which stored earlier product name.        '''
+
     if request.method == "POST":
         pr = Products.objects.get(id=pid)
         pname = pr.name
+
+        # change product name
         pr.name = request.POST["name"]
+
+        # change latest selling price
         pr.latest_selling_price = request.POST["latest_selling_price"]
 
+        # check if changes are made to loose attribute and add/ delete items accordingly
         if pr.loose == True and (request.POST["loose"]) == "False":
 
             for i in range(1, int(pr.quantity) + 1):
@@ -68,30 +100,73 @@ def product_update(request, pid):
             pr.loose = True
         else:
             pr.loose = request.POST["loose"]
+
+        # save and update
         pr.save()
+
+        #serialize and return updated response
         dict_obj = model_to_dict(pr)
         serialized = json.dumps(dict_obj)
         return HttpResponse(serialized)
 
 
+
+'''  View to buy Products '''
+
+
 def buy(request):
+
+    ''' Parameters
+        ------------
+       (POST) from user: name , avg_cost_price and quantity; 
+        ------------
+
+        Here, user buys a product. It might be a new product or an existing product. This counts for all IN Transactions.
+        
+        We search for a product using its name.
+        
+        If a Product already exists,
+        Then we recalculate avg_cost_pice of the product using the formula:
+        
+        new avg_cost_price = (current avg_cost_price*current no. of items) + (POSTed avg_cost_price* POSTed no. of items)
+                            -----------------------------------------------------------------------------------------------
+                                                    current no. of items + POSTed no. of items
+        
+        Then we increase the quantity of the product and
+        Then we check if product is loose or not, if not then we add new items of said product to the database accordingly.
+        We save the In transaction.
+
+        If Product doesn't exist, we create a new product using above paramenters keeping deafult value for loose(False) and
+        latest_selling_price (null) and save the transaction.
+
+        If we create a new product, we set the variable created to True and send it along with the response, else it is set to False 
+        and then sent
+        
+    '''
 
     if request.method == "POST":
 
         try:
+            # If Product exists
             re = Products.objects.get(name=request.POST["name"])
 
+            #Re Calculate avg_cost_price
             re.avg_cost_price = (
                 (re.avg_cost_price * re.quantity)
                 + (int(request.POST["avg_cost_price"]) * int(request.POST["quantity"]))
             ) / (int(request.POST["quantity"]) + re.quantity)
+
+            #Increase quantity
             re.quantity = re.quantity + int(request.POST["quantity"])
             re.save()
 
+            # If product is not loose, add items to database
             if re.loose == False:
                 for i in range(1, int(request.POST["quantity"]) + 1):
                     itobj = Items(product=re)
                     itobj.save()
+
+            # Save IN Transaction
             trobj = Product_Transaction(
                 product=re,
                 quantity=int(request.POST["quantity"]),
@@ -99,6 +174,8 @@ def buy(request):
                 in_or_out="In",
             )
             trobj.save()
+            
+            # Send response with created = False
             tr = Products.objects.get(name=request.POST["name"])
             created = {"created": False}
             dict_obj = model_to_dict(tr)
@@ -106,18 +183,23 @@ def buy(request):
             serialized = json.dumps(dict_obj)
             return HttpResponse(serialized)
 
-        except Products.DoesNotExist:
 
+        except Products.DoesNotExist:
+            # If Product does not exist already:
             name = request.POST["name"]
             quant = request.POST["quantity"]
 
             avg_cost_price = request.POST["avg_cost_price"]
 
             pdt = Products(name=name, quantity=quant, avg_cost_price=avg_cost_price)
+            # Created new product
             pdt.save()
+            # Added Items as default loose= False
             for i in range(1, int(request.POST["quantity"]) + 1):
                 itobj = Items(product=pdt)
                 itobj.save()
+
+            # Save Transaction
             trobj = Product_Transaction(
                 product=pdt,
                 quantity=int(request.POST["quantity"]),
@@ -125,6 +207,8 @@ def buy(request):
                 in_or_out="In",
             )
             trobj.save()
+
+            #Send Response with created = True
             tr = Products.objects.get(name=request.POST["name"])
             created = {"created": True}
             dict_obj = model_to_dict(tr)
@@ -134,18 +218,54 @@ def buy(request):
             return HttpResponse(serialized)
 
 
+
+''' View to sell products '''
+
 def sell(request):
+
+
+    ''' Parameters
+        ------------
+       (POST) from user: name , latest_selling_price and quantity; 
+        ------------
+
+        Here, user sells a product. It must be an existing product. This counts for all OUT Transactions.
+        
+        We search for a product using its name.
+        
+        If a Product does not exist, 404 error is generated
+
+        After finding the product, product quantity is deducted by the required quantity only if there is enough quantity
+        of the product available for selling
+        
+        If product is loose, new latest_selling_price of product is saved as given by user;
+        
+        else it is not saved as for packaged goods, latest_selling_price is MRP.
+
+        If product is packaged, number of items equal to those sold are deleted from database.
+
+        Transaction is then saved as an OUT transaction and suitable response is returned            '''
 
     if request.method == "POST":
 
+        # Retrieve object if it exisits or generate 404
+
         re = get_object_or_404(Products, name=request.POST["name"])
+
+        # Check if enough quantity of product is available for selling
 
         if re.quantity - int(request.POST["quantity"]) >= 0:
 
+            # Update product quantity
             re.quantity = re.quantity - int(request.POST["quantity"])
+
+            # If product is loose, update latest_selling_price
             if re.loose == True:
                 re.latest_selling_price = request.POST["latest_selling_price"]
+
             re.save()
+
+        # Save OUT Transaction
 
         trobj = Product_Transaction(
             product=re,
@@ -155,12 +275,14 @@ def sell(request):
         )
         trobj.save()
 
+        # If item is packaged. delete required amount of items from database
         if re.loose == False:
 
             it = Items.objects.filter(product__name=re.name)
             for i in range(0, int(request.POST["quantity"])):
                 it[i].delete()
 
+        # Send Required Response
         tr = Products.objects.get(name=request.POST["name"])
         created = {"created": False}
         dict_obj = model_to_dict(tr)

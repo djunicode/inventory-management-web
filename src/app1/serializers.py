@@ -34,14 +34,3 @@ class ProductListSerializer(serializers.ModelSerializer):
         ]
 
 
-class ProductDeleteSerializer(serializers.HyperlinkedModelSerializer):
-    class Meta:
-        model = Products
-        fields = [
-            "id",
-            "name",
-            "latest_selling_price",
-            "loose",
-            "avg_cost_price",
-            "quantity",
-        ]
