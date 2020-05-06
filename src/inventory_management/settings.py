@@ -134,16 +134,12 @@ USE_TZ = True
 
 STATIC_URL = "/static/"
 
-#STATICFILES_DIRS = [os.path.join(CLIENT_DIR, "build", "static")]
+# STATICFILES_DIRS = [os.path.join(CLIENT_DIR, "build", "static")]
 
-#STATIC_ROOT = os.path.join(BASE_DIR, "static")
+# STATIC_ROOT = os.path.join(BASE_DIR, "static")
 
 AUTH_USER_MODEL = "app1.User"
 
 CORS_ORIGIN_ALLOW_ALL = True
 
-STATICFILES_DIRS = (
-    os.path.join(
-        BASE_DIR, "static"
-    ),  # update the STATICFILES_DIRS
-)
+STATICFILES_DIRS = (os.path.join(BASE_DIR, "static"),)  # update the STATICFILES_DIRS
