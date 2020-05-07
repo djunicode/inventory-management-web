@@ -18,9 +18,14 @@ const useForm = type => {
       let quantityErr = ' ';
       let priceErr = ' ';
 
-      const { quantity } = productsList.find(
-        product => product.name === value.productName
-      );
+      if (type === 'Sell') {
+        const { quantity } = productsList.find(
+          product => product.name === value.productName
+        );
+        if (Number(value.quantity) > Number(quantity)) {
+          quantityErr = `Quantity cannot be greater than current stock : - ${quantity}`;
+        }
+      }
 
       if (value.productName === '') {
         productErr = 'Please fill out this field';
@@ -30,8 +35,6 @@ const useForm = type => {
         quantityErr = 'Please fill out this field';
       } else if (value.quantity === '0') {
         quantityErr = 'Quantity cannot be 0';
-      } else if (Number(value.quantity) > Number(quantity)) {
-        quantityErr = `Quantity cannot be greater than current stock : - ${quantity}`;
       }
 
       if (value.price === '') {
@@ -99,6 +102,7 @@ const useForm = type => {
         console.log('Here is response', data);
       }
       if (products.length) {
+        // add success snackbar if new product created
         setSnack({
           open: true,
           message: `Added ${products[0].name}`,
@@ -111,18 +115,22 @@ const useForm = type => {
           },
         });
       } else if (type === 'Buy') {
+        // add success snackbar on successful transaction
         setSnack({
           open: true,
           message: `Succesfully bought items`,
           action: '',
           actionParams: '',
+          type: 'success',
         });
       } else if (type === 'Sell') {
+        // add success snackbar on successful transaction
         setSnack({
           open: true,
           message: `Succesfully sold items`,
           action: '',
           actionParams: '',
+          type: 'success',
         });
       }
     } catch (e) {
@@ -202,6 +210,38 @@ const useForm = type => {
     }
   };
 
+  const handleProductChange = (event, newValue, index) => {
+    if (newValue && newValue.inputValue) {
+      setValues(prevState => {
+        const temp = [...prevState];
+        temp[index] = {
+          ...temp[index],
+          productName: newValue.inputValue,
+        };
+        return temp;
+      });
+      return;
+    }
+
+    setValues(prevState => {
+      const temp = [...prevState];
+      let val = '';
+
+      if (!newValue) {
+        val = '';
+      } else if (newValue.name) {
+        val = newValue.name;
+      } else {
+        val = newValue;
+      }
+      temp[index] = {
+        ...temp[index],
+        productName: val,
+      };
+      return temp;
+    });
+  };
+
   // function to handle clicking of add products button
   // it adds new blank values to the state, so that new inputs can be added
   const handleAddProduct = () => {
@@ -222,6 +262,7 @@ const useForm = type => {
     handleSubmit,
     productsList,
     handleAddProduct,
+    handleProductChange,
   };
 };
 
