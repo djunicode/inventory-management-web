@@ -1,6 +1,7 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useContext } from 'react';
 import { useHistory } from 'react-router-dom';
 import axios from 'axios';
+import { SnackContext } from '../SnackBar/SnackContext';
 
 // custom hook for form state management
 const useForm = ({ name, sellingPrice, loose, id }) => {
@@ -49,11 +50,22 @@ const useForm = ({ name, sellingPrice, loose, id }) => {
 
   const history = useHistory();
 
+  const { setSnack } = useContext(SnackContext);
+
   // function to post the credentials to the server, then user is redirected to employee page.
   //  if credentials are invalid then invalidcred is set to appropriate errors got from API
   const apiFetch = async formData => {
     try {
       await axios.post(`/api/update/${id}/`, formData);
+
+      // add success snackbar on successful request
+      setSnack({
+        open: true,
+        message: `Succesfully updated ${values.name}`,
+        action: '',
+        actionParams: '',
+        type: 'success',
+      });
       history.push('/inventory');
     } catch (e) {
       console.log(e.response);

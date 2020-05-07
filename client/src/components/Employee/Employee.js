@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import {
   Typography,
@@ -18,6 +18,7 @@ import EditIcon from '@material-ui/icons/Edit';
 import DeleteIcon from '@material-ui/icons/Delete';
 import { useHistory } from 'react-router-dom';
 import axios from 'axios';
+import { SnackContext } from '../SnackBar/SnackContext';
 import MobileEditMenu from '../MobileEditMenu';
 
 const useStyles = makeStyles(theme => ({
@@ -81,6 +82,8 @@ export default function Employee() {
 
   const history = useHistory();
 
+  const { setSnack } = useContext(SnackContext);
+
   const apiFetch = async () => {
     try {
       const token = localStorage.getItem('token');
@@ -122,12 +125,21 @@ export default function Employee() {
 
   // handle user delete
   const handleDelete = async row => {
-    const { email } = row;
+    const { email, name } = row;
     setDeletedRow(prevState => [...prevState, employeeList.indexOf(row)]);
     try {
       const formData = new FormData();
       formData.append('email', email);
       await axios.post('/auth/user_delete/', formData);
+
+      // add success snackbar on successful request
+      setSnack({
+        open: true,
+        message: `Succesfully deleted ${name}`,
+        action: '',
+        actionParams: '',
+        type: 'success',
+      });
     } catch (e) {
       console.log(e);
     }
