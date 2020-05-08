@@ -24,39 +24,45 @@ def login(request):
     return render(request, "app1/index.html")
 
 
+""" View to Display all transactions irrespective of Bill """
 
-''' View to Display all transactions irrespective of Bill '''
 
 class TransactionListView(generics.ListAPIView):
     queryset = Product_Transaction.objects.all()
     serializer_class = TransactionSerializer
 
-''' View to Display all Bills '''
+
+""" View to Display all Bills """
+
 
 class BillListView(generics.ListAPIView):
     queryset = Bill.objects.all()
     serializer_class = BillSerializer
 
-''' View to Display all Products '''
+
+""" View to Display all Products """
+
 
 class ProductListView(generics.ListCreateAPIView):
 
     queryset = Products.objects.all()
     serializer_class = ProductListSerializer
 
-''' View to Delete specific product from database using product id '''
+
+""" View to Delete specific product from database using product id """
+
 
 class ProductDeleteView(generics.DestroyAPIView):
     queryset = Products.objects.all()
     serializer_class = ProductListSerializer
 
 
-''' View to Update attributes of a specific product from database using product id (pid) '''
+""" View to Update attributes of a specific product from database using product id (pid) """
 
 
 def product_update(request, pid):
 
-    ''' Parameters
+    """ Parameters
         ------------
         product id(pid)
         (POST) from user: name , latest selling price and loose (Boolean Value)
@@ -72,7 +78,7 @@ def product_update(request, pid):
         However, if loose product is to be made packaged, i.e. loose = False, Items of that particular product are added in the
         database according to product quantity.
         If packaged product is to be made loose, items of that particular product are deleted from database.
-        addition and deletion of items is done using the pname variable which stored earlier product name.        '''
+        addition and deletion of items is done using the pname variable which stored earlier product name.        """
 
     if request.method == "POST":
         pr = Products.objects.get(id=pid)
@@ -104,19 +110,18 @@ def product_update(request, pid):
         # save and update
         pr.save()
 
-        #serialize and return updated response
+        # serialize and return updated response
         dict_obj = model_to_dict(pr)
         serialized = json.dumps(dict_obj)
         return HttpResponse(serialized)
 
 
-
-'''  View to buy Products '''
+"""  View to buy Products """
 
 
 def buy(request):
 
-    ''' Parameters
+    """ Parameters
         ------------
        (POST) from user: name , avg_cost_price and quantity; 
         ------------
@@ -142,7 +147,7 @@ def buy(request):
         If we create a new product, we set the variable created to True and send it along with the response, else it is set to False 
         and then sent
         
-    '''
+    """
 
     if request.method == "POST":
 
@@ -150,13 +155,13 @@ def buy(request):
             # If Product exists
             re = Products.objects.get(name=request.POST["name"])
 
-            #Re Calculate avg_cost_price
+            # Re Calculate avg_cost_price
             re.avg_cost_price = (
                 (re.avg_cost_price * re.quantity)
                 + (int(request.POST["avg_cost_price"]) * int(request.POST["quantity"]))
             ) / (int(request.POST["quantity"]) + re.quantity)
 
-            #Increase quantity
+            # Increase quantity
             re.quantity = re.quantity + int(request.POST["quantity"])
             re.save()
 
@@ -174,7 +179,7 @@ def buy(request):
                 in_or_out="In",
             )
             trobj.save()
-            
+
             # Send response with created = False
             tr = Products.objects.get(name=request.POST["name"])
             created = {"created": False}
@@ -182,7 +187,6 @@ def buy(request):
             dict_obj.update(created)
             serialized = json.dumps(dict_obj)
             return HttpResponse(serialized)
-
 
         except Products.DoesNotExist:
             # If Product does not exist already:
@@ -208,7 +212,7 @@ def buy(request):
             )
             trobj.save()
 
-            #Send Response with created = True
+            # Send Response with created = True
             tr = Products.objects.get(name=request.POST["name"])
             created = {"created": True}
             dict_obj = model_to_dict(tr)
@@ -218,13 +222,12 @@ def buy(request):
             return HttpResponse(serialized)
 
 
+""" View to sell products """
 
-''' View to sell products '''
 
 def sell(request):
 
-
-    ''' Parameters
+    """ Parameters
         ------------
        (POST) from user: name , latest_selling_price and quantity; 
         ------------
@@ -244,7 +247,7 @@ def sell(request):
 
         If product is packaged, number of items equal to those sold are deleted from database.
 
-        Transaction is then saved as an OUT transaction and suitable response is returned            '''
+        Transaction is then saved as an OUT transaction and suitable response is returned            """
 
     if request.method == "POST":
 
@@ -292,41 +295,53 @@ def sell(request):
 
 
 class Profit(generics.GenericAPIView):
-	def get(self, request, *args, **kwargs):
-		serializer_class = ProfitSerializer
-		products = Products.objects.all()
-		result={}
-		#final_profit = {}
+    def get(self, request, *args, **kwargs):
+        serializer_class = ProfitSerializer
+        products = Products.objects.all()
+        result = {}
+        # final_profit = {}
 
-		for i in products:
-			product_profit= Product_Transaction.objects.filter(product=i)
-			for j in product_profit:
-				month = str(j.date.strftime("%Y-%m"))
-				result[month] = 0
+        for i in products:
+            product_profit = Product_Transaction.objects.filter(product=i)
+            for j in product_profit:
+                month = str(j.date.strftime("%Y-%m"))
+                result[month] = 0
 
-			result['Total'] = 0
-			cp_total = 0
-			q_cp_total = 0
-			sp_total = 0
-			q_sp_total = 0
-			for m in result:
-				if m!='Total':
-					profit_product_monthly= product_profit.filter(date_year=m.split("-")[0], date_month= m.split("-")[1])
-					cp=0
-					q_cp = 0
-					sp=0
-					q_sp = 0
-					for transaction in profit_product_monthly:
-						if transaction.in_or_out == "In":
-							cp= cp + transaction.quantity * transaction.rate
-							q_cp += transaction.quantity
-						else:
-							sp = sp + transaction.quantity * transaction.rate
-							q_sp += transaction.quantity
-					if q_cp and q_sp:
-						result[m]= {'earned': sp, 'spent':cp, 'sold':q_sp,'bought':q_cp} #total earned and spent, and total items bought and sold every month
-						cp_total += cp
-						sp_total += sp
-						q_cp_total += q_cp
-						q_sp_total += q_sp
-		result['Total'] = {'earned':sp_total, 'sold':q_sp_total, 'spent':cp_total, 'bought':q_cp_total}
+            result["Total"] = 0
+            cp_total = 0
+            q_cp_total = 0
+            sp_total = 0
+            q_sp_total = 0
+            for m in result:
+                if m != "Total":
+                    profit_product_monthly = product_profit.filter(
+                        date_year=m.split("-")[0], date_month=m.split("-")[1]
+                    )
+                    cp = 0
+                    q_cp = 0
+                    sp = 0
+                    q_sp = 0
+                    for transaction in profit_product_monthly:
+                        if transaction.in_or_out == "In":
+                            cp = cp + transaction.quantity * transaction.rate
+                            q_cp += transaction.quantity
+                        else:
+                            sp = sp + transaction.quantity * transaction.rate
+                            q_sp += transaction.quantity
+                    if q_cp and q_sp:
+                        result[m] = {
+                            "earned": sp,
+                            "spent": cp,
+                            "sold": q_sp,
+                            "bought": q_cp,
+                        }  # total earned and spent, and total items bought and sold every month
+                        cp_total += cp
+                        sp_total += sp
+                        q_cp_total += q_cp
+                        q_sp_total += q_sp
+        result["Total"] = {
+            "earned": sp_total,
+            "sold": q_sp_total,
+            "spent": cp_total,
+            "bought": q_cp_total,
+        }
