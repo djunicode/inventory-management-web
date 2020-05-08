@@ -15,10 +15,11 @@ from .views import (
 from django.conf.urls import url
 
 urlpatterns = [
+    path("", login, name="login"),
+    path("login/", login, name="login"),
     path("auth/user_delete/", csrf_exempt(user_delete), name="user_delete"),
     path("auth/", include("djoser.urls")),
     path("auth/", include("djoser.urls.authtoken")),
-    path("login/", login, name="login"),
     url(r"^api/bill/$", BillListView.as_view()),
     url(r"^api/productlist/$", ProductListView.as_view()),
     url(r"^api/productlist/(?P<pk>\d+)/$", ProductDeleteView.as_view()),
