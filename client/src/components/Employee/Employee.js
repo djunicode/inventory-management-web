@@ -165,7 +165,7 @@ export default function Employee() {
             <TableBody>
               {employeeList.map((row, index) => (
                 <TableRow
-                  key={row.name}
+                  key={row.email}
                   hover
                   className={deletedRow.includes(index) ? 'delete' : ''}
                 >
