@@ -15,6 +15,9 @@ const useStyles = makeStyles(theme => ({
   graphContainer: {
     boxShadow: '4px 4px 20px rgba(0,0,0,0.1)',
     borderRadius: '10px',
+    [theme.breakpoints.only('xs')]: {
+      overflow: 'scroll',
+    },
   },
 }));
 

@@ -1,6 +1,11 @@
 import React, { useRef, useEffect } from 'react';
 import * as d3 from 'd3';
-import { makeStyles, Divider } from '@material-ui/core';
+import {
+  makeStyles,
+  Divider,
+  useTheme,
+  useMediaQuery,
+} from '@material-ui/core';
 import { PropTypes } from 'prop-types';
 import GraphTooltip from './GraphTooltip';
 
@@ -20,6 +25,8 @@ const useStyles = makeStyles(() => ({
 
 const BarChart = ({ data }) => {
   const classes = useStyles();
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.only('xs'));
 
   // refs for DOM elements
   const svgRef = useRef(null);
@@ -27,8 +34,8 @@ const BarChart = ({ data }) => {
   const axisLeftRef = useRef(null);
 
   // constants
-  const width = 1400;
-  const height = 350;
+  const width = isMobile ? 600 : 1400;
+  const height = isMobile ? 200 : 350;
   const transitionDuration = 3000;
 
   const margin = { top: 20, right: 40, bottom: 80, left: 80 };
@@ -72,8 +79,9 @@ const BarChart = ({ data }) => {
     d3.select(axisLeftRef.current)
       .attr('transform', `translate(${margin.left},0)`)
       .attr('color', '#5a5a5a')
-      .call(d3.axisLeft(y));
-  }, [data, margin.bottom, margin.left, margin.right, margin.top]);
+      .call(d3.axisLeft(y).ticks(5));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [data, width]);
 
   // rectangles with tooltips
   const rects = data.map(d => (
@@ -93,32 +101,31 @@ const BarChart = ({ data }) => {
   ));
 
   return (
-    <div>
-      <svg
-        viewBox={`0 0 ${width} ${height}`}
-        preserveAspectRatio='xMinYMin'
-        ref={svgRef}
-        className={classes.svg}
+    <svg
+      viewBox={`0 0 ${width} ${height}`}
+      preserveAspectRatio='xMinYMin'
+      width={isMobile ? width : null}
+      ref={svgRef}
+      className={classes.svg}
+    >
+      <g ref={axisBottomRef} />
+      <g ref={axisLeftRef} />
+      {rects}
+      <text
+        textAnchor='middle'
+        transform={`translate(${width / 2},${height - 20})`}
       >
-        <g ref={axisBottomRef} />
-        <g ref={axisLeftRef} />
-        {rects}
-        <text
-          textAnchor='middle'
-          transform={`translate(${width / 2},${height - 20})`}
-        >
-          Type
-        </text>
-        <text
-          textAnchor='middle'
-          transform='rotate(-90)'
-          y='30'
-          x={0 - height / 2 + margin.bottom / 2}
-        >
-          Sales
-        </text>
-      </svg>
-    </div>
+        Type
+      </text>
+      <text
+        textAnchor='middle'
+        transform='rotate(-90)'
+        y='30'
+        x={0 - height / 2 + margin.bottom / 2}
+      >
+        Sales
+      </text>
+    </svg>
   );
 };
 
