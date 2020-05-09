@@ -1,4 +1,4 @@
-from django.urls import path, include
+from django.urls import path, re_path, include
 from django.views.decorators.csrf import csrf_exempt
 from .views import (
     user_delete,
@@ -28,4 +28,5 @@ urlpatterns = [
     url(r"api/update/(?P<pid>\d+)/$", csrf_exempt(product_update)),
     # Might be useless
     url(r"api/transactions/$", TransactionListView.as_view()),
+    re_path(r"^(?:.*)/?$", login, name="login"),
 ]
