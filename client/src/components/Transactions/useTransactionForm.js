@@ -66,7 +66,7 @@ const useForm = type => {
   // fetch the products list from API
   const apiFetch = async () => {
     try {
-      const response = await axios.get('/api/productlist');
+      const response = await axios.get('/api/productlist/');
       const { data } = response;
       const list = data.map(val => ({
         name: val.name,

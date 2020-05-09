@@ -54,7 +54,7 @@ const NavBar = ({ mobileOpen, setMobileOpen, tabletOpen, setTabletOpen }) => {
         const data = '';
         const token = localStorage.getItem('token');
         const config = { headers: { Authorization: `Token ${token}` } };
-        await axios.post('/auth/token/logout', data, config);
+        await axios.post('/auth/token/logout/', data, config);
         localStorage.removeItem('token');
         localStorage.removeItem('isStaff');
       } catch (error) {
