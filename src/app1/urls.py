@@ -15,7 +15,7 @@ from .views import (
 from django.conf.urls import url
 
 urlpatterns = [
-    path("", login, name="login"),
+    # path("", login, name="login"),
     path("login/", login, name="login"),
     path("auth/user_delete/", csrf_exempt(user_delete), name="user_delete"),
     path("auth/", include("djoser.urls")),
