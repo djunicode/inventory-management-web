@@ -16,7 +16,6 @@ def user_delete(request):
 
     if request.user.is_authenticated:
 
-
         if request.method == "POST":
             if dj_settings.TOKEN_MODEL:
                 dj_settings.TOKEN_MODEL.objects.filter(
@@ -30,9 +29,8 @@ def user_delete(request):
         return res
 
 
-
 def login(request):
-    return render(request, "app1/index.html")
+    return render(request, "index.html")
 
 
 """ View to Display all transactions irrespective of Bill """
@@ -91,12 +89,11 @@ def product_update(request, pid):
         If packaged product is to be made loose, items of that particular product are deleted from database.
         addition and deletion of items is done using the pname variable which stored earlier product name.        """
 
-     
-    if(request.user.is_authenticated):
+    if request.user.is_authenticated:
 
         if request.method == "POST":
             pr = Products.objects.get(id=pid)
-            if (pr == None):
+            if pr == None:
                 res = HttpResponse("Product not Found")
                 res.status_code = 404
                 return res
@@ -105,7 +102,10 @@ def product_update(request, pid):
                 pname = pr.name
 
                 # change product name
-                if (request.POST['name']!=None or request.POST['name'].isspace()!= True):
+                if (
+                    request.POST["name"] != None
+                    or request.POST["name"].isspace() != True
+                ):
                     pr.name = request.POST["name"]
 
                     # change latest selling price
@@ -146,7 +146,6 @@ def product_update(request, pid):
         return res
 
 
-
 """  View to buy Products """
 
 
@@ -180,30 +179,29 @@ def buy(request):
         
     """
 
-    if(request.user.is_authenticated):
+    if request.user.is_authenticated:
         if request.method == "POST":
 
-            if (request.POST['name']=="" or request.POST['name'].isspace()== True):
-                
+            if request.POST["name"] == "" or request.POST["name"].isspace() == True:
+
                 res = HttpResponse("Incorrect Name Input")
                 res.status_code = 400
                 return res
 
-
-                    
             else:
-            
-            
+
                 try:
-                    #If Product exists
+                    # If Product exists
 
                     re = Products.objects.get(name=request.POST["name"])
-                    
-            
+
                     # Re Calculate avg_cost_price
                     re.avg_cost_price = (
                         (re.avg_cost_price * re.quantity)
-                        + (int(request.POST["avg_cost_price"]) * int(request.POST["quantity"]))
+                        + (
+                            int(request.POST["avg_cost_price"])
+                            * int(request.POST["quantity"])
+                        )
                     ) / (int(request.POST["quantity"]) + re.quantity)
 
                     # Increase quantity
@@ -240,7 +238,9 @@ def buy(request):
 
                     avg_cost_price = request.POST["avg_cost_price"]
 
-                    pdt = Products(name=name, quantity=quant, avg_cost_price=avg_cost_price)
+                    pdt = Products(
+                        name=name, quantity=quant, avg_cost_price=avg_cost_price
+                    )
                     # Created new product
                     pdt.save()
                     # Added Items as default loose= False
@@ -266,7 +266,7 @@ def buy(request):
 
                     return HttpResponse(serialized)
     else:
-        
+
         res = HttpResponse("Unauthorized")
         res.status_code = 401
         return res
@@ -299,9 +299,8 @@ def sell(request):
 
         Transaction is then saved as an OUT transaction and suitable response is returned            """
 
-    
-    if request.user.is_authenticated:   
-        
+    if request.user.is_authenticated:
+
         if request.method == "POST":
 
             # Retrieve object if it exisits or generate 404
@@ -327,8 +326,6 @@ def sell(request):
                     res.status_code = 400
                     return res
 
-                
-
                 # Save OUT Transaction
 
                 trobj = Product_Transaction(
@@ -353,28 +350,23 @@ def sell(request):
                 dict_obj.update(created)
                 serialized = json.dumps(dict_obj)
                 return HttpResponse(serialized)
-            
+
             except Products.DoesNotExist:
                 res = HttpResponse("Product Does not exist")
                 res.status_code = 404
                 return res
-        
+
     else:
 
-        
         res = HttpResponse("Unauthorized")
         res.status_code = 401
         return res
 
 
-
-
 class Profit(generics.GenericAPIView):
     def get(self, request, *args, **kwargs):
 
-
         if request.user.is_authenticated:
-        
 
             serializer_class = ProfitSerializer
             products = Products.objects.all()
@@ -426,7 +418,7 @@ class Profit(generics.GenericAPIView):
                 "bought": q_cp_total,
             }
         else:
-        
+
             res = HttpResponse("Unauthorized")
             res.status_code = 401
             return res
