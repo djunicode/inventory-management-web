@@ -2,6 +2,8 @@ from __future__ import unicode_literals
 from django.shortcuts import render, get_object_or_404
 from djoser.conf import settings as dj_settings
 from django.http import HttpResponse, JsonResponse
+from rest_framework import status
+
 from .models import *
 import json
 from django.forms.models import model_to_dict
@@ -11,13 +13,22 @@ from django.core import serializers
 
 
 def user_delete(request):
-    if request.method == "POST":
-        if dj_settings.TOKEN_MODEL:
-            dj_settings.TOKEN_MODEL.objects.filter(
-                user__email=request.POST.get("email")
-            ).delete()
-        User.objects.get(email=request.POST.get("email")).delete()
-    return HttpResponse("")
+
+    if request.user.is_authenticated:
+
+
+        if request.method == "POST":
+            if dj_settings.TOKEN_MODEL:
+                dj_settings.TOKEN_MODEL.objects.filter(
+                    user__email=request.POST.get("email")
+                ).delete()
+            User.objects.get(email=request.POST.get("email")).delete()
+        return HttpResponse("")
+    else:
+        res = HttpResponse("Unauthorized")
+        res.status_code = 401
+        return res
+
 
 
 def login(request):
@@ -80,40 +91,60 @@ def product_update(request, pid):
         If packaged product is to be made loose, items of that particular product are deleted from database.
         addition and deletion of items is done using the pname variable which stored earlier product name.        """
 
-    if request.method == "POST":
-        pr = Products.objects.get(id=pid)
-        pname = pr.name
+     
+    if(request.user.is_authenticated):
 
-        # change product name
-        pr.name = request.POST["name"]
+        if request.method == "POST":
+            pr = Products.objects.get(id=pid)
+            if (pr == None):
+                res = HttpResponse("Product not Found")
+                res.status_code = 404
+                return res
 
-        # change latest selling price
-        pr.latest_selling_price = request.POST["latest_selling_price"]
+            else:
+                pname = pr.name
 
-        # check if changes are made to loose attribute and add/ delete items accordingly
-        if pr.loose == True and (request.POST["loose"]) == "False":
+                # change product name
+                if (request.POST['name']!=None or request.POST['name'].isspace()!= True):
+                    pr.name = request.POST["name"]
 
-            for i in range(1, int(pr.quantity) + 1):
-                itobj = Items(product=pr)
-                itobj.save()
+                    # change latest selling price
+                    pr.latest_selling_price = request.POST["latest_selling_price"]
 
-            pr.loose = False
-        elif pr.loose == False and (request.POST["loose"] == "True"):
-            ito = Items.objects.filter(product__name=pname)
-            for i in ito:
-                i.delete()
+                    # check if changes are made to loose attribute and add/ delete items accordingly
+                    if pr.loose == True and (request.POST["loose"]) == "False":
 
-            pr.loose = True
-        else:
-            pr.loose = request.POST["loose"]
+                        for i in range(1, int(pr.quantity) + 1):
+                            itobj = Items(product=pr)
+                            itobj.save()
 
-        # save and update
-        pr.save()
+                        pr.loose = False
+                    elif pr.loose == False and (request.POST["loose"] == "True"):
+                        ito = Items.objects.filter(product__name=pname)
+                        for i in ito:
+                            i.delete()
 
-        # serialize and return updated response
-        dict_obj = model_to_dict(pr)
-        serialized = json.dumps(dict_obj)
-        return HttpResponse(serialized)
+                        pr.loose = True
+                    else:
+                        pr.loose = request.POST["loose"]
+
+                    # save and update
+                    pr.save()
+
+                    # serialize and return updated response
+                    dict_obj = model_to_dict(pr)
+                    serialized = json.dumps(dict_obj)
+                    return HttpResponse(serialized)
+
+                else:
+                    res = HttpResponse("Incorrect Name Input")
+                    res.status_code = 400
+                    return res
+    else:
+        res = HttpResponse("Unauthorized")
+        res.status_code = 401
+        return res
+
 
 
 """  View to buy Products """
@@ -149,77 +180,96 @@ def buy(request):
         
     """
 
-    if request.method == "POST":
+    if(request.user.is_authenticated):
+        if request.method == "POST":
 
-        try:
-            # If Product exists
-            re = Products.objects.get(name=request.POST["name"])
+            if (request.POST['name']=="" or request.POST['name'].isspace()== True):
+                
+                res = HttpResponse("Incorrect Name Input")
+                res.status_code = 400
+                return res
 
-            # Re Calculate avg_cost_price
-            re.avg_cost_price = (
-                (re.avg_cost_price * re.quantity)
-                + (int(request.POST["avg_cost_price"]) * int(request.POST["quantity"]))
-            ) / (int(request.POST["quantity"]) + re.quantity)
 
-            # Increase quantity
-            re.quantity = re.quantity + int(request.POST["quantity"])
-            re.save()
+                    
+            else:
+            
+            
+                try:
+                    #If Product exists
 
-            # If product is not loose, add items to database
-            if re.loose == False:
-                for i in range(1, int(request.POST["quantity"]) + 1):
-                    itobj = Items(product=re)
-                    itobj.save()
+                    re = Products.objects.get(name=request.POST["name"])
+                    
+            
+                    # Re Calculate avg_cost_price
+                    re.avg_cost_price = (
+                        (re.avg_cost_price * re.quantity)
+                        + (int(request.POST["avg_cost_price"]) * int(request.POST["quantity"]))
+                    ) / (int(request.POST["quantity"]) + re.quantity)
 
-            # Save IN Transaction
-            trobj = Product_Transaction(
-                product=re,
-                quantity=int(request.POST["quantity"]),
-                rate=int(request.POST["avg_cost_price"]),
-                in_or_out="In",
-            )
-            trobj.save()
+                    # Increase quantity
+                    re.quantity = re.quantity + int(request.POST["quantity"])
+                    re.save()
 
-            # Send response with created = False
-            tr = Products.objects.get(name=request.POST["name"])
-            created = {"created": False}
-            dict_obj = model_to_dict(tr)
-            dict_obj.update(created)
-            serialized = json.dumps(dict_obj)
-            return HttpResponse(serialized)
+                    # If product is not loose, add items to database
+                    if re.loose == False:
+                        for i in range(1, int(request.POST["quantity"]) + 1):
+                            itobj = Items(product=re)
+                            itobj.save()
 
-        except Products.DoesNotExist:
-            # If Product does not exist already:
-            name = request.POST["name"]
-            quant = request.POST["quantity"]
+                    # Save IN Transaction
+                    trobj = Product_Transaction(
+                        product=re,
+                        quantity=int(request.POST["quantity"]),
+                        rate=int(request.POST["avg_cost_price"]),
+                        in_or_out="In",
+                    )
+                    trobj.save()
 
-            avg_cost_price = request.POST["avg_cost_price"]
+                    # Send response with created = False
+                    tr = Products.objects.get(name=request.POST["name"])
+                    created = {"created": False}
+                    dict_obj = model_to_dict(tr)
+                    dict_obj.update(created)
+                    serialized = json.dumps(dict_obj)
+                    return HttpResponse(serialized)
 
-            pdt = Products(name=name, quantity=quant, avg_cost_price=avg_cost_price)
-            # Created new product
-            pdt.save()
-            # Added Items as default loose= False
-            for i in range(1, int(request.POST["quantity"]) + 1):
-                itobj = Items(product=pdt)
-                itobj.save()
+                except Products.DoesNotExist:
+                    # If Product does not exist already:
+                    name = request.POST["name"]
+                    quant = request.POST["quantity"]
 
-            # Save Transaction
-            trobj = Product_Transaction(
-                product=pdt,
-                quantity=int(request.POST["quantity"]),
-                rate=int(request.POST["avg_cost_price"]),
-                in_or_out="In",
-            )
-            trobj.save()
+                    avg_cost_price = request.POST["avg_cost_price"]
 
-            # Send Response with created = True
-            tr = Products.objects.get(name=request.POST["name"])
-            created = {"created": True}
-            dict_obj = model_to_dict(tr)
-            dict_obj.update(created)
-            serialized = json.dumps(dict_obj)
+                    pdt = Products(name=name, quantity=quant, avg_cost_price=avg_cost_price)
+                    # Created new product
+                    pdt.save()
+                    # Added Items as default loose= False
+                    for i in range(1, int(request.POST["quantity"]) + 1):
+                        itobj = Items(product=pdt)
+                        itobj.save()
 
-            return HttpResponse(serialized)
+                    # Save Transaction
+                    trobj = Product_Transaction(
+                        product=pdt,
+                        quantity=int(request.POST["quantity"]),
+                        rate=int(request.POST["avg_cost_price"]),
+                        in_or_out="In",
+                    )
+                    trobj.save()
+
+                    # Send Response with created = True
+                    tr = Products.objects.get(name=request.POST["name"])
+                    created = {"created": True}
+                    dict_obj = model_to_dict(tr)
+                    dict_obj.update(created)
+                    serialized = json.dumps(dict_obj)
+
+                    return HttpResponse(serialized)
+    else:
+        
+        res = HttpResponse("Unauthorized")
+        res.status_code = 401
+        return res
 
 
 """ View to sell products """
@@ -249,99 +299,134 @@ def sell(request):
 
         Transaction is then saved as an OUT transaction and suitable response is returned            """
 
-    if request.method == "POST":
+    
+    if request.user.is_authenticated:   
+        
+        if request.method == "POST":
 
-        # Retrieve object if it exisits or generate 404
+            # Retrieve object if it exisits or generate 404
 
-        re = get_object_or_404(Products, name=request.POST["name"])
+            try:
 
-        # Check if enough quantity of product is available for selling
+                re = Products.objects.get(name=request.POST["name"])
 
-        if re.quantity - int(request.POST["quantity"]) >= 0:
+                # Check if enough quantity of product is available for selling
 
-            # Update product quantity
-            re.quantity = re.quantity - int(request.POST["quantity"])
+                if re.quantity - int(request.POST["quantity"]) >= 0:
 
-            # If product is loose, update latest_selling_price
-            if re.loose == True:
-                re.latest_selling_price = request.POST["latest_selling_price"]
+                    # Update product quantity
+                    re.quantity = re.quantity - int(request.POST["quantity"])
+                    # If product is loose, update latest_selling_price
+                    if re.loose == True:
+                        re.latest_selling_price = request.POST["latest_selling_price"]
 
-            re.save()
+                    re.save()
 
-        # Save OUT Transaction
+                else:
+                    res = HttpResponse("Not enough items available")
+                    res.status_code = 400
+                    return res
 
-        trobj = Product_Transaction(
-            product=re,
-            quantity=int(request.POST["quantity"]),
-            rate=request.POST["latest_selling_price"],
-            in_or_out="Out",
-        )
-        trobj.save()
+                
 
-        # If item is packaged. delete required amount of items from database
-        if re.loose == False:
+                # Save OUT Transaction
 
-            it = Items.objects.filter(product__name=re.name)
-            for i in range(0, int(request.POST["quantity"])):
-                it[i].delete()
+                trobj = Product_Transaction(
+                    product=re,
+                    quantity=int(request.POST["quantity"]),
+                    rate=request.POST["latest_selling_price"],
+                    in_or_out="Out",
+                )
+                trobj.save()
 
-        # Send Required Response
-        tr = Products.objects.get(name=request.POST["name"])
-        created = {"created": False}
-        dict_obj = model_to_dict(tr)
-        dict_obj.update(created)
-        serialized = json.dumps(dict_obj)
-        return HttpResponse(serialized)
+                # If item is packaged. delete required amount of items from database
+                if re.loose == False:
+
+                    it = Items.objects.filter(product__name=re.name)
+                    for i in range(0, int(request.POST["quantity"])):
+                        it[i].delete()
+
+                # Send Required Response
+                tr = Products.objects.get(name=request.POST["name"])
+                created = {"created": False}
+                dict_obj = model_to_dict(tr)
+                dict_obj.update(created)
+                serialized = json.dumps(dict_obj)
+                return HttpResponse(serialized)
+            
+            except Products.DoesNotExist:
+                res = HttpResponse("Product Does not exist")
+                res.status_code = 404
+                return res
+        
+    else:
+
+        
+        res = HttpResponse("Unauthorized")
+        res.status_code = 401
+        return res
+
+
 
 
 class Profit(generics.GenericAPIView):
     def get(self, request, *args, **kwargs):
-        serializer_class = ProfitSerializer
-        products = Products.objects.all()
-        result = {}
-        # final_profit = {}
 
-        for i in products:
-            product_profit = Product_Transaction.objects.filter(product=i)
-            for j in product_profit:
-                month = str(j.date.strftime("%Y-%m"))
-                result[month] = 0
 
-            result["Total"] = 0
-            cp_total = 0
-            q_cp_total = 0
-            sp_total = 0
-            q_sp_total = 0
-            for m in result:
-                if m != "Total":
-                    profit_product_monthly = product_profit.filter(
-                        date_year=m.split("-")[0], date_month=m.split("-")[1]
-                    )
-                    cp = 0
-                    q_cp = 0
-                    sp = 0
-                    q_sp = 0
-                    for transaction in profit_product_monthly:
-                        if transaction.in_or_out == "In":
-                            cp = cp + transaction.quantity * transaction.rate
-                            q_cp += transaction.quantity
-                        else:
-                            sp = sp + transaction.quantity * transaction.rate
-                            q_sp += transaction.quantity
-                    if q_cp and q_sp:
-                        result[m] = {
-                            "earned": sp,
-                            "spent": cp,
-                            "sold": q_sp,
-                            "bought": q_cp,
-                        }  # total earned and spent, and total items bought and sold every month
-                        cp_total += cp
-                        sp_total += sp
-                        q_cp_total += q_cp
-                        q_sp_total += q_sp
-        result["Total"] = {
-            "earned": sp_total,
-            "sold": q_sp_total,
-            "spent": cp_total,
-            "bought": q_cp_total,
-        }
+        if request.user.is_authenticated:
+        
+
+            serializer_class = ProfitSerializer
+            products = Products.objects.all()
+            result = {}
+            # final_profit = {}
+
+            for i in products:
+                product_profit = Product_Transaction.objects.filter(product=i)
+                for j in product_profit:
+                    month = str(j.date.strftime("%Y-%m"))
+                    result[month] = 0
+
+                result["Total"] = 0
+                cp_total = 0
+                q_cp_total = 0
+                sp_total = 0
+                q_sp_total = 0
+                for m in result:
+                    if m != "Total":
+                        profit_product_monthly = product_profit.filter(
+                            date_year=m.split("-")[0], date_month=m.split("-")[1]
+                        )
+                        cp = 0
+                        q_cp = 0
+                        sp = 0
+                        q_sp = 0
+                        for transaction in profit_product_monthly:
+                            if transaction.in_or_out == "In":
+                                cp = cp + transaction.quantity * transaction.rate
+                                q_cp += transaction.quantity
+                            else:
+                                sp = sp + transaction.quantity * transaction.rate
+                                q_sp += transaction.quantity
+                        if q_cp and q_sp:
+                            result[m] = {
+                                "earned": sp,
+                                "spent": cp,
+                                "sold": q_sp,
+                                "bought": q_cp,
+                            }  # total earned and spent, and total items bought and sold every month
+                            cp_total += cp
+                            sp_total += sp
+                            q_cp_total += q_cp
+                            q_sp_total += q_sp
+            result["Total"] = {
+                "earned": sp_total,
+                "sold": q_sp_total,
+                "spent": cp_total,
+                "bought": q_cp_total,
+            }
+        else:
+        
+            res = HttpResponse("Unauthorized")
+            res.status_code = 401
+            return res
