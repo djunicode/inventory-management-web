@@ -10,7 +10,12 @@ import {
 import AddIcon from '@material-ui/icons/Add';
 import { makeStyles } from '@material-ui/core/styles';
 import { PropTypes } from 'prop-types';
+import Autocomplete, {
+  createFilterOptions,
+} from '@material-ui/lab/Autocomplete';
 import useForm from './useTransactionForm';
+
+const filter = createFilterOptions();
 
 const useStyles = makeStyles(theme => ({
   paper: {
@@ -110,6 +115,7 @@ const Form = ({ type }) => {
     handleSubmit,
     productsList,
     handleAddProduct,
+    handleProductChange,
   } = useForm(type);
 
   return (
@@ -133,16 +139,49 @@ const Form = ({ type }) => {
               </Typography>
               <div className={classes.form}>
                 {type === 'Buy' ? (
-                  <TextField
-                    required
-                    variant='filled'
-                    id='product-input'
-                    name='productName'
-                    label='Product Name'
+                  <Autocomplete
                     value={value.productName}
-                    onChange={event => handleChange(event, index)}
-                    error={!(error[index].product === ' ')}
-                    helperText={error[index].product}
+                    onChange={(event, newValue) => {
+                      handleProductChange(event, newValue, index);
+                    }}
+                    filterOptions={(options, params) => {
+                      const filtered = filter(options, params);
+
+                      if (params.inputValue !== '') {
+                        filtered.push({
+                          inputValue: params.inputValue,
+                          name: `Add "${params.inputValue}"`,
+                        });
+                      }
+
+                      return filtered;
+                    }}
+                    id='productfield-input'
+                    options={productsList}
+                    getOptionLabel={option => {
+                      // e.g value selected with enter, right from the input
+                      if (typeof option === 'string') {
+                        return option;
+                      }
+                      if (option.inputValue) {
+                        return option.inputValue;
+                      }
+                      return option.name;
+                    }}
+                    renderOption={option => option.name}
+                    freeSolo
+                    style={{ width: '100%', maxWidth: '20rem' }}
+                    renderInput={params => (
+                      <TextField
+                        // eslint-disable-next-line react/jsx-props-no-spreading
+                        {...params}
+                        required
+                        label='Product Name'
+                        variant='filled'
+                        error={!(error[index].product === ' ')}
+                        helperText={error[index].product}
+                      />
+                    )}
                   />
                 ) : (
                   <TextField

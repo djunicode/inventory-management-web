@@ -63,7 +63,7 @@ const TransactionHistory = () => {
   // fetch transaction list from API
   const apiFetch = async () => {
     try {
-      const response = await axios.get('/api/bill');
+      const response = await axios.get('/api/bill/');
       const { data } = response;
       setTransactionList(data);
     } catch (e) {

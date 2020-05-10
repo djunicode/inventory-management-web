@@ -9,6 +9,7 @@ const SnackContextProvider = ({ children }) => {
     message: '',
     action: '',
     actionParams: '',
+    type: '',
   });
 
   return (

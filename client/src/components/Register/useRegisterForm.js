@@ -1,6 +1,7 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useContext } from 'react';
 import { useHistory } from 'react-router-dom';
 import axios from 'axios';
+import { SnackContext } from '../SnackBar/SnackContext';
 
 // custom hook for form state management
 const useForm = () => {
@@ -78,6 +79,8 @@ const useForm = () => {
 
   const history = useHistory();
 
+  const { setSnack } = useContext(SnackContext);
+
   // function to post the credentials to the server, then user is redirected to employee page.
   //  if credentials are invalid then invalidcred is set to appropriate errors got from API
   const apiFetch = async formData => {
@@ -85,11 +88,30 @@ const useForm = () => {
       const token = localStorage.getItem('token');
       const config = { headers: { Authorization: `Token ${token}` } };
       await axios.post('/auth/users/', formData, config);
+
+      // add success snackbar on successful request
+      setSnack({
+        open: true,
+        message: `Succesfully added ${values.firstName} ${values.lastName}`,
+        action: '',
+        actionParams: '',
+        type: 'success',
+      });
       history.push('/employee');
     } catch (e) {
       console.log(e.response);
       if (e.response.status === 400) {
-        setInvalidCred(Object.values(e.response.data)[0][0]);
+        const responseError = Object.values(e.response.data)[0][0];
+        setInvalidCred(responseError);
+
+        // add error snackbar on unsuccessful request
+        setSnack({
+          open: true,
+          message: responseError,
+          action: '',
+          actionParams: '',
+          type: 'error',
+        });
       }
     }
   };

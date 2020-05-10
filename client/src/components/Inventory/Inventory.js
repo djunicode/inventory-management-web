@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import {
   Typography,
@@ -16,6 +16,7 @@ import DeleteIcon from '@material-ui/icons/Delete';
 import EditIcon from '@material-ui/icons/Edit';
 import axios from 'axios';
 import { useHistory } from 'react-router-dom';
+import { SnackContext } from '../SnackBar/SnackContext';
 import MobileEditMenu from '../MobileEditMenu';
 
 const useStyles = makeStyles(theme => ({
@@ -74,9 +75,11 @@ export default function Inventory() {
 
   const history = useHistory();
 
+  const { setSnack } = useContext(SnackContext);
+
   const apiFetch = async () => {
     try {
-      const response = await axios.get('/api/productlist');
+      const response = await axios.get('/api/productlist/');
       const { data } = response;
       const list = data.map(val => ({
         name: val.name,
@@ -103,7 +106,17 @@ export default function Inventory() {
     const { id } = row;
     setDeletedRow(prevState => [...prevState, inventoryList.indexOf(row)]);
     try {
-      await axios.delete(`/api/productlist/${id}`);
+      await axios.delete(`/api/productlist/${id}/`);
+
+      // add success snackbar on successful request
+      const { name } = inventoryList.find(val => val.id === id);
+      setSnack({
+        open: true,
+        message: `Succesfully deleted ${name}`,
+        action: '',
+        actionParams: '',
+        type: 'success',
+      });
     } catch (e) {
       console.log(e);
     }
