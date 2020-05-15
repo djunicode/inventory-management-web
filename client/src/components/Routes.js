@@ -1,3 +1,4 @@
+/* eslint-disable react/jsx-curly-newline */
 import React from 'react';
 import {
   BrowserRouter as Router,
@@ -10,6 +11,7 @@ import NavBar from './NavBar/NavBar';
 import Login from './Login/Login';
 import NavDrawer from './Drawer/Drawer';
 import Container from './Container/Container';
+import PageNotFound from './PageNotFound';
 
 const Routes = () => {
   // Using state so that navbar can communicate with drawer
@@ -20,17 +22,26 @@ const Routes = () => {
 
   return (
     <Router>
-      <NavBar
-        mobileOpen={mobileOpen}
-        setMobileOpen={setMobileOpen}
-        tabletOpen={tabletOpen}
-        setTabletOpen={setTabletOpen}
-      />
       <Switch>
         <PrivateRoute exact path='/login'>
+          <NavBar
+            mobileOpen={mobileOpen}
+            setMobileOpen={setMobileOpen}
+            tabletOpen={tabletOpen}
+            setTabletOpen={setTabletOpen}
+          />
           <Login />
         </PrivateRoute>
-        <PrivateRoute path='/'>
+        <PrivateRoute
+          exact
+          path={['/', '/inventory', '/transaction', '/employee']}
+        >
+          <NavBar
+            mobileOpen={mobileOpen}
+            setMobileOpen={setMobileOpen}
+            tabletOpen={tabletOpen}
+            setTabletOpen={setTabletOpen}
+          />
           <NavDrawer
             mobileOpen={mobileOpen}
             setMobileOpen={setMobileOpen}
@@ -38,19 +49,21 @@ const Routes = () => {
           />
           <Container tabletOpen={tabletOpen} />
         </PrivateRoute>
+        <Route component={PageNotFound} />
       </Switch>
     </Router>
   );
 };
 
 // Private Route Component
+// eslint-disable-next-line consistent-return
 const PrivateRoute = ({ children, path, ...rest }) => {
   const tokenExists = !!localStorage.getItem('token');
 
   // User cannot directly open homepage if token doesnt exist in local Storage.
   // It aslo redirects the user to login page
 
-  if (path === '/') {
+  if (path !== '/login') {
     return (
       <Route
         path={path}
