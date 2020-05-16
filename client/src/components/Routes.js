@@ -19,10 +19,20 @@ const Routes = () => {
   const [mobileOpen, setMobileOpen] = React.useState(false);
   // tabletOpen will be used for screen width between 960px and 600px
   const [tabletOpen, setTabletOpen] = React.useState(false);
+  // All the routes of our app, excluding login
+  const allRoutes = [
+    '/',
+    '/inventory',
+    '/transaction',
+    '/employee',
+    '/addemployee',
+    '/updateproduct',
+  ];
 
   return (
     <Router>
       <Switch>
+        {/* Route handling for login */}
         <PrivateRoute exact path='/login'>
           <NavBar
             mobileOpen={mobileOpen}
@@ -32,10 +42,8 @@ const Routes = () => {
           />
           <Login />
         </PrivateRoute>
-        <PrivateRoute
-          exact
-          path={['/', '/inventory', '/transaction', '/employee']}
-        >
+        {/* Route handling for all routes in allRoutes variable */}
+        <PrivateRoute exact path={allRoutes}>
           <NavBar
             mobileOpen={mobileOpen}
             setMobileOpen={setMobileOpen}
@@ -116,7 +124,10 @@ PrivateRoute.propTypes = {
     PropTypes.element.isRequired,
     PropTypes.arrayOf(PropTypes.element).isRequired,
   ]),
-  path: PropTypes.string,
+  path: PropTypes.oneOfType([
+    PropTypes.string,
+    PropTypes.arrayOf(PropTypes.string),
+  ]),
 };
 
 export default Routes;
