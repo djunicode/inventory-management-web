@@ -3,18 +3,22 @@ from django.shortcuts import render, get_object_or_404
 from djoser.conf import settings as dj_settings
 from django.http import HttpResponse, JsonResponse
 from rest_framework import status
-
 from .models import *
 import json
 from django.forms.models import model_to_dict
 from .serializers import *
 from rest_framework import generics
 from django.core import serializers
+from django.contrib.auth.decorators import login_required
+from django.middleware.csrf import CsrfViewMiddleware, get_token
+from django.views.decorators.csrf import csrf_exempt
+from rest_framework.decorators import api_view, permission_classes
+from django.contrib.auth.decorators import login_required, permission_required
+from rest_framework.permissions import IsAuthenticated
 
 
-def user_delete(request):
-
-    if request.user.is_authenticated:
+class User_Delete(generics.GenericAPIView):
+    def post(self, request, *args, **kwargs):
 
         if request.method == "POST":
             if dj_settings.TOKEN_MODEL:
@@ -23,10 +27,6 @@ def user_delete(request):
                 ).delete()
             User.objects.get(email=request.POST.get("email")).delete()
         return HttpResponse("")
-    else:
-        res = HttpResponse("Unauthorized")
-        res.status_code = 401
-        return res
 
 
 def login(request):
@@ -53,7 +53,6 @@ class BillListView(generics.ListAPIView):
 
 
 class ProductListView(generics.ListCreateAPIView):
-
     queryset = Products.objects.all()
     serializer_class = ProductListSerializer
 
@@ -69,36 +68,29 @@ class ProductDeleteView(generics.DestroyAPIView):
 """ View to Update attributes of a specific product from database using product id (pid) """
 
 
-def product_update(request, pid):
+class Product_Update(generics.GenericAPIView):
+    def post(self, request, pid, *args, **kwargs):
+        """ Parameters
+            ------------
+            product id(pid)
+            (POST) from user: name , latest selling price and loose (Boolean Value)
+            ------------
 
-    """ Parameters
-        ------------
-        product id(pid)
-        (POST) from user: name , latest selling price and loose (Boolean Value)
-        ------------
+            Here, user can change name of product, its latest selling price and make the product loose or not loose(packaged)
 
-        Here, user can change name of product, its latest selling price and make the product loose or not loose(packaged)
+            For name change, we get the product using its id, store its name in a variable pname and then change product's name
+            as requested by user
+            Similarly, latest selling price of the product is directly updated.
 
-        For name change, we get the product using its id, store its name in a variable pname and then change product's name 
-        as requested by user
-        Similarly, latest selling price of the product is directly updated.
-
-        For loose, if loose attriibute remains unchanged, then no changes occur 
-        However, if loose product is to be made packaged, i.e. loose = False, Items of that particular product are added in the
-        database according to product quantity.
-        If packaged product is to be made loose, items of that particular product are deleted from database.
-        addition and deletion of items is done using the pname variable which stored earlier product name.        """
-
-    if request.user.is_authenticated:
+            For loose, if loose attriibute remains unchanged, then no changes occur
+            However, if loose product is to be made packaged, i.e. loose = False, Items of that particular product are added in the
+            database according to product quantity.
+            If packaged product is to be made loose, items of that particular product are deleted from database.
+            addition and deletion of items is done using the pname variable which stored earlier product name.        """
 
         if request.method == "POST":
-            pr = Products.objects.get(id=pid)
-            if pr == None:
-                res = HttpResponse("Product not Found")
-                res.status_code = 404
-                return res
-
-            else:
+            try:
+                pr = Products.objects.get(id=pid)
                 pname = pr.name
 
                 # change product name
@@ -140,56 +132,52 @@ def product_update(request, pid):
                     res = HttpResponse("Incorrect Name Input")
                     res.status_code = 400
                     return res
-    else:
-        res = HttpResponse("Unauthorized")
-        res.status_code = 401
-        return res
+            except Products.DoesNotExist:
+
+                res = HttpResponse("Product Does not exist")
+                res.status_code = 404
+                return res
 
 
 """  View to buy Products """
 
 
-def buy(request):
+class Buy(generics.GenericAPIView):
+    def post(self, request, *args, **kwargs):
+        """ Parameters
+                ------------
+            (POST) from user: name , avg_cost_price and quantity;
+                ------------
 
-    """ Parameters
-        ------------
-       (POST) from user: name , avg_cost_price and quantity; 
-        ------------
+                Here, user buys a product. It might be a new product or an existing product. This counts for all IN Transactions.
 
-        Here, user buys a product. It might be a new product or an existing product. This counts for all IN Transactions.
-        
-        We search for a product using its name.
-        
-        If a Product already exists,
-        Then we recalculate avg_cost_pice of the product using the formula:
-        
-        new avg_cost_price = (current avg_cost_price*current no. of items) + (POSTed avg_cost_price* POSTed no. of items)
-                            -----------------------------------------------------------------------------------------------
-                                                    current no. of items + POSTed no. of items
-        
-        Then we increase the quantity of the product and
-        Then we check if product is loose or not, if not then we add new items of said product to the database accordingly.
-        We save the In transaction.
+                We search for a product using its name.
 
-        If Product doesn't exist, we create a new product using above paramenters keeping deafult value for loose(False) and
-        latest_selling_price (null) and save the transaction.
+                If a Product already exists,
+                Then we recalculate avg_cost_pice of the product using the formula:
 
-        If we create a new product, we set the variable created to True and send it along with the response, else it is set to False 
-        and then sent
-        
-    """
+                new avg_cost_price = (current avg_cost_price*current no. of items) + (POSTed avg_cost_price* POSTed no. of items)
+                                    -----------------------------------------------------------------------------------------------
+                                                            current no. of items + POSTed no. of items
 
-    if request.user.is_authenticated:
+                Then we increase the quantity of the product and
+                Then we check if product is loose or not, if not then we add new items of said product to the database accordingly.
+                We save the In transaction.
+
+                If Product doesn't exist, we create a new product using above paramenters keeping deafult value for loose(False) and
+                latest_selling_price (null) and save the transaction.
+
+                If we create a new product, we set the variable created to True and send it along with the response, else it is set to False
+                and then sent
+
+            """
+
         if request.method == "POST":
-
             if request.POST["name"] == "" or request.POST["name"].isspace() == True:
-
                 res = HttpResponse("Incorrect Name Input")
                 res.status_code = 400
                 return res
-
             else:
-
                 try:
                     # If Product exists
 
@@ -265,69 +253,54 @@ def buy(request):
                     serialized = json.dumps(dict_obj)
 
                     return HttpResponse(serialized)
-    else:
-
-        res = HttpResponse("Unauthorized")
-        res.status_code = 401
-        return res
 
 
 """ View to sell products """
 
 
-def sell(request):
+class Sell(generics.GenericAPIView):
+    def post(self, request, *args, **kwargs):
+        """ Parameters
+            ------------
+        (POST) from user: name , latest_selling_price and quantity;
+            ------------
 
-    """ Parameters
-        ------------
-       (POST) from user: name , latest_selling_price and quantity; 
-        ------------
+            Here, user sells a product. It must be an existing product. This counts for all OUT Transactions.
 
-        Here, user sells a product. It must be an existing product. This counts for all OUT Transactions.
-        
-        We search for a product using its name.
-        
-        If a Product does not exist, 404 error is generated
+            We search for a product using its name.
 
-        After finding the product, product quantity is deducted by the required quantity only if there is enough quantity
-        of the product available for selling
-        
-        If product is loose, new latest_selling_price of product is saved as given by user;
-        
-        else it is not saved as for packaged goods, latest_selling_price is MRP.
+            If a Product does not exist, 404 error is generated
 
-        If product is packaged, number of items equal to those sold are deleted from database.
+            After finding the product, product quantity is deducted by the required quantity only if there is enough quantity
+            of the product available for selling
 
-        Transaction is then saved as an OUT transaction and suitable response is returned            """
+            If product is loose, new latest_selling_price of product is saved as given by user;
 
-    if request.user.is_authenticated:
+            else it is not saved as for packaged goods, latest_selling_price is MRP.
+
+            If product is packaged, number of items equal to those sold are deleted from database.
+
+            Transaction is then saved as an OUT transaction and suitable response is returned            """
 
         if request.method == "POST":
-
             # Retrieve object if it exisits or generate 404
-
             try:
-
                 re = Products.objects.get(name=request.POST["name"])
 
                 # Check if enough quantity of product is available for selling
-
                 if re.quantity - int(request.POST["quantity"]) >= 0:
-
                     # Update product quantity
                     re.quantity = re.quantity - int(request.POST["quantity"])
                     # If product is loose, update latest_selling_price
                     if re.loose == True:
                         re.latest_selling_price = request.POST["latest_selling_price"]
-
                     re.save()
-
                 else:
                     res = HttpResponse("Not enough items available")
                     res.status_code = 400
                     return res
 
                 # Save OUT Transaction
-
                 trobj = Product_Transaction(
                     product=re,
                     quantity=int(request.POST["quantity"]),
@@ -338,7 +311,6 @@ def sell(request):
 
                 # If item is packaged. delete required amount of items from database
                 if re.loose == False:
-
                     it = Items.objects.filter(product__name=re.name)
                     for i in range(0, int(request.POST["quantity"])):
                         it[i].delete()
@@ -356,18 +328,10 @@ def sell(request):
                 res.status_code = 404
                 return res
 
-    else:
-
-        res = HttpResponse("Unauthorized")
-        res.status_code = 401
-        return res
-
 
 class Profit(generics.GenericAPIView):
     def get(self, request, *args, **kwargs):
-
-        if request.user.is_authenticated:
-
+        if request.user.is_authenticated() == True:
             serializer_class = ProfitSerializer
             products = Products.objects.all()
             result = {}
@@ -418,7 +382,6 @@ class Profit(generics.GenericAPIView):
                 "bought": q_cp_total,
             }
         else:
-
             res = HttpResponse("Unauthorized")
             res.status_code = 401
             return res
