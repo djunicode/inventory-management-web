@@ -56,7 +56,9 @@ const useForm = ({ name, sellingPrice, loose, id }) => {
   //  if credentials are invalid then invalidcred is set to appropriate errors got from API
   const apiFetch = async formData => {
     try {
-      await axios.post(`/api/update/${id}/`, formData);
+      const token = localStorage.getItem('token');
+      const config = { headers: { Authorization: `Token ${token}` } };
+      await axios.post(`/api/update/${id}/`, formData, config);
 
       // add success snackbar on successful request
       setSnack({

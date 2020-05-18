@@ -130,7 +130,9 @@ export default function Employee() {
     try {
       const formData = new FormData();
       formData.append('email', email);
-      await axios.post('/auth/user_delete/', formData);
+      const token = localStorage.getItem('token');
+      const config = { headers: { Authorization: `Token ${token}` } };
+      await axios.post('/auth/user_delete/', formData, config);
 
       // add success snackbar on successful request
       setSnack({
