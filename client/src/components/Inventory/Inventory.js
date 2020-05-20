@@ -79,7 +79,9 @@ export default function Inventory() {
 
   const apiFetch = async () => {
     try {
-      const response = await axios.get('/api/productlist/');
+      const token = localStorage.getItem('token');
+      const config = { headers: { Authorization: `Token ${token}` } };
+      const response = await axios.get('/api/productlist/', config);
       const { data } = response;
       const list = data.map(val => ({
         name: val.name,
@@ -106,7 +108,9 @@ export default function Inventory() {
     const { id } = row;
     setDeletedRow(prevState => [...prevState, inventoryList.indexOf(row)]);
     try {
-      await axios.delete(`/api/productlist/${id}/`);
+      const token = localStorage.getItem('token');
+      const config = { headers: { Authorization: `Token ${token}` } };
+      await axios.delete(`/api/productlist/${id}/`, config);
 
       // add success snackbar on successful request
       const { name } = inventoryList.find(val => val.id === id);

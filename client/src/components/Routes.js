@@ -1,3 +1,4 @@
+/* eslint-disable react/jsx-curly-newline */
 import React from 'react';
 import {
   BrowserRouter as Router,
@@ -10,6 +11,7 @@ import NavBar from './NavBar/NavBar';
 import Login from './Login/Login';
 import NavDrawer from './Drawer/Drawer';
 import Container from './Container/Container';
+import PageNotFound from './PageNotFound';
 
 const Routes = () => {
   // Using state so that navbar can communicate with drawer
@@ -17,20 +19,37 @@ const Routes = () => {
   const [mobileOpen, setMobileOpen] = React.useState(false);
   // tabletOpen will be used for screen width between 960px and 600px
   const [tabletOpen, setTabletOpen] = React.useState(false);
+  // All the routes of our app, excluding login
+  const allRoutes = [
+    '/',
+    '/inventory',
+    '/transaction',
+    '/employee',
+    '/addemployee',
+    '/updateproduct',
+  ];
 
   return (
     <Router>
-      <NavBar
-        mobileOpen={mobileOpen}
-        setMobileOpen={setMobileOpen}
-        tabletOpen={tabletOpen}
-        setTabletOpen={setTabletOpen}
-      />
       <Switch>
+        {/* Route handling for login */}
         <PrivateRoute exact path='/login'>
+          <NavBar
+            mobileOpen={mobileOpen}
+            setMobileOpen={setMobileOpen}
+            tabletOpen={tabletOpen}
+            setTabletOpen={setTabletOpen}
+          />
           <Login />
         </PrivateRoute>
-        <PrivateRoute path='/'>
+        {/* Route handling for all routes in allRoutes variable */}
+        <PrivateRoute exact path={allRoutes}>
+          <NavBar
+            mobileOpen={mobileOpen}
+            setMobileOpen={setMobileOpen}
+            tabletOpen={tabletOpen}
+            setTabletOpen={setTabletOpen}
+          />
           <NavDrawer
             mobileOpen={mobileOpen}
             setMobileOpen={setMobileOpen}
@@ -38,19 +57,21 @@ const Routes = () => {
           />
           <Container tabletOpen={tabletOpen} />
         </PrivateRoute>
+        <Route component={PageNotFound} />
       </Switch>
     </Router>
   );
 };
 
 // Private Route Component
+// eslint-disable-next-line consistent-return
 const PrivateRoute = ({ children, path, ...rest }) => {
   const tokenExists = !!localStorage.getItem('token');
 
   // User cannot directly open homepage if token doesnt exist in local Storage.
   // It aslo redirects the user to login page
 
-  if (path === '/') {
+  if (path !== '/login') {
     return (
       <Route
         path={path}
@@ -103,7 +124,10 @@ PrivateRoute.propTypes = {
     PropTypes.element.isRequired,
     PropTypes.arrayOf(PropTypes.element).isRequired,
   ]),
-  path: PropTypes.string,
+  path: PropTypes.oneOfType([
+    PropTypes.string,
+    PropTypes.arrayOf(PropTypes.string),
+  ]),
 };
 
 export default Routes;

@@ -63,7 +63,9 @@ const TransactionHistory = () => {
   // fetch transaction list from API
   const apiFetch = async () => {
     try {
-      const response = await axios.get('/api/bill/');
+      const token = localStorage.getItem('token');
+      const config = { headers: { Authorization: `Token ${token}` } };
+      const response = await axios.get('/api/bill/', config);
       const { data } = response;
       setTransactionList(data);
     } catch (e) {
