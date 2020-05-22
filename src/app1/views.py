@@ -204,7 +204,7 @@ class Buy(generics.GenericAPIView):
                     if re.loose == False:
 
                         for i in range(1, int(request.POST["quantity"]) + 1):
-                            itobj = Items(product=re, expiry=request.POST['expiry'])
+                            itobj = Items(product=re, expiry=request.POST["expiry"])
                             itobj.save()
 
                     # Save IN Transaction
@@ -238,7 +238,7 @@ class Buy(generics.GenericAPIView):
                     pdt.save()
                     # Added Items as default loose= False
                     for i in range(1, int(request.POST["quantity"]) + 1):
-                        itobj = Items(product=pdt, expiry=request.POST['expiry'])
+                        itobj = Items(product=pdt, expiry=request.POST["expiry"])
                         itobj.save()
 
                     # Save Transaction
@@ -402,8 +402,8 @@ class Expiry(generics.GenericAPIView):
             d = i[0].expiry
             d1 = i.filter(expiry=d)
             d2 = len(d1)
-            d3 = ((d - datetime.date.today()).days)
-            if(d3 <= 3):
+            d3 = (d - datetime.date.today()).days
+            if d3 <= 3:
                 p2 = {"Product": p.name, "No. of items": d2, "Days left": d3}
                 exp.append(p2)
         return HttpResponse(exp)
