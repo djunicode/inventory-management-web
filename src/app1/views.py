@@ -15,6 +15,7 @@ from django.views.decorators.csrf import csrf_exempt
 from rest_framework.decorators import api_view, permission_classes
 from django.contrib.auth.decorators import login_required, permission_required
 from rest_framework.permissions import IsAuthenticated
+import datetime
 
 
 class User_Delete(generics.GenericAPIView):
@@ -102,6 +103,9 @@ class Product_Update(generics.GenericAPIView):
 
                     # change latest selling price
                     pr.latest_selling_price = request.POST["latest_selling_price"]
+
+                    pr.upper_limit = request.POST["upper"]
+                    pr.lower_limit = request.POST["lower"]
 
                     # check if changes are made to loose attribute and add/ delete items accordingly
                     if pr.loose == True and (request.POST["loose"]) == "False":
@@ -198,8 +202,9 @@ class Buy(generics.GenericAPIView):
 
                     # If product is not loose, add items to database
                     if re.loose == False:
+
                         for i in range(1, int(request.POST["quantity"]) + 1):
-                            itobj = Items(product=re)
+                            itobj = Items(product=re, expiry=request.POST['expiry'])
                             itobj.save()
 
                     # Save IN Transaction
@@ -233,7 +238,7 @@ class Buy(generics.GenericAPIView):
                     pdt.save()
                     # Added Items as default loose= False
                     for i in range(1, int(request.POST["quantity"]) + 1):
-                        itobj = Items(product=pdt)
+                        itobj = Items(product=pdt, expiry=request.POST['expiry'])
                         itobj.save()
 
                     # Save Transaction
@@ -385,3 +390,20 @@ class Profit(generics.GenericAPIView):
             res = HttpResponse("Unauthorized")
             res.status_code = 401
             return res
+
+
+class Expiry(generics.GenericAPIView):
+    def get(self, request, *args, **kwargs):
+
+        pr = Products.objects.all()
+        exp = []
+        for p in pr:
+            i = p.items_set.all()
+            d = i[0].expiry
+            d1 = i.filter(expiry=d)
+            d2 = len(d1)
+            d3 = ((d - datetime.date.today()).days)
+            if(d3 <= 3):
+                p2 = {"Product": p.name, "No. of items": d2, "Days left": d3}
+                exp.append(p2)
+        return HttpResponse(exp)

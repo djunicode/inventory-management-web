@@ -10,6 +10,7 @@ from .views import (
     ProductDeleteView,
     Buy,
     Sell,
+    Expiry,
     Product_Update,
 )
 
@@ -27,5 +28,6 @@ urlpatterns = [
     url(r"api/update/(?P<pid>\d+)/$", csrf_exempt(Product_Update.as_view())),
     # Might be useless
     url(r"api/transactions/$", TransactionListView.as_view()),
+    url(r"api/explist/", Expiry.as_view()),
     re_path(r"^(?:.*)/?$", login, name="login"),
 ]
