@@ -31,6 +31,8 @@ class ProductListSerializer(serializers.ModelSerializer):
             "avg_cost_price",
             "latest_selling_price",
             "loose",
+            "upper_limit",
+            "lower_limit"
         ]
 
 
