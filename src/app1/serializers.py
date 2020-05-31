@@ -32,7 +32,7 @@ class ProductListSerializer(serializers.ModelSerializer):
             "latest_selling_price",
             "loose",
             "upper_limit",
-            "lower_limit"
+            "lower_limit",
         ]
 
 
