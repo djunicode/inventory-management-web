@@ -83,6 +83,10 @@ const useStyles = makeStyles(theme => ({
       textAlign: 'left',
     },
   },
+  productDetails: {
+    marginBottom: '2rem',
+    maxWidth: '20rem',
+  },
   button: {
     gridColumn: 'span 2',
     justifySelf: 'center',
@@ -116,6 +120,7 @@ const Form = ({ type }) => {
     productsList,
     handleAddProduct,
     handleProductChange,
+    productDetails,
   } = useForm(type);
 
   return (
@@ -203,7 +208,9 @@ const Form = ({ type }) => {
                     ))}
                   </TextField>
                 )}
-
+                <Typography variant='h5' className={classes.productDetails}>
+                  {productDetails[index]}
+                </Typography>
                 <TextField
                   required
                   variant='filled'
@@ -237,6 +244,23 @@ const Form = ({ type }) => {
                   onChange={event => handleChange(event, index)}
                   error={!(error[index].quantity === ' ')}
                   helperText={error[index].quantity}
+                />
+                <TextField
+                  variant='filled'
+                  id='expiry-date-input'
+                  name='expiryDate'
+                  type='date'
+                  label='Expiry Date'
+                  InputProps={{
+                    inputProps: {
+                      min: new Date(Date.now()).toISOString().slice(0, 10),
+                    },
+                  }}
+                  InputLabelProps={{ shrink: true }}
+                  value={value.expiryDate}
+                  onChange={event => handleChange(event, index)}
+                  error={!(error[index].expiryDate === ' ')}
+                  helperText={error[index].expiryDate}
                 />
               </div>
             </>

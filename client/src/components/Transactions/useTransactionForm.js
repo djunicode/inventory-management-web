@@ -11,14 +11,18 @@ const useForm = type => {
   const validateInputs = values => {
     let errors = [];
     for (let i = 0; i < values.length; i += 1) {
-      errors = [...errors, { product: ' ', quantity: ' ', price: ' ' }];
+      errors = [
+        ...errors,
+        { product: ' ', quantity: ' ', price: ' ', expiryDate: ' ' },
+      ];
     }
     values.forEach((value, index) => {
       let productErr = ' ';
       let quantityErr = ' ';
       let priceErr = ' ';
+      const expiryErr = ' ';
 
-      if (type === 'Sell') {
+      if (type === 'Sell' && value.productName) {
         const { quantity } = productsList.find(
           product => product.name === value.productName
         );
@@ -47,6 +51,7 @@ const useForm = type => {
         product: productErr,
         quantity: quantityErr,
         price: priceErr,
+        expiryDate: expiryErr,
       };
     });
     return errors;
@@ -54,14 +59,23 @@ const useForm = type => {
 
   // values for product name, quantity and price
   const [values, setValues] = useState([
-    { productName: '', quantity: '', price: '' },
+    {
+      productName: '',
+      quantity: '',
+      price: '',
+      expiryDate: '',
+    },
   ]);
   // error messages to be added to the inputs
   const [error, setError] = useState([
-    { product: ' ', quantity: ' ', price: ' ' },
+    { product: ' ', quantity: ' ', price: ' ', expiryDate: ' ' },
   ]);
   // true only if submit button is pressed
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const [productDetails, setProductDetails] = useState([
+    'Select a product to view details',
+  ]);
 
   // fetch the products list from API
   const apiFetch = async () => {
@@ -75,6 +89,8 @@ const useForm = type => {
         quantity: val.quantity,
         price: val.latest_selling_price,
         id: val.id,
+        upperLimit: val.upper_limit,
+        lowerLimit: val.lower_limit,
       }));
       setProductsList(list);
     } catch (e) {
@@ -151,6 +167,7 @@ const useForm = type => {
         const formData = new FormData();
         formData.append('name', val.productName);
         formData.append('quantity', val.quantity);
+        formData.append('expiry', val.expiryDate);
         if (type === 'Buy') {
           formData.append('avg_cost_price', val.price);
         } else {
@@ -162,10 +179,33 @@ const useForm = type => {
       });
       setIsSubmitting(false);
       // reset inputs
-      setValues([{ productName: '', quantity: '', price: '' }]);
+      setValues([{ productName: '', quantity: '', price: '', expiryDate: '' }]);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [error, isSubmitting]);
+
+  useEffect(() => {
+    const newProductDetails = [];
+    values.forEach((value, index) => {
+      let newDetails = 'Select a product to view details';
+      if (value.productName !== '') {
+        const currProduct = productsList.find(
+          product => product.name === value.productName
+        );
+        if (currProduct) {
+          if (type === 'Buy') {
+            newDetails = `${currProduct.quantity} in inventory, ${currProduct.upperLimit} Recommended limit`;
+          } else {
+            newDetails = `${currProduct.quantity} in inventory, ${currProduct.lowerLimit} Critical limit`;
+          }
+        } else {
+          newDetails = 'No Details';
+        }
+      }
+      newProductDetails[index] = newDetails;
+    });
+    setProductDetails(newProductDetails);
+  }, [productsList, type, values]);
 
   // function to handle submit
   const handleSubmit = event => {
@@ -251,11 +291,15 @@ const useForm = type => {
   const handleAddProduct = () => {
     setValues(prevState => [
       ...prevState,
-      { productName: '', quantity: '', price: '' },
+      { productName: '', quantity: '', price: '', expiryDate: '' },
     ]);
     setError(prevState => [
       ...prevState,
-      { product: ' ', quantity: ' ', price: ' ' },
+      { product: ' ', quantity: ' ', price: ' ', expiryDate: ' ' },
+    ]);
+    setProductDetails(prevState => [
+      ...prevState,
+      'Select a product to view details',
     ]);
   };
 
@@ -267,6 +311,7 @@ const useForm = type => {
     productsList,
     handleAddProduct,
     handleProductChange,
+    productDetails,
   };
 };
 
