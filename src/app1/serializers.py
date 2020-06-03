@@ -9,7 +9,7 @@ class TransactionSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Product_Transaction
-        fields = ["id", "name", "quantity", "rate","in_or_out"]
+        fields = ["id", "name", "quantity", "rate", "in_or_out"]
 
 
 class BillSerializer(serializers.ModelSerializer):
@@ -31,8 +31,6 @@ class ProductListSerializer(serializers.ModelSerializer):
             "avg_cost_price",
             "latest_selling_price",
             "loose",
-            "upper_limit",
-            "lower_limit",
         ]
 
 

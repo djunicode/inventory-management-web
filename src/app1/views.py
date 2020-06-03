@@ -176,88 +176,101 @@ class Buy(generics.GenericAPIView):
 
             """
 
-        if request.method == "POST":
-            if request.POST["name"] == "" or request.POST["name"].isspace() == True:
-                res = HttpResponse("Incorrect Name Input")
-                res.status_code = 400
-                return res
-            else:
-                try:
-                    # If Product exists
+        if request.POST["name"] == "" or request.POST["name"].isspace() == True:
+            res = HttpResponse("Incorrect Name Input")
+            res.status_code = 400
+            return res
 
-                    re = Products.objects.get(name=request.POST["name"])
+        else:
+            try:
+                # If Product exists
 
-                    # Re Calculate avg_cost_price
-                    re.avg_cost_price = (
-                        (re.avg_cost_price * re.quantity)
-                        + (
-                            int(request.POST["avg_cost_price"])
-                            * int(request.POST["quantity"])
-                        )
-                    ) / (int(request.POST["quantity"]) + re.quantity)
+                re = Products.objects.get(name=request.POST["name"])
 
-                    # Increase quantity
-                    re.quantity = re.quantity + int(request.POST["quantity"])
-                    re.save()
+                # Re Calculate avg_cost_price
+                re.avg_cost_price = (
+                    (re.avg_cost_price * re.quantity)
+                    + (
+                        int(request.POST["avg_cost_price"])
+                        * int(request.POST["quantity"])
+                    )
+                ) / (int(request.POST["quantity"]) + re.quantity)
 
-                    # If product is not loose, add items to database
-                    if re.loose == False:
+                # Increase quantity
+                re.quantity = re.quantity + int(request.POST["quantity"])
+                re.save()
+
+                # If product is not loose, add items to database
+
+                if re.loose == False:
+
+                    if request.POST["expiry"] != "":
 
                         for i in range(1, int(request.POST["quantity"]) + 1):
                             itobj = Items(product=re, expiry=request.POST["expiry"])
                             itobj.save()
+                    else:
+                        for i in range(1, int(request.POST["quantity"]) + 1):
+                            itobj = Items(product=re, expiry=None)
+                            itobj.save()
+                # Save IN Transaction
+                trobj = Product_Transaction(
+                    product=re,
+                    quantity=int(request.POST["quantity"]),
+                    rate=int(request.POST["avg_cost_price"]),
+                    in_or_out="In",
+                )
+                trobj.save()
 
-                    # Save IN Transaction
-                    trobj = Product_Transaction(
-                        product=re,
-                        quantity=int(request.POST["quantity"]),
-                        rate=int(request.POST["avg_cost_price"]),
-                        in_or_out="In",
-                    )
-                    trobj.save()
+                # Send response with created = False
+                tr = Products.objects.get(name=request.POST["name"])
+                created = {"created": False}
+                dict_obj = model_to_dict(tr)
+                dict_obj.update(created)
+                serialized = json.dumps(dict_obj)
+                return HttpResponse(serialized)
 
-                    # Send response with created = False
-                    tr = Products.objects.get(name=request.POST["name"])
-                    created = {"created": False}
-                    dict_obj = model_to_dict(tr)
-                    dict_obj.update(created)
-                    serialized = json.dumps(dict_obj)
-                    return HttpResponse(serialized)
+            except Products.DoesNotExist:
+                # If Product does not exist already:
+                name = request.POST["name"]
+                quant = request.POST["quantity"]
 
-                except Products.DoesNotExist:
-                    # If Product does not exist already:
-                    name = request.POST["name"]
-                    quant = request.POST["quantity"]
+                avg_cost_price = request.POST["avg_cost_price"]
 
-                    avg_cost_price = request.POST["avg_cost_price"]
+                pdt = Products(name=name, quantity=quant, avg_cost_price=avg_cost_price)
+                # Created new product
+                pdt.save()
+                # Added Items as default loose= False
 
-                    pdt = Products(
-                        name=name, quantity=quant, avg_cost_price=avg_cost_price
-                    )
-                    # Created new product
-                    pdt.save()
-                    # Added Items as default loose= False
+                if request.POST["expiry"] != "":
+
                     for i in range(1, int(request.POST["quantity"]) + 1):
                         itobj = Items(product=pdt, expiry=request.POST["expiry"])
                         itobj.save()
+                else:
 
-                    # Save Transaction
-                    trobj = Product_Transaction(
-                        product=pdt,
-                        quantity=int(request.POST["quantity"]),
-                        rate=int(request.POST["avg_cost_price"]),
-                        in_or_out="In",
-                    )
-                    trobj.save()
+                    for i in range(1, int(request.POST["quantity"]) + 1):
+                        itobj = Items(product=pdt, expiry=None)
 
-                    # Send Response with created = True
-                    tr = Products.objects.get(name=request.POST["name"])
-                    created = {"created": True}
-                    dict_obj = model_to_dict(tr)
-                    dict_obj.update(created)
-                    serialized = json.dumps(dict_obj)
+                        itobj.save()
 
-                    return HttpResponse(serialized)
+                # Save Transaction
+                trobj = Product_Transaction(
+                    product=pdt,
+                    quantity=int(request.POST["quantity"]),
+                    rate=int(request.POST["avg_cost_price"]),
+                    in_or_out="In",
+                )
+                trobj.save()
+
+                # Send Response with created = True
+                tr = Products.objects.get(name=request.POST["name"])
+                created = {"created": True}
+                dict_obj = model_to_dict(tr)
+                dict_obj.update(created)
+                serialized = json.dumps(dict_obj)
+
+                return HttpResponse(serialized)
 
 
 """ View to sell products """
@@ -336,60 +349,56 @@ class Sell(generics.GenericAPIView):
 
 class Profit(generics.GenericAPIView):
     def get(self, request, *args, **kwargs):
-        if request.user.is_authenticated() == True:
-            serializer_class = ProfitSerializer
-            products = Products.objects.all()
-            result = {}
-            # final_profit = {}
 
-            for i in products:
-                product_profit = Product_Transaction.objects.filter(product=i)
-                for j in product_profit:
-                    month = str(j.date.strftime("%Y-%m"))
-                    result[month] = 0
+        serializer_class = ProfitSerializer
+        products = Products.objects.all()
+        result = {}
+        # final_profit = {}
 
-                result["Total"] = 0
-                cp_total = 0
-                q_cp_total = 0
-                sp_total = 0
-                q_sp_total = 0
-                for m in result:
-                    if m != "Total":
-                        profit_product_monthly = product_profit.filter(
-                            date_year=m.split("-")[0], date_month=m.split("-")[1]
-                        )
-                        cp = 0
-                        q_cp = 0
-                        sp = 0
-                        q_sp = 0
-                        for transaction in profit_product_monthly:
-                            if transaction.in_or_out == "In":
-                                cp = cp + transaction.quantity * transaction.rate
-                                q_cp += transaction.quantity
-                            else:
-                                sp = sp + transaction.quantity * transaction.rate
-                                q_sp += transaction.quantity
-                        if q_cp and q_sp:
-                            result[m] = {
-                                "earned": sp,
-                                "spent": cp,
-                                "sold": q_sp,
-                                "bought": q_cp,
-                            }  # total earned and spent, and total items bought and sold every month
-                            cp_total += cp
-                            sp_total += sp
-                            q_cp_total += q_cp
-                            q_sp_total += q_sp
-            result["Total"] = {
-                "earned": sp_total,
-                "sold": q_sp_total,
-                "spent": cp_total,
-                "bought": q_cp_total,
-            }
-        else:
-            res = HttpResponse("Unauthorized")
-            res.status_code = 401
-            return res
+        for i in products:
+            product_profit = Product_Transaction.objects.filter(product=i)
+            for j in product_profit:
+                month = str(j.date.strftime("%Y-%m"))
+                result[month] = 0
+
+            result["Total"] = 0
+            cp_total = 0
+            q_cp_total = 0
+            sp_total = 0
+            q_sp_total = 0
+            for m in result:
+                if m != "Total":
+                    profit_product_monthly = product_profit.filter(
+                        date_year=m.split("-")[0], date_month=m.split("-")[1]
+                    )
+                    cp = 0
+                    q_cp = 0
+                    sp = 0
+                    q_sp = 0
+                    for transaction in profit_product_monthly:
+                        if transaction.in_or_out == "In":
+                            cp = cp + transaction.quantity * transaction.rate
+                            q_cp += transaction.quantity
+                        else:
+                            sp = sp + transaction.quantity * transaction.rate
+                            q_sp += transaction.quantity
+                    if q_cp and q_sp:
+                        result[m] = {
+                            "earned": sp,
+                            "spent": cp,
+                            "sold": q_sp,
+                            "bought": q_cp,
+                        }  # total earned and spent, and total items bought and sold every month
+                        cp_total += cp
+                        sp_total += sp
+                        q_cp_total += q_cp
+                        q_sp_total += q_sp
+        result["Total"] = {
+            "earned": sp_total,
+            "sold": q_sp_total,
+            "spent": cp_total,
+            "bought": q_cp_total,
+        }
 
 
 class Expiry(generics.GenericAPIView):
@@ -399,11 +408,14 @@ class Expiry(generics.GenericAPIView):
         exp = []
         for p in pr:
             i = p.items_set.all()
-            d = i[0].expiry
-            d1 = i.filter(expiry=d)
-            d2 = len(d1)
-            d3 = (d - datetime.date.today()).days
-            if d3 <= 3:
-                p2 = {"Product": p.name, "No. of items": d2, "Days left": d3}
-                exp.append(p2)
+            if i[0].expiry != None:
+                d = i[0].expiry
+                d1 = i.filter(expiry=d)
+                d2 = len(d1)
+                d3 = (d - datetime.date.today()).days
+                if d3 <= 3:
+                    p2 = {"Product": p.name, "No. of items": d2, "Days left": d3}
+                    exp.append(p2)
+            else:
+                continue
         return HttpResponse(exp)
