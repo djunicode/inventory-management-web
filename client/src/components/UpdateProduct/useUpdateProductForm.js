@@ -4,7 +4,7 @@ import axios from 'axios';
 import { SnackContext } from '../SnackBar/SnackContext';
 
 // custom hook for form state management
-const useForm = ({ name, sellingPrice, loose, id }) => {
+const useForm = ({ name, sellingPrice, loose, id, upperLimit, lowerLimit }) => {
   // function to validate inputs, returns the error statements
   const validateInputs = values => {
     const err = {
@@ -12,6 +12,8 @@ const useForm = ({ name, sellingPrice, loose, id }) => {
       name: ' ',
       sellingPrice: ' ',
       loose: ' ',
+      upperLimit: ' ',
+      lowerLimit: ' ',
     };
 
     if (values.sellingPrice === '0') {
@@ -19,10 +21,32 @@ const useForm = ({ name, sellingPrice, loose, id }) => {
       err.errors = true;
     }
 
+    if (values.upperLimit === '0') {
+      err.upperLimit = 'Upper Limit cannot be 0';
+      err.errors = true;
+    }
+
+    if (values.lowerLimit === '0') {
+      err.lowerLimit = 'Lower Limit cannot be 0';
+      err.errors = true;
+    }
+
+    if (Number(values.upperLimit) <= Number(values.lowerLimit)) {
+      err.upperLimit = 'Upper Limit cannot be lower or equal to Lower limit';
+      err.errors = true;
+    }
+
+    if (Number(values.lowerLimit) >= Number(values.upperLimit)) {
+      err.lowerLimit = 'Lower Limit cannot be lower or equal to Upper limit';
+      err.errors = true;
+    }
+
     Object.keys(values).forEach(key => {
-      if (values[key] === '') {
-        err[key] = 'Please fill out this field';
-        err.errors = true;
+      if (key !== 'upperLimit' || key !== 'lowerLimit') {
+        if (values[key] === '') {
+          err[key] = 'Please fill out this field';
+          err.errors = true;
+        }
       }
     });
 
@@ -35,6 +59,8 @@ const useForm = ({ name, sellingPrice, loose, id }) => {
     name,
     sellingPrice: sellingPrice || '',
     loose: loose === true ? 'true' : 'false',
+    upperLimit,
+    lowerLimit,
   });
 
   // error messages to be added to the inputs
@@ -43,6 +69,8 @@ const useForm = ({ name, sellingPrice, loose, id }) => {
     name: ' ',
     sellingPrice: ' ',
     loose: ' ',
+    upperLimit: ' ',
+    lowerLimit: ' ',
   });
 
   // true only if submit button is pressed
@@ -83,6 +111,12 @@ const useForm = ({ name, sellingPrice, loose, id }) => {
       formData.append('latest_selling_price', values.sellingPrice);
       const looseVal = values.loose === 'true' ? 'True' : 'False';
       formData.append('loose', looseVal);
+      if (values.upperLimit !== '') {
+        formData.append('upper', values.upperLimit);
+      }
+      if (values.lowerLimit !== '') {
+        formData.append('lower', values.lowerLimit);
+      }
       // post data to server
       apiFetch(formData);
       setIsSubmitting(false);

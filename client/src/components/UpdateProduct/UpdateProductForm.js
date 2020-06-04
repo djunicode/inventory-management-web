@@ -96,13 +96,22 @@ const useStyles = makeStyles(theme => ({
 const UpdateProduct = () => {
   // get state from location
   const location = useLocation();
-  const { name, sellingPrice, id, loose } = location.state;
+  const {
+    name,
+    sellingPrice,
+    id,
+    loose,
+    upperLimit,
+    lowerLimit,
+  } = location.state;
   // Use custom hook for form state management
   const { handleChange, handleSubmit, error, values } = useForm({
     name,
     sellingPrice,
     loose,
     id,
+    upperLimit,
+    lowerLimit,
   });
 
   const classes = useStyles();
@@ -150,6 +159,38 @@ const UpdateProduct = () => {
             onChange={handleChange}
             error={!(error.sellingPrice === ' ')}
             helperText={error.sellingPrice}
+          />
+          <TextField
+            variant='filled'
+            id='upperLimit-input'
+            type='number'
+            name='upperLimit'
+            label='Upper Limit'
+            InputProps={{
+              inputProps: {
+                min: 0,
+              },
+            }}
+            value={values.upperLimit}
+            onChange={handleChange}
+            error={!(error.upperLimit === ' ')}
+            helperText={error.upperLimit}
+          />
+          <TextField
+            variant='filled'
+            id='lowerLimit-input'
+            type='number'
+            name='lowerLimit'
+            label='Lower Limit'
+            InputProps={{
+              inputProps: {
+                min: 0,
+              },
+            }}
+            value={values.lowerLimit}
+            onChange={handleChange}
+            error={!(error.lowerLimit === ' ')}
+            helperText={error.lowerLimit}
           />
           <FormControl component='fieldset'>
             <FormLabel component='legend'>Type</FormLabel>
