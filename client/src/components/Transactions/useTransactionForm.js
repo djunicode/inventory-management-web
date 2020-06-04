@@ -123,15 +123,18 @@ const useForm = type => {
       }
       if (products.length) {
         // add success snackbar if new product created
+        const product = products[0];
         setSnack({
           open: true,
-          message: `Added ${products[0].name}`,
+          message: `Added ${product.name}`,
           action: 'EDIT',
           actionParams: {
-            name: products[0].name,
-            sellingPrice: products[0].latest_selling_price,
-            loose: products[0].loose,
-            id: products[0].id,
+            name: product.name,
+            sellingPrice: product.latest_selling_price,
+            loose: product.loose,
+            id: product.id,
+            upperLimit: product.upper_limit === null ? '' : product.upper_limit,
+            lowerLimit: product.lower_limit === null ? '' : product.upper_limit,
           },
         });
       } else if (type === 'Buy') {
@@ -194,9 +197,17 @@ const useForm = type => {
         );
         if (currProduct) {
           if (type === 'Buy') {
-            newDetails = `${currProduct.quantity} in inventory, ${currProduct.upperLimit} Recommended limit`;
+            newDetails = `${currProduct.quantity} in inventory ${
+              currProduct.upperLimit === null
+                ? ''
+                : `, ${currProduct.upperLimit} Recommended limit`
+            } `;
           } else {
-            newDetails = `${currProduct.quantity} in inventory, ${currProduct.lowerLimit} Critical limit`;
+            newDetails = `${currProduct.quantity} in inventory${
+              currProduct.lowerLimit === null
+                ? ''
+                : `, ${currProduct.lowerLimit} Critical limit`
+            } `;
           }
         } else {
           newDetails = 'No Details';
