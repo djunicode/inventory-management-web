@@ -348,57 +348,106 @@ class Sell(generics.GenericAPIView):
 
 
 class Profit(generics.GenericAPIView):
+    """
+    Profit class 
+    ---------------------
+    (GET): Gets data from transactions, and sends a list of items sold in a month, and overall
+    ----------------------
+    The GET function takes each product from Product's objects, and runs a search in all the product transactions, 
+    with the field being the product name.
+    After this, we run by the transactions month-wise, to get the transactions made in each month
+
+    In each transaction, we check if the type of transaction is 'IN' or 'OUT',
+    if IN, it means that a product has been bought.
+    so the money transactions made are added to cost price, both monthly and overall
+    and the quantity of items are added to the 'items bought' counter
+
+    else, implying that the product has been sold,
+    the money transactions made are added to the selling price, both monthly and overall
+    and the quantity of items are added to the 'items bought' counter
+    
+    returns: A JSON response consisting of the total cost, selling price and quantity of items bought/sold,
+    monthly and overall, for each product
+
+    """
+
     def get(self, request, *args, **kwargs):
 
         serializer_class = ProfitSerializer
         products = Products.objects.all()
         result = {}
+        result["Total"] = 0
+        cp_total = 0
+        q_cp_total = 0
+        sp_total = 0
+        q_sp_total = 0
         # final_profit = {}
 
         for i in products:
             product_profit = Product_Transaction.objects.filter(product=i)
+            print(i)
             for j in product_profit:
+                
                 month = str(j.date.strftime("%Y-%m"))
-                result[month] = 0
+        
+                if month not in result:
+                    result[month] = {}
+                print(result)
 
-            result["Total"] = 0
-            cp_total = 0
-            q_cp_total = 0
-            sp_total = 0
-            q_sp_total = 0
+            
             for m in result:
                 if m != "Total":
                     profit_product_monthly = product_profit.filter(
-                        date_year=m.split("-")[0], date_month=m.split("-")[1]
+                        date__year=m.split("-")[0], date__month=m.split("-")[1]
                     )
+                    
                     cp = 0
                     q_cp = 0
                     sp = 0
-                    q_sp = 0
+                    q_sp = 0 
+                    
+                    result[m][str(i)] = {
+                            "earned": 0.0,
+                            "spent": 0.0,
+                            "sold": 0,
+                            "bought": 0,
+                            }
                     for transaction in profit_product_monthly:
                         if transaction.in_or_out == "In":
                             cp = cp + transaction.quantity * transaction.rate
                             q_cp += transaction.quantity
+                            print("bought",m,cp,q_cp)
                         else:
                             sp = sp + transaction.quantity * transaction.rate
                             q_sp += transaction.quantity
-                    if q_cp and q_sp:
-                        result[m] = {
-                            "earned": sp,
-                            "spent": cp,
-                            "sold": q_sp,
-                            "bought": q_cp,
-                        }  # total earned and spent, and total items bought and sold every month
-                        cp_total += cp
-                        sp_total += sp
-                        q_cp_total += q_cp
-                        q_sp_total += q_sp
+                            print("sold",m,sp,q_sp)
+                    if q_cp :
+                        print(result[m][str(i)]["spent"])
+                        result[m][str(i)]["spent"] = cp
+                        result[m][str(i)]["bought"] =q_cp   
+                    if q_sp :
+                        print(q_sp,)
+                        result[m][str(i)]["earned"] = sp
+                        result[m][str(i)]["sold"] =q_sp
+
+                            # "spent": cp,
+                            # "sold": q_sp,
+                            # "bought": q_cp,
+                          # total earned and spent, and total items bought and sold every month
+
+                    cp_total += cp
+                    sp_total += sp
+                    q_cp_total += q_cp
+                    q_sp_total += q_sp
+
+
         result["Total"] = {
             "earned": sp_total,
             "sold": q_sp_total,
             "spent": cp_total,
             "bought": q_cp_total,
         }
+        return JsonResponse(result)
 
 
 class Expiry(generics.GenericAPIView):
