@@ -387,59 +387,57 @@ class Profit(generics.GenericAPIView):
             product_profit = Product_Transaction.objects.filter(product=i)
             print(i)
             for j in product_profit:
-                
+
                 month = str(j.date.strftime("%Y-%m"))
-        
+
                 if month not in result:
                     result[month] = {}
                 print(result)
 
-            
             for m in result:
                 if m != "Total":
                     profit_product_monthly = product_profit.filter(
                         date__year=m.split("-")[0], date__month=m.split("-")[1]
                     )
-                    
+
                     cp = 0
                     q_cp = 0
                     sp = 0
-                    q_sp = 0 
-                    
+                    q_sp = 0
+
                     result[m][str(i)] = {
-                            "earned": 0.0,
-                            "spent": 0.0,
-                            "sold": 0,
-                            "bought": 0,
-                            }
+                        "earned": 0.0,
+                        "spent": 0.0,
+                        "sold": 0,
+                        "bought": 0,
+                    }
                     for transaction in profit_product_monthly:
                         if transaction.in_or_out == "In":
                             cp = cp + transaction.quantity * transaction.rate
                             q_cp += transaction.quantity
-                            print("bought",m,cp,q_cp)
+                            print("bought", m, cp, q_cp)
                         else:
                             sp = sp + transaction.quantity * transaction.rate
                             q_sp += transaction.quantity
-                            print("sold",m,sp,q_sp)
-                    if q_cp :
+                            print("sold", m, sp, q_sp)
+                    if q_cp:
                         print(result[m][str(i)]["spent"])
                         result[m][str(i)]["spent"] = cp
-                        result[m][str(i)]["bought"] =q_cp   
-                    if q_sp :
+                        result[m][str(i)]["bought"] = q_cp
+                    if q_sp:
                         print(q_sp,)
                         result[m][str(i)]["earned"] = sp
-                        result[m][str(i)]["sold"] =q_sp
+                        result[m][str(i)]["sold"] = q_sp
 
-                            # "spent": cp,
-                            # "sold": q_sp,
-                            # "bought": q_cp,
-                          # total earned and spent, and total items bought and sold every month
+                        # "spent": cp,
+                        # "sold": q_sp,
+                        # "bought": q_cp,
+                        # total earned and spent, and total items bought and sold every month
 
                     cp_total += cp
                     sp_total += sp
                     q_cp_total += q_cp
                     q_sp_total += q_sp
-
 
         result["Total"] = {
             "earned": sp_total,

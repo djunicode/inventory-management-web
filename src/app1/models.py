@@ -97,7 +97,7 @@ class Product_Transaction(models.Model):
         null=True,
     )
     quantity = models.IntegerField()
-    date = models.DateField()
+    date = models.DateField(auto_now_add=True)
     rate = models.FloatField()
     choices = (
         ("In", "In"),

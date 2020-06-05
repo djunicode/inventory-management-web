@@ -24,17 +24,10 @@ class BillSerializer(serializers.ModelSerializer):
 class ProductListSerializer(serializers.ModelSerializer):
     class Meta:
         model = Products
-        fields = [
-            "id",
-            "name",
-            "quantity",
-            "avg_cost_price",
-            "latest_selling_price",
-            "loose",
-        ]
+        fields = "__all__"
 
 
 class ProfitSerializer(serializers.ModelSerializer):
     class Meta:
         model = Product_Transaction
-        fields = "_all_"
+        fields = "__all__"
