@@ -20,6 +20,7 @@ import { useHistory } from 'react-router-dom';
 import axios from 'axios';
 import { SnackContext } from '../SnackBar/SnackContext';
 import MobileEditMenu from '../MobileEditMenu';
+import Spinner from '../Spinner';
 
 const useStyles = makeStyles(theme => ({
   paper: {
@@ -79,6 +80,8 @@ export default function Employee() {
   const [employeeList, setEmployeeList] = useState([]);
   // contains the index of the row, if delete is used
   const [deletedRow, setDeletedRow] = useState([]);
+  // true when waiting for an response from API
+  const [isLoading, setIsLoading] = useState(false);
 
   const history = useHistory();
 
@@ -86,6 +89,7 @@ export default function Employee() {
 
   const apiFetch = async () => {
     try {
+      setIsLoading(true);
       const token = localStorage.getItem('token');
       const config = { headers: { Authorization: `Token ${token}` } };
       const response = await axios.get('/auth/users/', config);
@@ -99,6 +103,7 @@ export default function Employee() {
         email: val.email,
       }));
       setEmployeeList(list);
+      setIsLoading(false);
     } catch (e) {
       console.log(e);
     }
@@ -125,6 +130,7 @@ export default function Employee() {
 
   // handle user delete
   const handleDelete = async row => {
+    setIsLoading(true);
     const { email, name } = row;
     setDeletedRow(prevState => [...prevState, employeeList.indexOf(row)]);
     try {
@@ -133,7 +139,7 @@ export default function Employee() {
       const token = localStorage.getItem('token');
       const config = { headers: { Authorization: `Token ${token}` } };
       await axios.post('/auth/user_delete/', formData, config);
-
+      setIsLoading(false);
       // add success snackbar on successful request
       setSnack({
         open: true,
@@ -149,6 +155,7 @@ export default function Employee() {
 
   return (
     <>
+      {isLoading ? <Spinner /> : null}
       <Typography variant='h3' className={classes.heading}>
         Employees
       </Typography>

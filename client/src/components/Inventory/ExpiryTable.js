@@ -10,6 +10,7 @@ import {
   TableRow,
 } from '@material-ui/core';
 import axios from 'axios';
+import Spinner from '../Spinner';
 
 const useStyles = makeStyles(theme => ({
   paper: {
@@ -50,9 +51,12 @@ const useStyles = makeStyles(theme => ({
 export default function ExpiryTable() {
   // list of near expiry products got from API
   const [expiryList, setExpiryList] = useState([]);
+  // true when waiting for an response from API
+  const [isLoading, setIsLoading] = useState(false);
 
   const apiFetch = async () => {
     try {
+      setIsLoading(true);
       const token = localStorage.getItem('token');
       const config = { headers: { Authorization: `Token ${token}` } };
       const response = await axios.get('/api/explist/', config);
@@ -64,6 +68,7 @@ export default function ExpiryTable() {
         daysLeft: val['Days left'],
       }));
       setExpiryList(list);
+      setIsLoading(false);
     } catch (e) {
       console.log(e);
     }
@@ -77,27 +82,30 @@ export default function ExpiryTable() {
   const classes = useStyles();
 
   return (
-    <Paper className={classes.paper}>
-      <TableContainer className={classes.tableContainer}>
-        <Table className={classes.table} aria-label='simple table'>
-          <TableHead>
-            <TableRow>
-              <TableCell>Product</TableCell>
-              <TableCell align='right'>Items</TableCell>
-              <TableCell align='right'>Days Left</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {expiryList.map(row => (
-              <TableRow key={row.name} hover>
-                <TableCell>{row.name}</TableCell>
-                <TableCell align='right'>{row.quantity}</TableCell>
-                <TableCell align='right'>{row.daysLeft}</TableCell>
+    <>
+      {isLoading ? <Spinner /> : null}
+      <Paper className={classes.paper}>
+        <TableContainer className={classes.tableContainer}>
+          <Table className={classes.table} aria-label='simple table'>
+            <TableHead>
+              <TableRow>
+                <TableCell>Product</TableCell>
+                <TableCell align='right'>Items</TableCell>
+                <TableCell align='right'>Days Left</TableCell>
               </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
-    </Paper>
+            </TableHead>
+            <TableBody>
+              {expiryList.map(row => (
+                <TableRow key={row.name} hover>
+                  <TableCell>{row.name}</TableCell>
+                  <TableCell align='right'>{row.quantity}</TableCell>
+                  <TableCell align='right'>{row.daysLeft}</TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </TableContainer>
+      </Paper>
+    </>
   );
 }

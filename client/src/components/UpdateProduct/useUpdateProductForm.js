@@ -75,6 +75,8 @@ const useForm = ({ name, sellingPrice, loose, id, upperLimit, lowerLimit }) => {
 
   // true only if submit button is pressed
   const [isSubmitting, setIsSubmitting] = useState(false);
+  // true when waiting for an response from API
+  const [isLoading, setIsLoading] = useState(false);
 
   const history = useHistory();
 
@@ -84,9 +86,11 @@ const useForm = ({ name, sellingPrice, loose, id, upperLimit, lowerLimit }) => {
   //  if credentials are invalid then invalidcred is set to appropriate errors got from API
   const apiFetch = async formData => {
     try {
+      setIsLoading(true);
       const token = localStorage.getItem('token');
       const config = { headers: { Authorization: `Token ${token}` } };
       await axios.post(`/api/update/${id}/`, formData, config);
+      setIsLoading(false);
 
       // add success snackbar on successful request
       setSnack({
@@ -146,6 +150,7 @@ const useForm = ({ name, sellingPrice, loose, id, upperLimit, lowerLimit }) => {
     handleSubmit,
     error,
     values,
+    isLoading,
   };
 };
 

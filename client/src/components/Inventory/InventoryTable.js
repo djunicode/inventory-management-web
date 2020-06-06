@@ -17,6 +17,7 @@ import axios from 'axios';
 import { useHistory } from 'react-router-dom';
 import { SnackContext } from '../SnackBar/SnackContext';
 import MobileEditMenu from '../MobileEditMenu';
+import Spinner from '../Spinner';
 
 const useStyles = makeStyles(theme => ({
   paper: {
@@ -67,13 +68,15 @@ export default function InventoryTable() {
   const [inventoryList, setInventoryList] = useState([]);
   // contains the index of the row, if delete is used
   const [deletedRow, setDeletedRow] = useState([]);
-
+  // true when waiting for an response from API
+  const [isLoading, setIsLoading] = useState(false);
   const history = useHistory();
 
   const { setSnack } = useContext(SnackContext);
 
   const apiFetch = async () => {
     try {
+      setIsLoading(true);
       const token = localStorage.getItem('token');
       const config = { headers: { Authorization: `Token ${token}` } };
       const response = await axios.get('/api/productlist/', config);
@@ -88,6 +91,7 @@ export default function InventoryTable() {
         lowerLimit: val.lower_limit === null ? '' : val.lower_limit,
       }));
       setInventoryList(list);
+      setIsLoading(false);
     } catch (e) {
       console.log(e);
     }
@@ -102,6 +106,7 @@ export default function InventoryTable() {
 
   // handle product delete
   const handleDelete = async row => {
+    setIsLoading(true);
     const { id } = row;
     setDeletedRow(prevState => [...prevState, inventoryList.indexOf(row)]);
     try {
@@ -111,6 +116,7 @@ export default function InventoryTable() {
 
       // add success snackbar on successful request
       const { name } = inventoryList.find(val => val.id === id);
+      setIsLoading(false);
       setSnack({
         open: true,
         message: `Succesfully deleted ${name}`,
@@ -136,59 +142,62 @@ export default function InventoryTable() {
   };
 
   return (
-    <Paper className={classes.paper}>
-      <TableContainer>
-        <Table className={classes.table} aria-label='simple table'>
-          <TableHead>
-            <TableRow>
-              <TableCell />
-              <TableCell>Product</TableCell>
-              <TableCell align='right'>Items</TableCell>
-              <TableCell align='right'>Price (Rs)</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {inventoryList.map((row, index) => (
-              <TableRow
-                key={row.name}
-                hover
-                className={deletedRow.includes(index) ? 'delete' : ''}
-              >
-                <TableCell className={classes.firstColumn}>
-                  <Hidden xsDown>
-                    <IconButton
-                      onClick={() => {
-                        handleEdit(row);
-                      }}
-                    >
-                      <EditIcon />
-                    </IconButton>
-                    <IconButton
-                      onClick={() => {
-                        handleDelete(row);
-                      }}
-                    >
-                      <DeleteIcon />
-                    </IconButton>
-                  </Hidden>
-                  <Hidden smUp>
-                    <MobileEditMenu
-                      handleDelete={handleDelete}
-                      handleEdit={handleEdit}
-                      row={row}
-                    />
-                  </Hidden>
-                </TableCell>
-                <TableCell>{row.name}</TableCell>
-                <TableCell align='right'>{row.quantity}</TableCell>
-                <TableCell align='right'>
-                  {row.sellingPrice || 'Not Set'}
-                </TableCell>
+    <>
+      {isLoading ? <Spinner /> : null}
+      <Paper className={classes.paper}>
+        <TableContainer>
+          <Table className={classes.table} aria-label='simple table'>
+            <TableHead>
+              <TableRow>
+                <TableCell />
+                <TableCell>Product</TableCell>
+                <TableCell align='right'>Items</TableCell>
+                <TableCell align='right'>Price (Rs)</TableCell>
               </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
-    </Paper>
+            </TableHead>
+            <TableBody>
+              {inventoryList.map((row, index) => (
+                <TableRow
+                  key={row.name}
+                  hover
+                  className={deletedRow.includes(index) ? 'delete' : ''}
+                >
+                  <TableCell className={classes.firstColumn}>
+                    <Hidden xsDown>
+                      <IconButton
+                        onClick={() => {
+                          handleEdit(row);
+                        }}
+                      >
+                        <EditIcon />
+                      </IconButton>
+                      <IconButton
+                        onClick={() => {
+                          handleDelete(row);
+                        }}
+                      >
+                        <DeleteIcon />
+                      </IconButton>
+                    </Hidden>
+                    <Hidden smUp>
+                      <MobileEditMenu
+                        handleDelete={handleDelete}
+                        handleEdit={handleEdit}
+                        row={row}
+                      />
+                    </Hidden>
+                  </TableCell>
+                  <TableCell>{row.name}</TableCell>
+                  <TableCell align='right'>{row.quantity}</TableCell>
+                  <TableCell align='right'>
+                    {row.sellingPrice || 'Not Set'}
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </TableContainer>
+      </Paper>
+    </>
   );
 }

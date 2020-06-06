@@ -6,6 +6,8 @@ import { SnackContext } from '../SnackBar/SnackContext';
 const useForm = type => {
   // list of all products got from API
   const [productsList, setProductsList] = useState([]);
+  // true when waiting for an response from API
+  const [isLoading, setIsLoading] = useState(false);
 
   // function to validate inputs, returns the error statements
   const validateInputs = values => {
@@ -80,6 +82,7 @@ const useForm = type => {
   // fetch the products list from API
   const apiFetch = async () => {
     try {
+      setIsLoading(true);
       const token = localStorage.getItem('token');
       const config = { headers: { Authorization: `Token ${token}` } };
       const response = await axios.get('/api/productlist/', config);
@@ -93,6 +96,7 @@ const useForm = type => {
         lowerLimit: val.lower_limit,
       }));
       setProductsList(list);
+      setIsLoading(false);
     } catch (e) {
       console.log(e);
     }
@@ -105,6 +109,7 @@ const useForm = type => {
   const { setSnack } = useContext(SnackContext);
   // post data to API
   const apiPost = async formData => {
+    setIsLoading(true);
     const products = [];
     try {
       const token = localStorage.getItem('token');
@@ -121,6 +126,7 @@ const useForm = type => {
         const { data } = response;
         console.log('Here is response', data);
       }
+      setIsLoading(false);
       if (products.length) {
         // add success snackbar if new product created
         const product = products[0];
@@ -239,7 +245,7 @@ const useForm = type => {
     });
   };
 
-  const handleProductChange = (newValue, index) => {
+  const handleProductChange = (event, newValue, index) => {
     if (type === 'Buy') {
       if (newValue && newValue.inputValue) {
         setValues(prevState => {
@@ -332,6 +338,7 @@ const useForm = type => {
     handleAddProduct,
     handleProductChange,
     productDetails,
+    isLoading,
   };
 };
 

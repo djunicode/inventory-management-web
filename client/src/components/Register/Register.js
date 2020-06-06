@@ -18,6 +18,7 @@ import {
 import Visibility from '@material-ui/icons/Visibility';
 import VisibilityOff from '@material-ui/icons/VisibilityOff';
 import useForm from './useRegisterForm';
+import Spinner from '../Spinner';
 
 const useStyles = makeStyles(theme => ({
   paper: {
@@ -112,177 +113,184 @@ const Register = () => {
     showPassword,
     toggleShowPassword,
     toggleShowconfirmPassword,
+    isLoading,
   } = useForm();
 
   const classes = useStyles({ invalid: invalidCred });
 
   return (
-    <Paper className={classes.paper}>
-      <Typography variant='h4' className={classes.heading}>
-        Add New Employee
-      </Typography>
-      <Typography
-        variant='h6'
-        color='error'
-        className={classes.invalid}
-        gutterBottom
-      >
-        {invalidCred}
-      </Typography>
-      <form
-        noValidate
-        onSubmit={handleSubmit}
-        autoComplete='off'
-        className={classes.gridContainer}
-      >
-        <Divider />
-        <Typography variant='h5' className={classes.formHeading}>
-          Account
+    <>
+      {isLoading ? <Spinner /> : null}
+      <Paper className={classes.paper}>
+        <Typography variant='h4' className={classes.heading}>
+          Add New Employee
         </Typography>
-        <div className={classes.form}>
-          <TextField
-            required
-            variant='filled'
-            id='last-name-input'
-            name='firstName'
-            label='First Name'
-            value={values.firstName}
-            onChange={handleChange}
-            error={!(error.firstName === ' ')}
-            helperText={error.firstName}
-          />
-          <TextField
-            required
-            variant='filled'
-            id='first-name-input'
-            name='lastName'
-            label='Last Name'
-            value={values.lastName}
-            onChange={handleChange}
-            error={!(error.lastName === ' ')}
-            helperText={error.lastName}
-          />
-          <TextField
-            required
-            variant='filled'
-            id='email-input'
-            name='email'
-            type='email'
-            label='Email'
-            value={values.email}
-            onChange={handleChange}
-            error={!(error.email === ' ')}
-            helperText={error.email}
-          />
-          <TextField
-            required
-            variant='filled'
-            id='password-input'
-            name='password'
-            type={showPassword ? 'text' : 'password'}
-            label='Password'
-            value={values.password}
-            onChange={handleChange}
-            error={!(error.password === ' ')}
-            helperText={error.password}
-            InputProps={{
-              endAdornment: (
-                <InputAdornment position='end'>
-                  <IconButton onClick={toggleShowPassword} tabIndex='-1'>
-                    {showPassword ? <Visibility /> : <VisibilityOff />}
-                  </IconButton>
-                </InputAdornment>
-              ),
-            }}
-          />
-          <TextField
-            required
-            variant='filled'
-            id='confirm-password-input'
-            name='confirmPassword'
-            type={showConfirmPassword ? 'text' : 'password'}
-            label='Confirm Password'
-            value={values.confirmPassword}
-            onChange={handleChange}
-            error={!(error.confirmPassword === ' ')}
-            helperText={error.confirmPassword}
-            InputProps={{
-              endAdornment: (
-                <InputAdornment position='end'>
-                  <IconButton onClick={toggleShowconfirmPassword} tabIndex='-1'>
-                    {showConfirmPassword ? <Visibility /> : <VisibilityOff />}
-                  </IconButton>
-                </InputAdornment>
-              ),
-            }}
-          />
-          <TextField
-            required
-            variant='filled'
-            id='gender-input'
-            name='gender'
-            select
-            label='Employee Gender'
-            value={values.gender}
-            onChange={handleChange}
-            error={!(error.gender === ' ')}
-            helperText={error.gender}
-          >
-            {['Male', 'Female', 'Other'].map((option, index) => (
-              <MenuItem key={option} value={['M', 'F', 'Other'][index]}>
-                {option}
-              </MenuItem>
-            ))}
-          </TextField>
-          <TextField
-            required
-            variant='filled'
-            id='age-input'
-            name='age'
-            type='number'
-            label='Employee Age'
-            InputProps={{
-              inputProps: {
-                min: 0,
-              },
-            }}
-            value={values.age}
-            onChange={handleChange}
-            error={!(error.age === ' ')}
-            helperText={error.age}
-          />
-          <FormControl component='fieldset'>
-            <FormLabel component='legend'>Type</FormLabel>
-            <RadioGroup
-              name='isStaff'
-              value={values.isStaff}
-              onChange={handleChange}
-              className={classes.radio}
-            >
-              <FormControlLabel
-                value='true'
-                control={<Radio />}
-                label='Manager'
-              />
-              <FormControlLabel
-                value='false'
-                control={<Radio />}
-                label='Employee'
-              />
-            </RadioGroup>
-          </FormControl>
-        </div>
-        <Button
-          type='submit'
-          color='primary'
-          variant='contained'
-          className={classes.button}
-          onClick={handleSubmit}
+        <Typography
+          variant='h6'
+          color='error'
+          className={classes.invalid}
+          gutterBottom
         >
-          Register
-        </Button>
-      </form>
-    </Paper>
+          {invalidCred}
+        </Typography>
+        <form
+          noValidate
+          onSubmit={handleSubmit}
+          autoComplete='off'
+          className={classes.gridContainer}
+        >
+          <Divider />
+          <Typography variant='h5' className={classes.formHeading}>
+            Account
+          </Typography>
+          <div className={classes.form}>
+            <TextField
+              required
+              variant='filled'
+              id='last-name-input'
+              name='firstName'
+              label='First Name'
+              value={values.firstName}
+              onChange={handleChange}
+              error={!(error.firstName === ' ')}
+              helperText={error.firstName}
+            />
+            <TextField
+              required
+              variant='filled'
+              id='first-name-input'
+              name='lastName'
+              label='Last Name'
+              value={values.lastName}
+              onChange={handleChange}
+              error={!(error.lastName === ' ')}
+              helperText={error.lastName}
+            />
+            <TextField
+              required
+              variant='filled'
+              id='email-input'
+              name='email'
+              type='email'
+              label='Email'
+              value={values.email}
+              onChange={handleChange}
+              error={!(error.email === ' ')}
+              helperText={error.email}
+            />
+            <TextField
+              required
+              variant='filled'
+              id='password-input'
+              name='password'
+              type={showPassword ? 'text' : 'password'}
+              label='Password'
+              value={values.password}
+              onChange={handleChange}
+              error={!(error.password === ' ')}
+              helperText={error.password}
+              InputProps={{
+                endAdornment: (
+                  <InputAdornment position='end'>
+                    <IconButton onClick={toggleShowPassword} tabIndex='-1'>
+                      {showPassword ? <Visibility /> : <VisibilityOff />}
+                    </IconButton>
+                  </InputAdornment>
+                ),
+              }}
+            />
+            <TextField
+              required
+              variant='filled'
+              id='confirm-password-input'
+              name='confirmPassword'
+              type={showConfirmPassword ? 'text' : 'password'}
+              label='Confirm Password'
+              value={values.confirmPassword}
+              onChange={handleChange}
+              error={!(error.confirmPassword === ' ')}
+              helperText={error.confirmPassword}
+              InputProps={{
+                endAdornment: (
+                  <InputAdornment position='end'>
+                    <IconButton
+                      onClick={toggleShowconfirmPassword}
+                      tabIndex='-1'
+                    >
+                      {showConfirmPassword ? <Visibility /> : <VisibilityOff />}
+                    </IconButton>
+                  </InputAdornment>
+                ),
+              }}
+            />
+            <TextField
+              required
+              variant='filled'
+              id='gender-input'
+              name='gender'
+              select
+              label='Employee Gender'
+              value={values.gender}
+              onChange={handleChange}
+              error={!(error.gender === ' ')}
+              helperText={error.gender}
+            >
+              {['Male', 'Female', 'Other'].map((option, index) => (
+                <MenuItem key={option} value={['M', 'F', 'Other'][index]}>
+                  {option}
+                </MenuItem>
+              ))}
+            </TextField>
+            <TextField
+              required
+              variant='filled'
+              id='age-input'
+              name='age'
+              type='number'
+              label='Employee Age'
+              InputProps={{
+                inputProps: {
+                  min: 0,
+                },
+              }}
+              value={values.age}
+              onChange={handleChange}
+              error={!(error.age === ' ')}
+              helperText={error.age}
+            />
+            <FormControl component='fieldset'>
+              <FormLabel component='legend'>Type</FormLabel>
+              <RadioGroup
+                name='isStaff'
+                value={values.isStaff}
+                onChange={handleChange}
+                className={classes.radio}
+              >
+                <FormControlLabel
+                  value='true'
+                  control={<Radio />}
+                  label='Manager'
+                />
+                <FormControlLabel
+                  value='false'
+                  control={<Radio />}
+                  label='Employee'
+                />
+              </RadioGroup>
+            </FormControl>
+          </div>
+          <Button
+            type='submit'
+            color='primary'
+            variant='contained'
+            className={classes.button}
+            onClick={handleSubmit}
+          >
+            Register
+          </Button>
+        </form>
+      </Paper>
+    </>
   );
 };
 
