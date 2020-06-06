@@ -465,4 +465,6 @@ class Expiry(generics.GenericAPIView):
                     exp.append(p2)
             else:
                 continue
-        return HttpResponse(exp)
+
+        a = json.dumps(exp)
+        return HttpResponse(a)
