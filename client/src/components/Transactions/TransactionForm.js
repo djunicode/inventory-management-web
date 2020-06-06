@@ -3,7 +3,6 @@ import {
   Paper,
   Typography,
   TextField,
-  MenuItem,
   Button,
   Divider,
 } from '@material-ui/core';
@@ -146,8 +145,11 @@ const Form = ({ type }) => {
                 {type === 'Buy' ? (
                   <Autocomplete
                     value={value.productName}
+                    onInputChange={(event, newValue) => {
+                      handleProductChange(newValue, index);
+                    }}
                     onChange={(event, newValue) => {
-                      handleProductChange(event, newValue, index);
+                      handleProductChange(newValue, index);
                     }}
                     filterOptions={(options, params) => {
                       const filtered = filter(options, params);
@@ -189,24 +191,39 @@ const Form = ({ type }) => {
                     )}
                   />
                 ) : (
-                  <TextField
-                    required
-                    variant='filled'
-                    id='product-input'
-                    name='productName'
-                    select
-                    label='Product Name'
+                  <Autocomplete
                     value={value.productName}
-                    onChange={event => handleChange(event, index)}
-                    error={!(error[index].product === ' ')}
-                    helperText={error[index].product}
-                  >
-                    {productsList.map(option => (
-                      <MenuItem key={option.name} value={option.name}>
-                        {option.name}
-                      </MenuItem>
-                    ))}
-                  </TextField>
+                    onChange={(event, newValue) => {
+                      handleProductChange(newValue, index);
+                    }}
+                    style={{ width: '100%', maxWidth: '20rem' }}
+                    id='productfield-input'
+                    options={productsList.concat({ name: '' })}
+                    getOptionLabel={option => {
+                      // e.g value selected with enter, right from the input
+                      if (typeof option === 'string') {
+                        return option;
+                      }
+                      if (option.inputValue) {
+                        return option.inputValue;
+                      }
+                      return option.name;
+                    }}
+                    getOptionSelected={(option, val) => {
+                      return option.name === val;
+                    }}
+                    renderInput={params => (
+                      <TextField
+                        // eslint-disable-next-line react/jsx-props-no-spreading
+                        {...params}
+                        required
+                        label='Product Name'
+                        variant='filled'
+                        error={!(error[index].product === ' ')}
+                        helperText={error[index].product}
+                      />
+                    )}
+                  />
                 )}
                 <Typography variant='h5' className={classes.productDetails}>
                   {productDetails[index]}
@@ -245,23 +262,25 @@ const Form = ({ type }) => {
                   error={!(error[index].quantity === ' ')}
                   helperText={error[index].quantity}
                 />
-                <TextField
-                  variant='filled'
-                  id='expiry-date-input'
-                  name='expiryDate'
-                  type='date'
-                  label='Expiry Date'
-                  InputProps={{
-                    inputProps: {
-                      min: new Date(Date.now()).toISOString().slice(0, 10),
-                    },
-                  }}
-                  InputLabelProps={{ shrink: true }}
-                  value={value.expiryDate}
-                  onChange={event => handleChange(event, index)}
-                  error={!(error[index].expiryDate === ' ')}
-                  helperText={error[index].expiryDate}
-                />
+                {type === 'Buy' ? (
+                  <TextField
+                    variant='filled'
+                    id='expiry-date-input'
+                    name='expiryDate'
+                    type='date'
+                    label='Expiry Date'
+                    InputProps={{
+                      inputProps: {
+                        min: new Date(Date.now()).toISOString().slice(0, 10),
+                      },
+                    }}
+                    InputLabelProps={{ shrink: true }}
+                    value={value.expiryDate}
+                    onChange={event => handleChange(event, index)}
+                    error={!(error[index].expiryDate === ' ')}
+                    helperText={error[index].expiryDate}
+                  />
+                ) : null}
               </div>
             </>
           ))}

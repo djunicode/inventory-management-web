@@ -237,64 +237,73 @@ const useForm = type => {
       };
       return temp;
     });
-    // on sell form if product name is updated then update the price
-    // according to the products list from API
-    if (type === 'Sell' && event.target.name === 'productName') {
-      const { price } = productsList.find(
-        product => product.name === event.target.value
-      );
-      if (price) {
-        setValues(prevState => {
-          const temp = [...prevState];
-          temp[index] = {
-            ...temp[index],
-            price,
-          };
-          return temp;
-        });
-      } else {
-        setValues(prevState => {
-          const temp = [...prevState];
-          temp[index] = {
-            ...temp[index],
-            price: '',
-          };
-          return temp;
-        });
-      }
-    }
   };
 
-  const handleProductChange = (event, newValue, index) => {
-    if (newValue && newValue.inputValue) {
+  const handleProductChange = (newValue, index) => {
+    if (type === 'Buy') {
+      if (newValue && newValue.inputValue) {
+        setValues(prevState => {
+          const temp = [...prevState];
+          temp[index] = {
+            ...temp[index],
+            productName: newValue.inputValue,
+          };
+          return temp;
+        });
+        return;
+      }
+
+      setValues(prevState => {
+        const temp = [...prevState];
+        let val = '';
+
+        if (!newValue) {
+          val = '';
+        } else if (newValue.name) {
+          val = newValue.name;
+        } else {
+          val = newValue;
+        }
+        temp[index] = {
+          ...temp[index],
+          productName: val,
+        };
+        return temp;
+      });
+    } else {
+      let val = '';
+      if (newValue === null) {
+        val = '';
+      } else if (typeof newValue === 'string') {
+        val = newValue;
+      } else if (typeof newValue === 'object') {
+        val = newValue.name;
+      }
       setValues(prevState => {
         const temp = [...prevState];
         temp[index] = {
           ...temp[index],
-          productName: newValue.inputValue,
+          productName: val,
         };
         return temp;
       });
-      return;
-    }
 
-    setValues(prevState => {
-      const temp = [...prevState];
-      let val = '';
+      // on sell form if product name is updated then update the price
+      // according to the products list from API
+      const matchedProduct =
+        productsList.find(product => product.name === val) || {};
 
-      if (!newValue) {
-        val = '';
-      } else if (newValue.name) {
-        val = newValue.name;
-      } else {
-        val = newValue;
+      if (matchedProduct.price) {
+        setValues(prevState => {
+          const temp = [...prevState];
+          temp[index] = {
+            ...temp[index],
+            price: matchedProduct.price,
+          };
+          return temp;
+        });
       }
-      temp[index] = {
-        ...temp[index],
-        productName: val,
-      };
-      return temp;
-    });
+    }
   };
 
   // function to handle clicking of add products button
