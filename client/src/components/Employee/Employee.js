@@ -18,9 +18,14 @@ import EditIcon from '@material-ui/icons/Edit';
 import DeleteIcon from '@material-ui/icons/Delete';
 import { useHistory } from 'react-router-dom';
 import axios from 'axios';
-import { SnackContext } from '../SnackBar/SnackContext';
-import MobileEditMenu from '../MobileEditMenu';
+import Dialog from '@material-ui/core/Dialog';
+import DialogActions from '@material-ui/core/DialogActions';
+import DialogContent from '@material-ui/core/DialogContent';
+import DialogContentText from '@material-ui/core/DialogContentText';
+import DialogTitle from '@material-ui/core/DialogTitle';
 import Spinner from '../Spinner';
+import MobileEditMenu from '../MobileEditMenu';
+import { SnackContext } from '../SnackBar/SnackContext';
 
 const useStyles = makeStyles(theme => ({
   paper: {
@@ -82,6 +87,18 @@ export default function Employee() {
   const [deletedRow, setDeletedRow] = useState([]);
   // true when waiting for an response from API
   const [isLoading, setIsLoading] = useState(false);
+  // dialog box
+  const [open, setOpen] = useState(false);
+  // row to be selected on clicking the delete icon
+  const [selectedRow, setSelectedRow] = useState([]);
+
+  const handleClickOpen = () => {
+    setOpen(true);
+  };
+
+  const handleClose = () => {
+    setOpen(false);
+  };
 
   const history = useHistory();
 
@@ -189,7 +206,8 @@ export default function Employee() {
                       </IconButton>
                       <IconButton
                         onClick={() => {
-                          handleDelete(row);
+                          setSelectedRow(row);
+                          handleClickOpen();
                         }}
                       >
                         <DeleteIcon />
@@ -213,6 +231,38 @@ export default function Employee() {
           </Table>
         </TableContainer>
       </Paper>
+      {/* start of dialog */}
+      <Dialog
+        open={open}
+        onClose={handleClose}
+        aria-labelledby='alert-dialog-title'
+        aria-describedby='alert-dialog-description'
+      >
+        <DialogTitle id='alert-dialog-title'>
+          {`Delete ${selectedRow.name}?`}
+        </DialogTitle>
+        <DialogContent>
+          <DialogContentText id='alert-dialog-description'>
+            Are you sure you want to delete {selectedRow.name}?
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <IconButton onClick={handleClose} color='primary'>
+            Disagree
+          </IconButton>
+          <IconButton
+            onClick={() => {
+              handleDelete(selectedRow);
+              handleClose();
+            }}
+            color='primary'
+            autoFocus
+          >
+            Agree
+          </IconButton>
+        </DialogActions>
+      </Dialog>
+      {/* end of dialog */}
       <Fab
         color='primary'
         aria-label='add'
