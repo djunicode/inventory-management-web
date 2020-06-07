@@ -198,13 +198,15 @@ class Buy(generics.GenericAPIView):
 
                 # Increase quantity
                 re.quantity = re.quantity + int(request.POST["quantity"])
-                re.save()
 
                 # If product is not loose, add items to database
+                re.save()
 
                 if re.loose == False:
 
-                    if request.POST["expiry"] != "":
+                    if (request.POST["expiry"] != "") or (
+                        request.POST["expiry"] != None
+                    ):
 
                         for i in range(1, int(request.POST["quantity"]) + 1):
                             itobj = Items(product=re, expiry=request.POST["expiry"])
@@ -213,6 +215,7 @@ class Buy(generics.GenericAPIView):
                         for i in range(1, int(request.POST["quantity"]) + 1):
                             itobj = Items(product=re, expiry=None)
                             itobj.save()
+
                 # Save IN Transaction
                 trobj = Product_Transaction(
                     product=re,
@@ -239,10 +242,11 @@ class Buy(generics.GenericAPIView):
 
                 pdt = Products(name=name, quantity=quant, avg_cost_price=avg_cost_price)
                 # Created new product
-                pdt.save()
-                # Added Items as default loose= False
 
-                if request.POST["expiry"] != "":
+                # Added Items as default loose= False
+                pdt.save()
+
+                if (request.POST["expiry"] != "") or (request.POST["expiry"] != None):
 
                     for i in range(1, int(request.POST["quantity"]) + 1):
                         itobj = Items(product=pdt, expiry=request.POST["expiry"])
@@ -376,11 +380,12 @@ class Profit(generics.GenericAPIView):
         serializer_class = ProfitSerializer
         products = Products.objects.all()
         result = {}
-        result["Total"] = 0
+        result["Total"] = {}
         cp_total = 0
         q_cp_total = 0
         sp_total = 0
         q_sp_total = 0
+        months = []
         # final_profit = {}
 
         for i in products:
@@ -389,11 +394,17 @@ class Profit(generics.GenericAPIView):
             for j in product_profit:
 
                 month = str(j.date.strftime("%Y-%m"))
-
+                if month not in months:
+                    months.append(month)
                 if month not in result:
                     result[month] = {}
-                print(result)
 
+            result["Total"][str(i)] = {
+                "earned": 0.0,
+                "spent": 0.0,
+                "sold": 0,
+                "bought": 0,
+            }
             for m in result:
                 if m != "Total":
                     profit_product_monthly = product_profit.filter(
@@ -415,36 +426,59 @@ class Profit(generics.GenericAPIView):
                         if transaction.in_or_out == "In":
                             cp = cp + transaction.quantity * transaction.rate
                             q_cp += transaction.quantity
-                            print("bought", m, cp, q_cp)
+                            # print("bought", m, cp, q_cp)
                         else:
                             sp = sp + transaction.quantity * transaction.rate
                             q_sp += transaction.quantity
-                            print("sold", m, sp, q_sp)
+                            # print("sold", m, sp, q_sp)
                     if q_cp:
-                        print(result[m][str(i)]["spent"])
+                        # print(result[m][str(i)]["spent"])
                         result[m][str(i)]["spent"] = cp
                         result[m][str(i)]["bought"] = q_cp
+                        result["Total"][str(i)]["spent"] += cp
+                        result["Total"][str(i)]["bought"] += q_cp
+
                     if q_sp:
-                        print(q_sp,)
                         result[m][str(i)]["earned"] = sp
                         result[m][str(i)]["sold"] = q_sp
-
-                        # "spent": cp,
-                        # "sold": q_sp,
-                        # "bought": q_cp,
-                        # total earned and spent, and total items bought and sold every month
+                        result["Total"][str(i)]["earned"] += sp
+                        result["Total"][str(i)]["sold"] += q_sp
 
                     cp_total += cp
                     sp_total += sp
                     q_cp_total += q_cp
                     q_sp_total += q_sp
+                    result["Total"]["Total"] = {
+                        "earned": sp_total,
+                        "spent": cp_total,
+                        "sold": q_sp_total,
+                        "bought": q_cp_total,
+                    }
 
-        result["Total"] = {
-            "earned": sp_total,
-            "sold": q_sp_total,
-            "spent": cp_total,
-            "bought": q_cp_total,
-        }
+        # result["Total"]["earned"]= sp_total,
+        # result["Total"]["sold"]= sp_total,
+        # result["Total"]["spent"]= cp_total,
+        # result["Total"]["bought"]= q_cp_total,
+
+        # calculating total per month:
+        for mon in months:
+            m_cp = 0.0
+            m_sp = 0.0
+            m_q_cp = 0
+            m_q_sp = 0
+            for i in products:
+                m_cp += result[mon][str(i)]["spent"]
+                m_sp += result[mon][str(i)]["earned"]
+                m_q_cp += result[mon][str(i)]["bought"]
+                m_q_sp += result[mon][str(i)]["sold"]
+                print(result[mon][str(i)])
+            result[mon]["Total"] = {
+                "earned": m_sp,
+                "spent": m_cp,
+                "sold": m_q_sp,
+                "bought": m_q_cp,
+            }
+
         return JsonResponse(result)
 
 
