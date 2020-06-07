@@ -18,8 +18,13 @@ import axios from 'axios';
 import { useHistory } from 'react-router-dom';
 import { SnackContext } from '../SnackBar/SnackContext';
 import MobileEditMenu from '../MobileEditMenu';
+import Dialog from '@material-ui/core/Dialog';
+import DialogActions from '@material-ui/core/DialogActions';
+import DialogContent from '@material-ui/core/DialogContent';
+import DialogContentText from '@material-ui/core/DialogContentText';
+import DialogTitle from '@material-ui/core/DialogTitle';
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles((theme) => ({
   paper: {
     boxShadow: '4px 4px 20px rgba(0,0,0,0.1)',
     textAlign: 'center',
@@ -72,6 +77,18 @@ export default function Inventory() {
   const [inventoryList, setInventoryList] = useState([]);
   // contains the index of the row, if delete is used
   const [deletedRow, setDeletedRow] = useState([]);
+  // dialog box
+  const [open, setOpen] = useState(false);
+  // row to be selected on clicking the delete icon
+  const [selectedRow, setSelectedRow] = useState([]);
+
+  const handleClickOpen = () => {
+    setOpen(true);
+  };
+
+  const handleClose = () => {
+    setOpen(false);
+  };
 
   const history = useHistory();
 
@@ -83,7 +100,7 @@ export default function Inventory() {
       const config = { headers: { Authorization: `Token ${token}` } };
       const response = await axios.get('/api/productlist/', config);
       const { data } = response;
-      const list = data.map(val => ({
+      const list = data.map((val) => ({
         name: val.name,
         quantity: val.quantity,
         sellingPrice: val.latest_selling_price,
@@ -104,16 +121,16 @@ export default function Inventory() {
   const classes = useStyles();
 
   // handle product delete
-  const handleDelete = async row => {
+  const handleDelete = async (row) => {
     const { id } = row;
-    setDeletedRow(prevState => [...prevState, inventoryList.indexOf(row)]);
+    setDeletedRow((prevState) => [...prevState, inventoryList.indexOf(row)]);
     try {
       const token = localStorage.getItem('token');
       const config = { headers: { Authorization: `Token ${token}` } };
       await axios.delete(`/api/productlist/${id}/`, config);
 
       // add success snackbar on successful request
-      const { name } = inventoryList.find(val => val.id === id);
+      const { name } = inventoryList.find((val) => val.id === id);
       setSnack({
         open: true,
         message: `Succesfully deleted ${name}`,
@@ -127,7 +144,7 @@ export default function Inventory() {
   };
 
   // handle product edit
-  const handleEdit = row => {
+  const handleEdit = (row) => {
     history.push('/updateproduct', {
       name: row.name,
       sellingPrice: row.sellingPrice,
@@ -170,7 +187,8 @@ export default function Inventory() {
                       </IconButton>
                       <IconButton
                         onClick={() => {
-                          handleDelete(row);
+                          setSelectedRow(row);
+                          handleClickOpen();
                         }}
                       >
                         <DeleteIcon />
@@ -195,6 +213,38 @@ export default function Inventory() {
           </Table>
         </TableContainer>
       </Paper>
+      {/* start of dialog */}
+      <Dialog
+        open={open}
+        onClose={handleClose}
+        aria-labelledby='alert-dialog-title'
+        aria-describedby='alert-dialog-description'
+      >
+        <DialogTitle id='alert-dialog-title'>
+          {'Delete ' + selectedRow.name + '?'}
+        </DialogTitle>
+        <DialogContent>
+          <DialogContentText id='alert-dialog-description'>
+            Are you sure you want to delete {selectedRow.name}?
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <IconButton onClick={handleClose} color='primary'>
+            Disagree
+          </IconButton>
+          <IconButton
+            onClick={() => {
+              handleDelete(selectedRow);
+              handleClose();
+            }}
+            color='primary'
+            autoFocus
+          >
+            Agree
+          </IconButton>
+        </DialogActions>
+      </Dialog>
+      {/* end of dialog */}
     </>
   );
 }
