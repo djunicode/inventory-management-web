@@ -204,16 +204,18 @@ class Buy(generics.GenericAPIView):
 
                 if re.loose == False:
 
-                    if (request.POST["expiry"] != "") or (
-                        request.POST["expiry"] != None
+                    if (request.POST["expiry"] == "") or (
+                        request.POST["expiry"] == None
                     ):
+                        for i in range(1, int(request.POST["quantity"]) + 1):
+                            itobj = Items(product=re, expiry=None)
+
+                            itobj.save()
+
+                    else:
 
                         for i in range(1, int(request.POST["quantity"]) + 1):
                             itobj = Items(product=re, expiry=request.POST["expiry"])
-                            itobj.save()
-                    else:
-                        for i in range(1, int(request.POST["quantity"]) + 1):
-                            itobj = Items(product=re, expiry=None)
                             itobj.save()
 
                 # Save IN Transaction
@@ -246,16 +248,16 @@ class Buy(generics.GenericAPIView):
                 # Added Items as default loose= False
                 pdt.save()
 
-                if (request.POST["expiry"] != "") or (request.POST["expiry"] != None):
-
-                    for i in range(1, int(request.POST["quantity"]) + 1):
-                        itobj = Items(product=pdt, expiry=request.POST["expiry"])
-                        itobj.save()
-                else:
-
+                if (request.POST["expiry"] == "") or (request.POST["expiry"] == None):
                     for i in range(1, int(request.POST["quantity"]) + 1):
                         itobj = Items(product=pdt, expiry=None)
 
+                        itobj.save()
+
+                else:
+
+                    for i in range(1, int(request.POST["quantity"]) + 1):
+                        itobj = Items(product=pdt, expiry=request.POST["expiry"])
                         itobj.save()
 
                 # Save Transaction
@@ -390,7 +392,7 @@ class Profit(generics.GenericAPIView):
 
         for i in products:
             product_profit = Product_Transaction.objects.filter(product=i)
-            print(i)
+
             for j in product_profit:
 
                 month = str(j.date.strftime("%Y-%m"))
@@ -471,7 +473,7 @@ class Profit(generics.GenericAPIView):
                 m_sp += result[mon][str(i)]["earned"]
                 m_q_cp += result[mon][str(i)]["bought"]
                 m_q_sp += result[mon][str(i)]["sold"]
-                print(result[mon][str(i)])
+                # print(result[mon][str(i)])
             result[mon]["Total"] = {
                 "earned": m_sp,
                 "spent": m_cp,
