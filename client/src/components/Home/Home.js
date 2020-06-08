@@ -45,9 +45,7 @@ const Home = () => {
 
   const apiFetch = async () => {
     try {
-      const token = localStorage.getItem('token');
-      const config = { headers: { Authorization: `Token ${token}` } };
-      const response = await axios.get('/api/profit/', config);
+      const response = await axios.get('/api/profit/');
       setData(response.data);
     } catch (e) {
       console.log(e);

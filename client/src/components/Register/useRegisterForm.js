@@ -88,9 +88,7 @@ const useForm = () => {
   const apiFetch = async formData => {
     try {
       setIsLoading(true);
-      const token = localStorage.getItem('token');
-      const config = { headers: { Authorization: `Token ${token}` } };
-      await axios.post('/auth/users/', formData, config);
+      await axios.post('/auth/users/', formData);
       setIsLoading(false);
 
       // add success snackbar on successful request

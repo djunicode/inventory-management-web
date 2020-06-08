@@ -107,9 +107,7 @@ export default function Employee() {
   const apiFetch = async () => {
     try {
       setIsLoading(true);
-      const token = localStorage.getItem('token');
-      const config = { headers: { Authorization: `Token ${token}` } };
-      const response = await axios.get('/auth/users/', config);
+      const response = await axios.get('/auth/users/');
       const { data } = response;
       // map genders got from API
       const genderMapper = { M: 'Male', F: 'Female', Other: 'Other' };
@@ -153,9 +151,7 @@ export default function Employee() {
     try {
       const formData = new FormData();
       formData.append('email', email);
-      const token = localStorage.getItem('token');
-      const config = { headers: { Authorization: `Token ${token}` } };
-      await axios.post('/auth/user_delete/', formData, config);
+      await axios.post('/auth/user_delete/', formData);
       setIsLoading(false);
       // add success snackbar on successful request
       setSnack({

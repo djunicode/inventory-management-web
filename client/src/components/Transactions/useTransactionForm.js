@@ -83,9 +83,7 @@ const useForm = type => {
   const apiFetch = async () => {
     try {
       setIsLoading(true);
-      const token = localStorage.getItem('token');
-      const config = { headers: { Authorization: `Token ${token}` } };
-      const response = await axios.get('/api/productlist/', config);
+      const response = await axios.get('/api/productlist/');
       const { data } = response;
       const list = data.map(val => ({
         name: val.name,
@@ -112,17 +110,15 @@ const useForm = type => {
     setIsLoading(true);
     const products = [];
     try {
-      const token = localStorage.getItem('token');
-      const config = { headers: { Authorization: `Token ${token}` } };
       if (type === 'Buy') {
-        const response = await axios.post('/api/buy/', formData, config);
+        const response = await axios.post('/api/buy/', formData);
         const { data } = response;
         console.log('Here is response', data);
         if (data.created) {
           products.push(data);
         }
       } else {
-        const response = await axios.post('/api/sell/', formData, config);
+        const response = await axios.post('/api/sell/', formData);
         const { data } = response;
         console.log('Here is response', data);
       }

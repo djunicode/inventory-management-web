@@ -66,8 +66,7 @@ const useForm = () => {
       const { data } = response;
       localStorage.setItem('token', data.auth_token);
       // call API to check if current user is admin
-      const config = { headers: { Authorization: `Token ${data.auth_token}` } };
-      const res = await axios.get('/auth/users/me/', config);
+      const res = await axios.get('/auth/users/me/');
       // add the is_staff variable got fro API to localStorage
       localStorage.setItem('isStaff', res.data.is_staff);
       setIsLoading(false);

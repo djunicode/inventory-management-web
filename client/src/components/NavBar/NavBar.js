@@ -95,6 +95,8 @@ export default NavBar;
 
 // Confirms user logut.
 function AlertDialog() {
+  const [open, setOpen] = React.useState(false);
+
   // used to check current url
   const location = useLocation();
   // used to programmatically change url
@@ -110,9 +112,7 @@ function AlertDialog() {
     if (isLoggedIn) {
       try {
         const data = '';
-        const token = localStorage.getItem('token');
-        const config = { headers: { Authorization: `Token ${token}` } };
-        await axios.post('/auth/token/logout', data, config);
+        await axios.post('/auth/token/logout', data);
         localStorage.removeItem('token');
         localStorage.removeItem('isStaff');
       } catch (error) {
@@ -120,9 +120,8 @@ function AlertDialog() {
       }
     }
     history.push('/login');
+    setOpen(false);
   };
-
-  const [open, setOpen] = React.useState(false);
 
   const handleClickOpen = () => {
     setOpen(true);

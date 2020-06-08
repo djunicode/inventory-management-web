@@ -67,9 +67,7 @@ const TransactionHistory = () => {
   const apiFetch = async () => {
     try {
       setIsLoading(true);
-      const token = localStorage.getItem('token');
-      const config = { headers: { Authorization: `Token ${token}` } };
-      const response = await axios.get('/api/bill/', config);
+      const response = await axios.get('/api/bill/');
       const { data } = response;
       setTransactionList(data);
       setIsLoading(false);

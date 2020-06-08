@@ -87,9 +87,7 @@ const useForm = ({ name, sellingPrice, loose, id, upperLimit, lowerLimit }) => {
   const apiFetch = async formData => {
     try {
       setIsLoading(true);
-      const token = localStorage.getItem('token');
-      const config = { headers: { Authorization: `Token ${token}` } };
-      await axios.post(`/api/update/${id}/`, formData, config);
+      await axios.post(`/api/update/${id}/`, formData);
       setIsLoading(false);
 
       // add success snackbar on successful request

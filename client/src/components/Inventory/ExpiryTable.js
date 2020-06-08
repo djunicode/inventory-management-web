@@ -57,9 +57,7 @@ export default function ExpiryTable() {
   const apiFetch = async () => {
     try {
       setIsLoading(true);
-      const token = localStorage.getItem('token');
-      const config = { headers: { Authorization: `Token ${token}` } };
-      const response = await axios.get('/api/explist/', config);
+      const response = await axios.get('/api/explist/');
       const { data } = response;
       console.log(data);
       const list = data.map(val => ({
