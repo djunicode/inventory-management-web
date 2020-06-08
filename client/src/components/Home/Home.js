@@ -1,8 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import { Typography, Paper } from '@material-ui/core';
+import { Typography, Paper, TextField, MenuItem } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
+import axios from 'axios';
 import AreaChart from '../Graphs/AreaChart';
 import BarChart from '../Graphs/BarChart';
+import NoData from './NoData';
 
 const useStyles = makeStyles(theme => ({
   heading: {
@@ -15,119 +17,36 @@ const useStyles = makeStyles(theme => ({
   graphContainer: {
     boxShadow: '4px 4px 20px rgba(0,0,0,0.1)',
     borderRadius: '10px',
+    padding: '1rem',
     [theme.breakpoints.only('xs')]: {
       overflow: 'scroll',
+      padding: '5px',
+    },
+    '& .MuiTextField-root': {
+      margin: '1rem 2rem',
+      width: '100%',
+      maxWidth: '20rem',
+      [theme.breakpoints.only('xs')]: {
+        margin: '0.5rem 1rem',
+        maxWidth: '12rem',
+      },
     },
   },
 }));
 
 const Home = () => {
   // dummy data
-  const [data, setData] = useState({
-    Cadbury: {
-      total: 2320,
-    },
-    Lays: {
-      total: 1890,
-    },
-    totalProfit: {
-      '2020-01': 300,
-      '2020-02': 220,
-      '2020-03': 180,
-      '2020-04': 202,
-      '2020-05': 223,
-      '2020-06': 262,
-      '2020-07': 172,
-      '2020-08': 290,
-      '2020-09': 277,
-      '2020-10': 283,
-      '2020-11': 301,
-      '2020-12': 340,
-      total: 3050,
-    },
-  });
-
+  const [data, setData] = useState({});
   const [salesAreaData, setSalesAreaData] = useState([]);
   const [salesBarData, setSalesBarData] = useState([]);
 
+  const [areaType, setAreaType] = useState('Earned');
+  const [barType, setBarType] = useState('Earned');
+
   const apiFetch = async () => {
     try {
-      // TODO implement this when endpoint is ready
-      // setting dummy data
-      setData({
-        Football: {
-          '2020-01': 150,
-          '2020-02': 60,
-          '2020-03': 25,
-          '2020-04': 82,
-          '2020-05': 93,
-          '2020-06': 160,
-          '2020-07': 76,
-          '2020-08': 190,
-          '2020-09': 162,
-          '2020-10': 120,
-          '2020-11': 145,
-          '2020-12': 160,
-          total: 1423,
-        },
-        Shoes: {
-          '2020-01': 150,
-          '2020-02': 160,
-          '2020-03': 155,
-          '2020-04': 120,
-          '2020-05': 130,
-          '2020-06': 102,
-          '2020-07': 96,
-          '2020-08': 100,
-          '2020-09': 115,
-          '2020-10': 163,
-          '2020-11': 156,
-          '2020-12': 180,
-          total: 1627,
-        },
-        Kurkure: {
-          total: 2042,
-        },
-        Oreo: {
-          total: 2463,
-        },
-        ParleG: {
-          total: 1756,
-        },
-        Lassi: {
-          total: 860,
-        },
-        Laptop: {
-          total: 1983,
-        },
-        Mobile: {
-          total: 2630,
-        },
-        Milk: {
-          total: 2005,
-        },
-        Cadbury: {
-          total: 2320,
-        },
-        Lays: {
-          total: 1890,
-        },
-        totalProfit: {
-          '2020-01': 300,
-          '2020-02': 220,
-          '2020-03': 180,
-          '2020-04': 202,
-          '2020-05': 223,
-          '2020-06': 262,
-          '2020-07': 172,
-          '2020-08': 290,
-          '2020-09': 277,
-          '2020-10': 283,
-          '2020-11': 301,
-          '2020-12': 340,
-          total: 3050,
-        },
-      });
+      const response = await axios.get('/api/profit/');
+      setData(response.data);
     } catch (e) {
       console.log(e);
     }
@@ -140,49 +59,103 @@ const Home = () => {
 
   // useEffect to set appropriate graphs data after getting data from API
   useEffect(() => {
-    // parse the data to generate data for the area graph
-    const temp1 = [];
+    if (data.Total) {
+      // parse the data to generate data for the bar graph
+      const t1 = [];
+      const t2 = [];
+      Object.entries(data.Total).forEach(val => {
+        const [key, value] = val;
+        if (key !== 'Total') {
+          t1.push({ name: key, value: value.earned });
+          t2.push({ name: key, value: value.spent });
+        }
+      });
+      const barDataType = barType === 'Earned' ? t1 : t2;
+      setSalesBarData(barDataType);
 
-    Object.entries(data.totalProfit).forEach(val => {
-      const [key, value] = val;
-      if (key !== 'total') {
-        temp1.push({ date: new Date(key), value });
-      }
-    });
-
-    setSalesAreaData(temp1);
-
-    // parse the data to generate data for the bar graph
-    const temp2 = [];
-
-    Object.keys(data).forEach(key => {
-      if (key !== 'totalProfit') {
-        temp2.push({ name: key, value: data[key].total });
-      }
-    });
-    setSalesBarData(temp2);
-  }, [data]);
+      // parse the data to generate data for the area graph
+      const t3 = [];
+      const t4 = [];
+      Object.entries(data).forEach(val => {
+        const [key, value] = val;
+        if (key !== 'Total') {
+          t3.push({ date: new Date(key), value: value.Total.earned });
+          t4.push({ date: new Date(key), value: value.Total.spent });
+        }
+      });
+      const areaDataType = areaType === 'Earned' ? t3 : t4;
+      setSalesAreaData(areaDataType);
+    }
+  }, [areaType, barType, data]);
 
   const classes = useStyles();
 
+  const handleAreaChange = event => {
+    setAreaType(event.target.value);
+  };
+
+  const handleBarChange = event => {
+    setBarType(event.target.value);
+  };
+
   return (
     <>
-      <div className={classes.graph}>
-        <Typography variant='h4' className={classes.heading}>
-          Sales over time
-        </Typography>
-        <Paper className={classes.graphContainer}>
-          <AreaChart data={salesAreaData} />
-        </Paper>
-      </div>
-      <div className={classes.graph}>
-        <Typography variant='h4' className={classes.heading}>
-          Sales per product
-        </Typography>
-        <Paper className={classes.graphContainer}>
-          <BarChart data={salesBarData} />
-        </Paper>
-      </div>
+      {salesAreaData.length < 2 ? (
+        <NoData />
+      ) : (
+        <>
+          <div className={classes.graph}>
+            <Typography variant='h4' className={classes.heading}>
+              Sales over time
+            </Typography>
+            <Paper className={classes.graphContainer}>
+              <TextField
+                required
+                variant='filled'
+                id='type-area-input'
+                name='areaType'
+                select
+                label='Graph Type'
+                value={areaType}
+                onChange={handleAreaChange}
+              >
+                <MenuItem key='Earned' value='Earned'>
+                  Earned
+                </MenuItem>
+                <MenuItem key='Spent' value='Spent'>
+                  Spent
+                </MenuItem>
+              </TextField>
+              <AreaChart data={salesAreaData} type={areaType} />
+            </Paper>
+          </div>
+          <div className={classes.graph}>
+            <Typography variant='h4' className={classes.heading}>
+              Sales per product
+            </Typography>
+            <Paper className={classes.graphContainer}>
+              <TextField
+                required
+                variant='filled'
+                id='type-bar-input'
+                name='barType'
+                select
+                label='Graph Type'
+                value={barType}
+                onChange={handleBarChange}
+              >
+                <MenuItem key='Earned' value='Earned'>
+                  Earned
+                </MenuItem>
+                <MenuItem key='Spent' value='Spent'>
+                  Spent
+                </MenuItem>
+              </TextField>
+              <BarChart data={salesBarData} type={barType} />
+            </Paper>
+          </div>
+        </>
+      )}
     </>
   );
 };

@@ -57,21 +57,7 @@ TabPanel.propTypes = {
   value: PropTypes.number.isRequired,
 };
 
-const useStyles = makeStyles(theme => ({
-  root: {},
-  button: {
-    width: theme.spacing(20),
-    marginLeft: theme.spacing(55),
-    borderRadius: 20,
-  },
-  subHeading: {
-    marginTop: 20,
-    textAlign: 'center',
-  },
-  links: {
-    flexGrow: 1,
-    marginTop: 25,
-  },
+const useStyles = makeStyles(() => ({
   heading: {
     fontWeight: 'bold',
   },
@@ -89,7 +75,7 @@ export default function Transaction() {
   };
 
   return (
-    <div className={classes.root}>
+    <>
       <Typography variant='h3' className={classes.heading} gutterBottom>
         Transactions
       </Typography>
@@ -107,6 +93,6 @@ export default function Transaction() {
       <TabPanel value={tab} index={2}>
         <TransactionHistory />
       </TabPanel>
-    </div>
+    </>
   );
 }

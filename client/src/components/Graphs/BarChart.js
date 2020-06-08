@@ -23,7 +23,7 @@ const useStyles = makeStyles(() => ({
   },
 }));
 
-const BarChart = ({ data }) => {
+const BarChart = ({ data, type }) => {
   const classes = useStyles();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.only('xs'));
@@ -115,7 +115,7 @@ const BarChart = ({ data }) => {
         textAnchor='middle'
         transform={`translate(${width / 2},${height - 20})`}
       >
-        Type
+        Product
       </text>
       <text
         textAnchor='middle'
@@ -123,7 +123,7 @@ const BarChart = ({ data }) => {
         y='30'
         x={0 - height / 2 + margin.bottom / 2}
       >
-        Sales
+        {`${type} (₹)`}
       </text>
     </svg>
   );
@@ -131,6 +131,7 @@ const BarChart = ({ data }) => {
 
 BarChart.propTypes = {
   data: PropTypes.arrayOf(PropTypes.object).isRequired,
+  type: PropTypes.string.isRequired,
 };
 
 export default BarChart;

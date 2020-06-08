@@ -14,6 +14,7 @@ import {
 } from '@material-ui/core';
 import { useLocation } from 'react-router-dom';
 import useForm from './useUpdateProductForm';
+import Spinner from '../Spinner';
 
 const useStyles = makeStyles(theme => ({
   paper: {
@@ -96,93 +97,137 @@ const useStyles = makeStyles(theme => ({
 const UpdateProduct = () => {
   // get state from location
   const location = useLocation();
-  const { name, sellingPrice, id, loose } = location.state;
+  const {
+    name,
+    sellingPrice,
+    id,
+    loose,
+    upperLimit,
+    lowerLimit,
+  } = location.state;
   // Use custom hook for form state management
-  const { handleChange, handleSubmit, error, values } = useForm({
+  const { handleChange, handleSubmit, error, values, isLoading } = useForm({
     name,
     sellingPrice,
     loose,
     id,
+    upperLimit,
+    lowerLimit,
   });
 
   const classes = useStyles();
 
   return (
-    <Paper className={classes.paper}>
-      <Typography variant='h4' className={classes.heading}>
-        Update Product
-      </Typography>
-      <form
-        noValidate
-        onSubmit={handleSubmit}
-        autoComplete='off'
-        className={classes.gridContainer}
-      >
-        <Divider />
-        <Typography variant='h5' className={classes.formHeading}>
-          Product
+    <>
+      {isLoading ? <Spinner /> : null}
+      <Paper className={classes.paper}>
+        <Typography variant='h4' className={classes.heading}>
+          Update Product
         </Typography>
-        <div className={classes.form}>
-          <TextField
-            required
-            variant='filled'
-            id='name-input'
-            name='name'
-            label='Name'
-            value={values.name}
-            onChange={handleChange}
-            error={!(error.name === ' ')}
-            helperText={error.name}
-          />
-          <TextField
-            required
-            variant='filled'
-            id='sellingPrice-input'
-            type='number'
-            name='sellingPrice'
-            label='Selling Price'
-            InputProps={{
-              inputProps: {
-                min: 0,
-              },
-            }}
-            value={values.sellingPrice}
-            onChange={handleChange}
-            error={!(error.sellingPrice === ' ')}
-            helperText={error.sellingPrice}
-          />
-          <FormControl component='fieldset'>
-            <FormLabel component='legend'>Type</FormLabel>
-            <RadioGroup
-              name='loose'
-              value={values.loose}
-              onChange={handleChange}
-              className={classes.radio}
-            >
-              <FormControlLabel
-                value='true'
-                control={<Radio />}
-                label='Loose'
-              />
-              <FormControlLabel
-                value='false'
-                control={<Radio />}
-                label='Packed'
-              />
-            </RadioGroup>
-          </FormControl>
-        </div>
-        <Button
-          type='submit'
-          color='primary'
-          variant='contained'
-          className={classes.button}
-          onClick={handleSubmit}
+        <form
+          noValidate
+          onSubmit={handleSubmit}
+          autoComplete='off'
+          className={classes.gridContainer}
         >
-          Update
-        </Button>
-      </form>
-    </Paper>
+          <Divider />
+          <Typography variant='h5' className={classes.formHeading}>
+            Product
+          </Typography>
+          <div className={classes.form}>
+            <TextField
+              required
+              variant='filled'
+              id='name-input'
+              name='name'
+              label='Name'
+              value={values.name}
+              onChange={handleChange}
+              error={!(error.name === ' ')}
+              helperText={error.name}
+            />
+            <TextField
+              required
+              variant='filled'
+              id='sellingPrice-input'
+              type='number'
+              name='sellingPrice'
+              label='Selling Price'
+              InputProps={{
+                inputProps: {
+                  min: 0,
+                },
+              }}
+              value={values.sellingPrice}
+              onChange={handleChange}
+              error={!(error.sellingPrice === ' ')}
+              helperText={error.sellingPrice}
+            />
+            <TextField
+              variant='filled'
+              id='upperLimit-input'
+              type='number'
+              name='upperLimit'
+              label='Upper Limit'
+              InputProps={{
+                inputProps: {
+                  min: 0,
+                },
+              }}
+              value={values.upperLimit}
+              onChange={handleChange}
+              error={!(error.upperLimit === ' ')}
+              helperText={error.upperLimit}
+            />
+            <TextField
+              variant='filled'
+              id='lowerLimit-input'
+              type='number'
+              name='lowerLimit'
+              label='Lower Limit'
+              InputProps={{
+                inputProps: {
+                  min: 0,
+                },
+              }}
+              value={values.lowerLimit}
+              onChange={handleChange}
+              error={!(error.lowerLimit === ' ')}
+              helperText={error.lowerLimit}
+            />
+            <FormControl component='fieldset'>
+              <FormLabel component='legend'>Type</FormLabel>
+              <RadioGroup
+                name='loose'
+                value={values.loose}
+                onChange={handleChange}
+                className={classes.radio}
+              >
+                <FormControlLabel
+                  value='true'
+                  control={<Radio />}
+                  label='Loose'
+                />
+                <FormControlLabel
+                  value='false'
+                  control={<Radio />}
+                  label='Packed'
+                />
+              </RadioGroup>
+            </FormControl>
+          </div>
+          <Button
+            type='submit'
+            color='primary'
+            variant='contained'
+            className={classes.button}
+            onClick={handleSubmit}
+          >
+            Update
+          </Button>
+        </form>
+      </Paper>
+    </>
   );
 };
 

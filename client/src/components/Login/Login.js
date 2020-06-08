@@ -13,6 +13,7 @@ import Visibility from '@material-ui/icons/Visibility';
 import VisibilityOff from '@material-ui/icons/VisibilityOff';
 import illustration from '../../images/Login.svg';
 import useForm from './useForm';
+import Spinner from '../Spinner';
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -107,86 +108,90 @@ const Login = () => {
     values,
     showPassword,
     toggleShowPassword,
+    isLoading,
   } = useForm();
 
   const classes = useStyles({ invalid: isInvalidCred });
 
   return (
-    <div className={classes.root}>
-      <Paper className={classes.paper}>
-        <Hidden xsDown>
-          <img
-            src={illustration}
-            alt='Login illustration'
-            className={classes.img}
-          />
-        </Hidden>
-        <div className={classes.formContainer}>
-          <Typography variant='h3' className={classes.heading}>
-            Login
-          </Typography>
-          <Hidden smUp>
+    <>
+      {isLoading ? <Spinner /> : null}
+      <div className={classes.root}>
+        <Paper className={classes.paper}>
+          <Hidden xsDown>
             <img
               src={illustration}
               alt='Login illustration'
               className={classes.img}
             />
           </Hidden>
-          <Typography variant='h6' color='error' className={classes.invalid}>
-            Invalid email or password. Please try again
-          </Typography>
-          <form
-            noValidate
-            onSubmit={handleSubmit}
-            autoComplete='off'
-            className={classes.form}
-          >
-            <TextField
-              required
-              variant='filled'
-              id='email-input'
-              name='email'
-              type='email'
-              label='Email'
-              value={values.email}
-              onChange={handleChange}
-              error={!(error.email === ' ')}
-              helperText={error.email}
-            />
-            <TextField
-              required
-              variant='filled'
-              id='password-input'
-              name='password'
-              type={showPassword ? 'text' : 'password'}
-              label='Password'
-              value={values.password}
-              onChange={handleChange}
-              error={!(error.password === ' ')}
-              helperText={error.password}
-              InputProps={{
-                endAdornment: (
-                  <InputAdornment position='end'>
-                    <IconButton onClick={toggleShowPassword} tabIndex='-1'>
-                      {showPassword ? <Visibility /> : <VisibilityOff />}
-                    </IconButton>
-                  </InputAdornment>
-                ),
-              }}
-            />
-            <Button
-              type='submit'
-              color='primary'
-              variant='contained'
-              className={classes.button}
-              data-testid='submit'
-            >
+          <div className={classes.formContainer}>
+            <Typography variant='h3' className={classes.heading}>
               Login
-            </Button>
-          </form>
-        </div>
-      </Paper>
-    </div>
+            </Typography>
+            <Hidden smUp>
+              <img
+                src={illustration}
+                alt='Login illustration'
+                className={classes.img}
+              />
+            </Hidden>
+            <Typography variant='h6' color='error' className={classes.invalid}>
+              Invalid email or password. Please try again
+            </Typography>
+            <form
+              noValidate
+              onSubmit={handleSubmit}
+              autoComplete='off'
+              className={classes.form}
+            >
+              <TextField
+                required
+                variant='filled'
+                id='email-input'
+                name='email'
+                type='email'
+                label='Email'
+                value={values.email}
+                onChange={handleChange}
+                error={!(error.email === ' ')}
+                helperText={error.email}
+              />
+              <TextField
+                required
+                variant='filled'
+                id='password-input'
+                name='password'
+                type={showPassword ? 'text' : 'password'}
+                label='Password'
+                value={values.password}
+                onChange={handleChange}
+                error={!(error.password === ' ')}
+                helperText={error.password}
+                InputProps={{
+                  endAdornment: (
+                    <InputAdornment position='end'>
+                      <IconButton onClick={toggleShowPassword} tabIndex='-1'>
+                        {showPassword ? <Visibility /> : <VisibilityOff />}
+                      </IconButton>
+                    </InputAdornment>
+                  ),
+                }}
+              />
+              <Button
+                type='submit'
+                color='primary'
+                variant='contained'
+                className={classes.button}
+                data-testid='submit'
+              >
+                Login
+              </Button>
+            </form>
+          </div>
+        </Paper>
+      </div>
+    </>
   );
 };
 

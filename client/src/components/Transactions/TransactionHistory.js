@@ -10,6 +10,7 @@ import {
   TableRow,
 } from '@material-ui/core';
 import axios from 'axios';
+import Spinner from '../Spinner';
 
 const useStyles = makeStyles(theme => ({
   paper: {
@@ -59,15 +60,17 @@ const useStyles = makeStyles(theme => ({
 const TransactionHistory = () => {
   // list of all transactions got from API
   const [transactionList, setTransactionList] = useState([]);
+  // true when waiting for an response from API
+  const [isLoading, setIsLoading] = useState(false);
 
   // fetch transaction list from API
   const apiFetch = async () => {
     try {
-      const token = localStorage.getItem('token');
-      const config = { headers: { Authorization: `Token ${token}` } };
-      const response = await axios.get('/api/bill/', config);
+      setIsLoading(true);
+      const response = await axios.get('/api/bill/');
       const { data } = response;
       setTransactionList(data);
+      setIsLoading(false);
     } catch (e) {
       console.log(e);
     }
@@ -91,50 +94,53 @@ const TransactionHistory = () => {
   };
 
   return (
-    <Paper className={classes.paper}>
-      <TableContainer>
-        <Table className={classes.table} aria-label='simple table'>
-          <TableHead>
-            <TableRow>
-              <TableCell> ID </TableCell>
-              <TableCell> Date </TableCell>
-              <TableCell>Products</TableCell>
-              <TableCell>Items</TableCell>
-              <TableCell align='right'>Price (Rs)</TableCell>
-              <TableCell align='center'>Type</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {transactionList.map(row => (
-              <TableRow key={row.id} hover>
-                <TableCell>{row.id}</TableCell>
-                <TableCell>{parseDate(row.date_time)}</TableCell>
-                <TableCell>
-                  {row.transaction.map((val, index) =>
-                    index === row.transaction.length - 1
-                      ? val.name
-                      : `${val.name}, `
-                  )}
-                </TableCell>
-                <TableCell>
-                  {row.transaction.map((val, index) =>
-                    index === row.transaction.length - 1
-                      ? val.quantity
-                      : `${val.quantity}, `
-                  )}
-                </TableCell>
-                <TableCell align='right'>
-                  {parsePrice(row.transaction)}
-                </TableCell>
-                <TableCell align='center'>
-                  {row.in_or_out === 'In' ? 'Buy' : 'Sell'}
-                </TableCell>
+    <>
+      {isLoading ? <Spinner /> : null}
+      <Paper className={classes.paper}>
+        <TableContainer>
+          <Table className={classes.table} aria-label='simple table'>
+            <TableHead>
+              <TableRow>
+                <TableCell> ID </TableCell>
+                <TableCell> Date </TableCell>
+                <TableCell>Products</TableCell>
+                <TableCell>Items</TableCell>
+                <TableCell align='right'>Price (Rs)</TableCell>
+                <TableCell align='center'>Type</TableCell>
               </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
-    </Paper>
+            </TableHead>
+            <TableBody>
+              {transactionList.map(row => (
+                <TableRow key={row.id} hover>
+                  <TableCell>{row.id}</TableCell>
+                  <TableCell>{parseDate(row.date_time)}</TableCell>
+                  <TableCell>
+                    {row.transaction.map((val, index) =>
+                      index === row.transaction.length - 1
+                        ? val.name
+                        : `${val.name}, `
+                    )}
+                  </TableCell>
+                  <TableCell>
+                    {row.transaction.map((val, index) =>
+                      index === row.transaction.length - 1
+                        ? val.quantity
+                        : `${val.quantity}, `
+                    )}
+                  </TableCell>
+                  <TableCell align='right'>
+                    {parsePrice(row.transaction)}
+                  </TableCell>
+                  <TableCell align='center'>
+                    {row.in_or_out === 'In' ? 'Buy' : 'Sell'}
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </TableContainer>
+      </Paper>
+    </>
   );
 };
 

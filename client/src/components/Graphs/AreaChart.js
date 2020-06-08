@@ -36,7 +36,7 @@ const useStyles = makeStyles(theme => ({
   },
 }));
 
-const AreaChart = ({ data }) => {
+const AreaChart = ({ data, type }) => {
   const classes = useStyles();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.only('xs'));
@@ -195,7 +195,7 @@ const AreaChart = ({ data }) => {
         y='30'
         x={0 - height / 2 + margin.bottom / 2}
       >
-        Sales
+        {`${type} (₹)`}
       </text>
     </svg>
   );
@@ -203,6 +203,7 @@ const AreaChart = ({ data }) => {
 
 AreaChart.propTypes = {
   data: PropTypes.arrayOf(PropTypes.object).isRequired,
+  type: PropTypes.string.isRequired,
 };
 
 export default AreaChart;

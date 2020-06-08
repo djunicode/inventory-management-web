@@ -6,19 +6,25 @@ import { SnackContext } from '../SnackBar/SnackContext';
 const useForm = type => {
   // list of all products got from API
   const [productsList, setProductsList] = useState([]);
+  // true when waiting for an response from API
+  const [isLoading, setIsLoading] = useState(false);
 
   // function to validate inputs, returns the error statements
   const validateInputs = values => {
     let errors = [];
     for (let i = 0; i < values.length; i += 1) {
-      errors = [...errors, { product: ' ', quantity: ' ', price: ' ' }];
+      errors = [
+        ...errors,
+        { product: ' ', quantity: ' ', price: ' ', expiryDate: ' ' },
+      ];
     }
     values.forEach((value, index) => {
       let productErr = ' ';
       let quantityErr = ' ';
       let priceErr = ' ';
+      const expiryErr = ' ';
 
-      if (type === 'Sell') {
+      if (type === 'Sell' && value.productName) {
         const { quantity } = productsList.find(
           product => product.name === value.productName
         );
@@ -47,6 +53,7 @@ const useForm = type => {
         product: productErr,
         quantity: quantityErr,
         price: priceErr,
+        expiryDate: expiryErr,
       };
     });
     return errors;
@@ -54,29 +61,40 @@ const useForm = type => {
 
   // values for product name, quantity and price
   const [values, setValues] = useState([
-    { productName: '', quantity: '', price: '' },
+    {
+      productName: '',
+      quantity: '',
+      price: '',
+      expiryDate: '',
+    },
   ]);
   // error messages to be added to the inputs
   const [error, setError] = useState([
-    { product: ' ', quantity: ' ', price: ' ' },
+    { product: ' ', quantity: ' ', price: ' ', expiryDate: ' ' },
   ]);
   // true only if submit button is pressed
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  const [productDetails, setProductDetails] = useState([
+    'Select a product to view details',
+  ]);
+
   // fetch the products list from API
   const apiFetch = async () => {
     try {
-      const token = localStorage.getItem('token');
-      const config = { headers: { Authorization: `Token ${token}` } };
-      const response = await axios.get('/api/productlist/', config);
+      setIsLoading(true);
+      const response = await axios.get('/api/productlist/');
       const { data } = response;
       const list = data.map(val => ({
         name: val.name,
         quantity: val.quantity,
         price: val.latest_selling_price,
         id: val.id,
+        upperLimit: val.upper_limit,
+        lowerLimit: val.lower_limit,
       }));
       setProductsList(list);
+      setIsLoading(false);
     } catch (e) {
       console.log(e);
     }
@@ -89,33 +107,36 @@ const useForm = type => {
   const { setSnack } = useContext(SnackContext);
   // post data to API
   const apiPost = async formData => {
+    setIsLoading(true);
     const products = [];
     try {
-      const token = localStorage.getItem('token');
-      const config = { headers: { Authorization: `Token ${token}` } };
       if (type === 'Buy') {
-        const response = await axios.post('/api/buy/', formData, config);
+        const response = await axios.post('/api/buy/', formData);
         const { data } = response;
         console.log('Here is response', data);
         if (data.created) {
           products.push(data);
         }
       } else {
-        const response = await axios.post('/api/sell/', formData, config);
+        const response = await axios.post('/api/sell/', formData);
         const { data } = response;
         console.log('Here is response', data);
       }
+      setIsLoading(false);
       if (products.length) {
         // add success snackbar if new product created
+        const product = products[0];
         setSnack({
           open: true,
-          message: `Added ${products[0].name}`,
+          message: `Added ${product.name}`,
           action: 'EDIT',
           actionParams: {
-            name: products[0].name,
-            sellingPrice: products[0].latest_selling_price,
-            loose: products[0].loose,
-            id: products[0].id,
+            name: product.name,
+            sellingPrice: product.latest_selling_price,
+            loose: product.loose,
+            id: product.id,
+            upperLimit: product.upper_limit === null ? '' : product.upper_limit,
+            lowerLimit: product.lower_limit === null ? '' : product.upper_limit,
           },
         });
       } else if (type === 'Buy') {
@@ -151,6 +172,7 @@ const useForm = type => {
         const formData = new FormData();
         formData.append('name', val.productName);
         formData.append('quantity', val.quantity);
+        formData.append('expiry', val.expiryDate);
         if (type === 'Buy') {
           formData.append('avg_cost_price', val.price);
         } else {
@@ -162,10 +184,41 @@ const useForm = type => {
       });
       setIsSubmitting(false);
       // reset inputs
-      setValues([{ productName: '', quantity: '', price: '' }]);
+      setValues([{ productName: '', quantity: '', price: '', expiryDate: '' }]);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [error, isSubmitting]);
+
+  useEffect(() => {
+    const newProductDetails = [];
+    values.forEach((value, index) => {
+      let newDetails = 'Select a product to view details';
+      if (value.productName !== '') {
+        const currProduct = productsList.find(
+          product => product.name === value.productName
+        );
+        if (currProduct) {
+          if (type === 'Buy') {
+            newDetails = `${currProduct.quantity} in inventory ${
+              currProduct.upperLimit === null
+                ? ''
+                : `, ${currProduct.upperLimit} Recommended limit`
+            } `;
+          } else {
+            newDetails = `${currProduct.quantity} in inventory${
+              currProduct.lowerLimit === null
+                ? ''
+                : `, ${currProduct.lowerLimit} Critical limit`
+            } `;
+          }
+        } else {
+          newDetails = 'No Details';
+        }
+      }
+      newProductDetails[index] = newDetails;
+    });
+    setProductDetails(newProductDetails);
+  }, [productsList, type, values]);
 
   // function to handle submit
   const handleSubmit = event => {
@@ -186,64 +239,73 @@ const useForm = type => {
       };
       return temp;
     });
-    // on sell form if product name is updated then update the price
-    // according to the products list from API
-    if (type === 'Sell' && event.target.name === 'productName') {
-      const { price } = productsList.find(
-        product => product.name === event.target.value
-      );
-      if (price) {
-        setValues(prevState => {
-          const temp = [...prevState];
-          temp[index] = {
-            ...temp[index],
-            price,
-          };
-          return temp;
-        });
-      } else {
-        setValues(prevState => {
-          const temp = [...prevState];
-          temp[index] = {
-            ...temp[index],
-            price: '',
-          };
-          return temp;
-        });
-      }
-    }
   };
 
   const handleProductChange = (event, newValue, index) => {
-    if (newValue && newValue.inputValue) {
+    if (type === 'Buy') {
+      if (newValue && newValue.inputValue) {
+        setValues(prevState => {
+          const temp = [...prevState];
+          temp[index] = {
+            ...temp[index],
+            productName: newValue.inputValue,
+          };
+          return temp;
+        });
+        return;
+      }
+
+      setValues(prevState => {
+        const temp = [...prevState];
+        let val = '';
+
+        if (!newValue) {
+          val = '';
+        } else if (newValue.name) {
+          val = newValue.name;
+        } else {
+          val = newValue;
+        }
+        temp[index] = {
+          ...temp[index],
+          productName: val,
+        };
+        return temp;
+      });
+    } else {
+      let val = '';
+      if (newValue === null) {
+        val = '';
+      } else if (typeof newValue === 'string') {
+        val = newValue;
+      } else if (typeof newValue === 'object') {
+        val = newValue.name;
+      }
       setValues(prevState => {
         const temp = [...prevState];
         temp[index] = {
           ...temp[index],
-          productName: newValue.inputValue,
+          productName: val,
         };
         return temp;
       });
-      return;
-    }
 
-    setValues(prevState => {
-      const temp = [...prevState];
-      let val = '';
+      // on sell form if product name is updated then update the price
+      // according to the products list from API
+      const matchedProduct =
+        productsList.find(product => product.name === val) || {};
 
-      if (!newValue) {
-        val = '';
-      } else if (newValue.name) {
-        val = newValue.name;
-      } else {
-        val = newValue;
+      if (matchedProduct.price) {
+        setValues(prevState => {
+          const temp = [...prevState];
+          temp[index] = {
+            ...temp[index],
+            price: matchedProduct.price,
+          };
+          return temp;
+        });
       }
-      temp[index] = {
-        ...temp[index],
-        productName: val,
-      };
-      return temp;
-    });
+    }
   };
 
   // function to handle clicking of add products button
@@ -251,11 +313,15 @@ const useForm = type => {
   const handleAddProduct = () => {
     setValues(prevState => [
       ...prevState,
-      { productName: '', quantity: '', price: '' },
+      { productName: '', quantity: '', price: '', expiryDate: '' },
     ]);
     setError(prevState => [
       ...prevState,
-      { product: ' ', quantity: ' ', price: ' ' },
+      { product: ' ', quantity: ' ', price: ' ', expiryDate: ' ' },
+    ]);
+    setProductDetails(prevState => [
+      ...prevState,
+      'Select a product to view details',
     ]);
   };
 
@@ -267,6 +333,8 @@ const useForm = type => {
     productsList,
     handleAddProduct,
     handleProductChange,
+    productDetails,
+    isLoading,
   };
 };
 

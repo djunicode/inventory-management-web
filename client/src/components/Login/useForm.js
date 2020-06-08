@@ -49,6 +49,8 @@ const useForm = () => {
 
   // true only if submit button is pressed
   const [isSubmitting, setIsSubmitting] = useState(false);
+  // true when waiting for an response from API
+  const [isLoading, setIsLoading] = useState(false);
 
   // used to programmatically change the url
   const history = useHistory();
@@ -59,16 +61,18 @@ const useForm = () => {
 
   const apiFetch = async formData => {
     try {
+      setIsLoading(true);
       const response = await axios.post('/auth/token/login/', formData);
       const { data } = response;
       localStorage.setItem('token', data.auth_token);
       // call API to check if current user is admin
-      const config = { headers: { Authorization: `Token ${data.auth_token}` } };
-      const res = await axios.get('/auth/users/me/', config);
+      const res = await axios.get('/auth/users/me/');
       // add the is_staff variable got fro API to localStorage
       localStorage.setItem('isStaff', res.data.is_staff);
+      setIsLoading(false);
       history.push('/');
     } catch (e) {
+      setIsLoading(false);
       setIsInvalidCred(true);
     }
   };
@@ -118,6 +122,7 @@ const useForm = () => {
     values,
     showPassword,
     toggleShowPassword,
+    isLoading,
   };
 };
 

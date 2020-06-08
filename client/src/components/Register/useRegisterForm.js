@@ -76,6 +76,8 @@ const useForm = () => {
   const [invalidCred, setInvalidCred] = useState('');
   // true only if submit button is pressed
   const [isSubmitting, setIsSubmitting] = useState(false);
+  // true when waiting for an response from API
+  const [isLoading, setIsLoading] = useState(false);
 
   const history = useHistory();
 
@@ -85,9 +87,9 @@ const useForm = () => {
   //  if credentials are invalid then invalidcred is set to appropriate errors got from API
   const apiFetch = async formData => {
     try {
-      const token = localStorage.getItem('token');
-      const config = { headers: { Authorization: `Token ${token}` } };
-      await axios.post('/auth/users/', formData, config);
+      setIsLoading(true);
+      await axios.post('/auth/users/', formData);
+      setIsLoading(false);
 
       // add success snackbar on successful request
       setSnack({
@@ -103,6 +105,7 @@ const useForm = () => {
       if (e.response.status === 400) {
         const responseError = Object.values(e.response.data)[0][0];
         setInvalidCred(responseError);
+        setIsLoading(false);
 
         // add error snackbar on unsuccessful request
         setSnack({
@@ -173,6 +176,7 @@ const useForm = () => {
     setError,
     toggleShowPassword,
     toggleShowconfirmPassword,
+    isLoading,
   };
 };
 

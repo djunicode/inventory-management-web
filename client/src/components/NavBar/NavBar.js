@@ -22,7 +22,6 @@ import DialogContent from '@material-ui/core/DialogContent';
 import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogTitle from '@material-ui/core/DialogTitle';
 
-
 const useStyles = makeStyles(theme => ({
   root: {
     flexGrow: 1,
@@ -77,19 +76,13 @@ const NavBar = ({ mobileOpen, setMobileOpen, tabletOpen, setTabletOpen }) => {
           <Typography variant='h6' className={classes.title}>
             Inventory Management Web App
           </Typography>
-    
-   
-        <AlertDialog/>
-            
-        
+
+          <AlertDialog />
         </Toolbar>
       </AppBar>
     </div>
   );
 };
-
-
-
 
 NavBar.propTypes = {
   mobileOpen: PropTypes.bool.isRequired,
@@ -100,42 +93,35 @@ NavBar.propTypes = {
 
 export default NavBar;
 
-
 // Confirms user logut.
 function AlertDialog() {
-
-    // used to check current url
-    const location = useLocation();
-    // used to programmatically change url
-    const history = useHistory();
-    // true if in tablet mode
-   
-    const isLoggedIn = location.pathname !== '/login';
-    
-  
-    // function to handle logout
-    // token is passed in header to server and then removed from localStorage
-    // then user is redirected to login page
-    const handleClick = async () => {
-
-      if (isLoggedIn) {
-        try {
-          const data = '';
-          const token = localStorage.getItem('token');
-          const config = { headers: { Authorization: `Token ${token}` } };
-          await axios.post('/auth/token/logout', data, config);
-          localStorage.removeItem('token');
-          localStorage.removeItem('isStaff');
-        } catch (error) {
-          console.log(error);
-        }
-      }
-      history.push('/login');
-      setOpen(false);
-    };
-
-
   const [open, setOpen] = React.useState(false);
+
+  // used to check current url
+  const location = useLocation();
+  // used to programmatically change url
+  const history = useHistory();
+  // true if in tablet mode
+
+  const isLoggedIn = location.pathname !== '/login';
+
+  // function to handle logout
+  // token is passed in header to server and then removed from localStorage
+  // then user is redirected to login page
+  const handleClick = async () => {
+    if (isLoggedIn) {
+      try {
+        const data = '';
+        await axios.post('/auth/token/logout', data);
+        localStorage.removeItem('token');
+        localStorage.removeItem('isStaff');
+      } catch (error) {
+        console.log(error);
+      }
+    }
+    history.push('/login');
+    setOpen(false);
+  };
 
   const handleClickOpen = () => {
     setOpen(true);
@@ -145,35 +131,39 @@ function AlertDialog() {
     setOpen(false);
   };
 
-  
   return (
     <div>
-      {isLoggedIn ? (<> <Button color='inherit' onClick={handleClickOpen}>
-        {isLoggedIn ? 'Logout' : 'Login'}
-      </Button>
-      <Dialog
-        open={open}
-        onClose={handleClose}
-        aria-labelledby="alert-dialog-title"
-        aria-describedby="alert-dialog-description"
-      >
-        <DialogTitle id="alert-dialog-title">{"Are you sure you wish to logout?"}</DialogTitle>
-        <DialogContent>
-          <DialogContentText id="alert-dialog-description">
-            If you Agree, you will be logged out from all devices...
-          </DialogContentText>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleClose} color="primary">
-            Disagree
+      {isLoggedIn ? (
+        <>
+          {' '}
+          <Button color='inherit' onClick={handleClickOpen}>
+            {isLoggedIn ? 'Logout' : 'Login'}
           </Button>
-          <Button onClick={handleClick} color="primary" autoFocus>
-            Agree
-          </Button>
-        </DialogActions>
-      </Dialog></>):null}
-     
+          <Dialog
+            open={open}
+            onClose={handleClose}
+            aria-labelledby='alert-dialog-title'
+            aria-describedby='alert-dialog-description'
+          >
+            <DialogTitle id='alert-dialog-title'>
+              Are you sure you wish to logout?
+            </DialogTitle>
+            <DialogContent>
+              <DialogContentText id='alert-dialog-description'>
+                If you Agree, you will be logged out from all devices...
+              </DialogContentText>
+            </DialogContent>
+            <DialogActions>
+              <Button onClick={handleClose} color='primary'>
+                Disagree
+              </Button>
+              <Button onClick={handleClick} color='primary' autoFocus>
+                Agree
+              </Button>
+            </DialogActions>
+          </Dialog>
+        </>
+      ) : null}
     </div>
   );
 }
-

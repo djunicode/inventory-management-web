@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import {
-  Typography,
   Paper,
   TableBody,
   Table,
@@ -9,23 +8,21 @@ import {
   TableContainer,
   TableHead,
   TableRow,
-  Fab,
   IconButton,
   Hidden,
 } from '@material-ui/core';
-import AddIcon from '@material-ui/icons/Add';
-import EditIcon from '@material-ui/icons/Edit';
 import DeleteIcon from '@material-ui/icons/Delete';
-import { useHistory } from 'react-router-dom';
+import EditIcon from '@material-ui/icons/Edit';
 import axios from 'axios';
+import { useHistory } from 'react-router-dom';
 import Dialog from '@material-ui/core/Dialog';
 import DialogActions from '@material-ui/core/DialogActions';
 import DialogContent from '@material-ui/core/DialogContent';
 import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogTitle from '@material-ui/core/DialogTitle';
-import Spinner from '../Spinner';
 import MobileEditMenu from '../MobileEditMenu';
 import { SnackContext } from '../SnackBar/SnackContext';
+import Spinner from '../Spinner';
 
 const useStyles = makeStyles(theme => ({
   paper: {
@@ -61,15 +58,6 @@ const useStyles = makeStyles(theme => ({
       display: 'none',
     },
   },
-  heading: {
-    fontWeight: '700',
-    marginBottom: theme.spacing(5),
-  },
-  fab: {
-    position: 'fixed',
-    bottom: theme.spacing(4),
-    right: theme.spacing(4),
-  },
   firstColumn: {
     width: '7rem',
     paddingRight: 0,
@@ -80,9 +68,9 @@ const useStyles = makeStyles(theme => ({
   },
 }));
 
-export default function Employee() {
-  // list of employees got from API
-  const [employeeList, setEmployeeList] = useState([]);
+export default function InventoryTable() {
+  // list of inventory got from API
+  const [inventoryList, setInventoryList] = useState([]);
   // contains the index of the row, if delete is used
   const [deletedRow, setDeletedRow] = useState([]);
   // true when waiting for an response from API
@@ -99,7 +87,6 @@ export default function Employee() {
   const handleClose = () => {
     setOpen(false);
   };
-
   const history = useHistory();
 
   const { setSnack } = useContext(SnackContext);
@@ -107,17 +94,18 @@ export default function Employee() {
   const apiFetch = async () => {
     try {
       setIsLoading(true);
-      const response = await axios.get('/auth/users/');
+      const response = await axios.get('/api/productlist/');
       const { data } = response;
-      // map genders got from API
-      const genderMapper = { M: 'Male', F: 'Female', Other: 'Other' };
       const list = data.map(val => ({
-        name: `${val.first_name} ${val.last_name}`,
-        age: val.age,
-        gender: genderMapper[val.gender],
-        email: val.email,
+        name: val.name,
+        quantity: val.quantity,
+        sellingPrice: val.latest_selling_price,
+        loose: val.loose,
+        id: val.id,
+        upperLimit: val.upper_limit === null ? '' : val.upper_limit,
+        lowerLimit: val.lower_limit === null ? '' : val.lower_limit,
       }));
-      setEmployeeList(list);
+      setInventoryList(list);
       setIsLoading(false);
     } catch (e) {
       console.log(e);
@@ -131,29 +119,17 @@ export default function Employee() {
 
   const classes = useStyles();
 
-  // handle click on the FAB
-  const handleFabClick = () => {
-    history.push('/addemployee');
-  };
-
-  // handle user edit
-  const handleEdit = row => {
-    console.log(row);
-    // TODO implement this when endpoint is ready
-    // open the create user form and pass the data as props
-  };
-
-  // handle user delete
+  // handle product delete
   const handleDelete = async row => {
     setIsLoading(true);
-    const { email, name } = row;
-    setDeletedRow(prevState => [...prevState, employeeList.indexOf(row)]);
+    const { id } = row;
+    setDeletedRow(prevState => [...prevState, inventoryList.indexOf(row)]);
     try {
-      const formData = new FormData();
-      formData.append('email', email);
-      await axios.post('/auth/user_delete/', formData);
-      setIsLoading(false);
+      await axios.delete(`/api/productlist/${id}/`);
+
       // add success snackbar on successful request
+      const { name } = inventoryList.find(val => val.id === id);
+      setIsLoading(false);
       setSnack({
         open: true,
         message: `Succesfully deleted ${name}`,
@@ -166,28 +142,36 @@ export default function Employee() {
     }
   };
 
+  // handle product edit
+  const handleEdit = row => {
+    history.push('/updateproduct', {
+      name: row.name,
+      sellingPrice: row.sellingPrice,
+      loose: row.loose,
+      id: row.id,
+      upperLimit: row.upperLimit,
+      lowerLimit: row.lowerLimit,
+    });
+  };
+
   return (
     <>
       {isLoading ? <Spinner /> : null}
-      <Typography variant='h3' className={classes.heading}>
-        Employees
-      </Typography>
       <Paper className={classes.paper}>
         <TableContainer>
           <Table className={classes.table} aria-label='simple table'>
             <TableHead>
               <TableRow>
                 <TableCell />
-                <TableCell>Name</TableCell>
-                <TableCell>Gender</TableCell>
-                <TableCell>Email</TableCell>
-                <TableCell align='right'>Age</TableCell>
+                <TableCell>Product</TableCell>
+                <TableCell align='right'>Items</TableCell>
+                <TableCell align='right'>Price (Rs)</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
-              {employeeList.map((row, index) => (
+              {inventoryList.map((row, index) => (
                 <TableRow
-                  key={row.email}
+                  key={row.name}
                   hover
                   className={deletedRow.includes(index) ? 'delete' : ''}
                 >
@@ -218,9 +202,10 @@ export default function Employee() {
                     </Hidden>
                   </TableCell>
                   <TableCell>{row.name}</TableCell>
-                  <TableCell>{row.gender}</TableCell>
-                  <TableCell>{row.email}</TableCell>
-                  <TableCell align='right'>{row.age}</TableCell>
+                  <TableCell align='right'>{row.quantity}</TableCell>
+                  <TableCell align='right'>
+                    {row.sellingPrice || 'Not Set'}
+                  </TableCell>
                 </TableRow>
               ))}
             </TableBody>
@@ -259,14 +244,6 @@ export default function Employee() {
         </DialogActions>
       </Dialog>
       {/* end of dialog */}
-      <Fab
-        color='primary'
-        aria-label='add'
-        className={classes.fab}
-        onClick={handleFabClick}
-      >
-        <AddIcon />
-      </Fab>
     </>
   );
 }

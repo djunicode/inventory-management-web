@@ -3,7 +3,6 @@ import {
   Paper,
   Typography,
   TextField,
-  MenuItem,
   Button,
   Divider,
 } from '@material-ui/core';
@@ -14,6 +13,7 @@ import Autocomplete, {
   createFilterOptions,
 } from '@material-ui/lab/Autocomplete';
 import useForm from './useTransactionForm';
+import Spinner from '../Spinner';
 
 const filter = createFilterOptions();
 
@@ -83,6 +83,10 @@ const useStyles = makeStyles(theme => ({
       textAlign: 'left',
     },
   },
+  productDetails: {
+    marginBottom: '2rem',
+    maxWidth: '20rem',
+  },
   button: {
     gridColumn: 'span 2',
     justifySelf: 'center',
@@ -116,154 +120,195 @@ const Form = ({ type }) => {
     productsList,
     handleAddProduct,
     handleProductChange,
+    productDetails,
+    isLoading,
   } = useForm(type);
 
   return (
-    <div>
-      <Paper className={classes.paper}>
-        <Typography variant='h4' className={classes.paperHeading}>
-          {type} Items
-        </Typography>
-        <form
-          noValidate
-          onSubmit={handleSubmit}
-          autoComplete='off'
-          className={classes.gridContainer}
-        >
-          {/* Map over all the values in state to render an input for each one of them */}
-          {values.map((value, index) => (
-            <>
-              <Divider />
-              <Typography variant='h5' className={classes.formHeading}>
-                Product {values.length > 1 ? index + 1 : ''}
-              </Typography>
-              <div className={classes.form}>
-                {type === 'Buy' ? (
-                  <Autocomplete
-                    value={value.productName}
-                    onChange={(event, newValue) => {
-                      handleProductChange(event, newValue, index);
-                    }}
-                    filterOptions={(options, params) => {
-                      const filtered = filter(options, params);
+    <>
+      {isLoading ? <Spinner /> : null}
+      <div>
+        <Paper className={classes.paper}>
+          <Typography variant='h4' className={classes.paperHeading}>
+            {type} Items
+          </Typography>
+          <form
+            noValidate
+            onSubmit={handleSubmit}
+            autoComplete='off'
+            className={classes.gridContainer}
+          >
+            {/* Map over all the values in state to render an input for each one of them */}
+            {values.map((value, index) => (
+              <>
+                <Divider />
+                <Typography variant='h5' className={classes.formHeading}>
+                  Product {values.length > 1 ? index + 1 : ''}
+                </Typography>
+                <div className={classes.form}>
+                  {type === 'Buy' ? (
+                    <Autocomplete
+                      value={value.productName}
+                      onChange={(event, newValue) => {
+                        handleProductChange(event, newValue, index);
+                      }}
+                      filterOptions={(options, params) => {
+                        const filtered = filter(options, params);
 
-                      if (params.inputValue !== '') {
-                        filtered.push({
-                          inputValue: params.inputValue,
-                          name: `Add "${params.inputValue}"`,
-                        });
-                      }
+                        if (params.inputValue !== '') {
+                          filtered.push({
+                            inputValue: params.inputValue,
+                            name: `Add "${params.inputValue}"`,
+                          });
+                        }
 
-                      return filtered;
-                    }}
-                    id='productfield-input'
-                    options={productsList}
-                    getOptionLabel={option => {
-                      // e.g value selected with enter, right from the input
-                      if (typeof option === 'string') {
-                        return option;
-                      }
-                      if (option.inputValue) {
-                        return option.inputValue;
-                      }
-                      return option.name;
-                    }}
-                    renderOption={option => option.name}
-                    freeSolo
-                    style={{ width: '100%', maxWidth: '20rem' }}
-                    renderInput={params => (
-                      <TextField
-                        // eslint-disable-next-line react/jsx-props-no-spreading
-                        {...params}
-                        required
-                        label='Product Name'
-                        variant='filled'
-                        error={!(error[index].product === ' ')}
-                        helperText={error[index].product}
-                      />
-                    )}
-                  />
-                ) : (
+                        return filtered;
+                      }}
+                      id='productfield-input'
+                      options={productsList}
+                      getOptionLabel={option => {
+                        // e.g value selected with enter, right from the input
+                        if (typeof option === 'string') {
+                          return option;
+                        }
+                        if (option.inputValue) {
+                          return option.inputValue;
+                        }
+                        return option.name;
+                      }}
+                      renderOption={option => option.name}
+                      freeSolo
+                      style={{ width: '100%', maxWidth: '20rem' }}
+                      renderInput={params => (
+                        <TextField
+                          // eslint-disable-next-line react/jsx-props-no-spreading
+                          {...params}
+                          required
+                          label='Product Name'
+                          variant='filled'
+                          error={!(error[index].product === ' ')}
+                          helperText={error[index].product}
+                        />
+                      )}
+                    />
+                  ) : (
+                    <Autocomplete
+                      value={value.productName}
+                      onChange={(event, newValue) => {
+                        handleProductChange(event, newValue, index);
+                      }}
+                      style={{ width: '100%', maxWidth: '20rem' }}
+                      id='productfield-input'
+                      options={productsList.concat({ name: '' })}
+                      getOptionLabel={option => {
+                        // e.g value selected with enter, right from the input
+                        if (typeof option === 'string') {
+                          return option;
+                        }
+                        if (option.inputValue) {
+                          return option.inputValue;
+                        }
+                        return option.name;
+                      }}
+                      getOptionSelected={(option, val) => {
+                        return option.name === val;
+                      }}
+                      renderInput={params => (
+                        <TextField
+                          // eslint-disable-next-line react/jsx-props-no-spreading
+                          {...params}
+                          required
+                          label='Product Name'
+                          variant='filled'
+                          error={!(error[index].product === ' ')}
+                          helperText={error[index].product}
+                        />
+                      )}
+                    />
+                  )}
+                  <Typography variant='h5' className={classes.productDetails}>
+                    {productDetails[index]}
+                  </Typography>
                   <TextField
                     required
                     variant='filled'
-                    id='product-input'
-                    name='productName'
-                    select
-                    label='Product Name'
-                    value={value.productName}
+                    id='price-input'
+                    name='price'
+                    type='number'
+                    label='Price'
+                    InputProps={{
+                      inputProps: {
+                        min: 0,
+                      },
+                    }}
+                    value={value.price}
                     onChange={event => handleChange(event, index)}
-                    error={!(error[index].product === ' ')}
-                    helperText={error[index].product}
-                  >
-                    {productsList.map(option => (
-                      <MenuItem key={option.name} value={option.name}>
-                        {option.name}
-                      </MenuItem>
-                    ))}
-                  </TextField>
-                )}
-
-                <TextField
-                  required
-                  variant='filled'
-                  id='price-input'
-                  name='price'
-                  type='number'
-                  label='Price'
-                  InputProps={{
-                    inputProps: {
-                      min: 0,
-                    },
-                  }}
-                  value={value.price}
-                  onChange={event => handleChange(event, index)}
-                  error={!(error[index].price === ' ')}
-                  helperText={error[index].price}
-                />
-                <TextField
-                  required
-                  variant='filled'
-                  id='quantity-input'
-                  name='quantity'
-                  type='number'
-                  label='Quantity'
-                  InputProps={{
-                    inputProps: {
-                      min: 0,
-                    },
-                  }}
-                  value={value.quantity}
-                  onChange={event => handleChange(event, index)}
-                  error={!(error[index].quantity === ' ')}
-                  helperText={error[index].quantity}
-                />
-              </div>
-            </>
-          ))}
-          <Typography />
-          <Button
-            variant='outlined'
-            color='primary'
-            type='button'
-            onClick={handleAddProduct}
-            startIcon={<AddIcon />}
-            className={classes.addProduct}
-          >
-            Add Products
-          </Button>
-          <Button
-            type='submit'
-            color='primary'
-            variant='contained'
-            className={classes.button}
-            onClick={handleSubmit}
-          >
-            {type}
-          </Button>
-        </form>
-      </Paper>
-    </div>
+                    error={!(error[index].price === ' ')}
+                    helperText={error[index].price}
+                  />
+                  <TextField
+                    required
+                    variant='filled'
+                    id='quantity-input'
+                    name='quantity'
+                    type='number'
+                    label='Quantity'
+                    InputProps={{
+                      inputProps: {
+                        min: 0,
+                      },
+                    }}
+                    value={value.quantity}
+                    onChange={event => handleChange(event, index)}
+                    error={!(error[index].quantity === ' ')}
+                    helperText={error[index].quantity}
+                  />
+                  {type === 'Buy' ? (
+                    <TextField
+                      variant='filled'
+                      id='expiry-date-input'
+                      name='expiryDate'
+                      type='date'
+                      label='Expiry Date'
+                      InputProps={{
+                        inputProps: {
+                          min: new Date(Date.now()).toISOString().slice(0, 10),
+                        },
+                      }}
+                      InputLabelProps={{ shrink: true }}
+                      value={value.expiryDate}
+                      onChange={event => handleChange(event, index)}
+                      error={!(error[index].expiryDate === ' ')}
+                      helperText={error[index].expiryDate}
+                    />
+                  ) : null}
+                </div>
+              </>
+            ))}
+            <Typography />
+            <Button
+              variant='outlined'
+              color='primary'
+              type='button'
+              onClick={handleAddProduct}
+              startIcon={<AddIcon />}
+              className={classes.addProduct}
+            >
+              Add Products
+            </Button>
+            <Button
+              type='submit'
+              color='primary'
+              variant='contained'
+              className={classes.button}
+              onClick={handleSubmit}
+            >
+              {type}
+            </Button>
+          </form>
+        </Paper>
+      </div>
+    </>
   );
 };
 
