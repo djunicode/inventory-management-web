@@ -18,16 +18,12 @@ import EditIcon from '@material-ui/icons/Edit';
 import DeleteIcon from '@material-ui/icons/Delete';
 import { useHistory } from 'react-router-dom';
 import axios from 'axios';
-import Dialog from '@material-ui/core/Dialog';
-import DialogActions from '@material-ui/core/DialogActions';
-import DialogContent from '@material-ui/core/DialogContent';
-import DialogContentText from '@material-ui/core/DialogContentText';
-import DialogTitle from '@material-ui/core/DialogTitle';
 import Spinner from '../Spinner';
 import MobileEditMenu from '../MobileEditMenu';
 import { SnackContext } from '../SnackBar/SnackContext';
+import DialogBox from '../DialogBox/DialogBox';
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles((theme) => ({
   paper: {
     boxShadow: '4px 4px 20px rgba(0,0,0,0.1)',
     textAlign: 'center',
@@ -111,7 +107,7 @@ export default function Employee() {
       const { data } = response;
       // map genders got from API
       const genderMapper = { M: 'Male', F: 'Female', Other: 'Other' };
-      const list = data.map(val => ({
+      const list = data.map((val) => ({
         name: `${val.first_name} ${val.last_name}`,
         age: val.age,
         gender: genderMapper[val.gender],
@@ -137,17 +133,17 @@ export default function Employee() {
   };
 
   // handle user edit
-  const handleEdit = row => {
+  const handleEdit = (row) => {
     console.log(row);
     // TODO implement this when endpoint is ready
     // open the create user form and pass the data as props
   };
 
   // handle user delete
-  const handleDelete = async row => {
+  const handleDelete = async (row) => {
     setIsLoading(true);
     const { email, name } = row;
-    setDeletedRow(prevState => [...prevState, employeeList.indexOf(row)]);
+    setDeletedRow((prevState) => [...prevState, employeeList.indexOf(row)]);
     try {
       const formData = new FormData();
       formData.append('email', email);
@@ -227,38 +223,15 @@ export default function Employee() {
           </Table>
         </TableContainer>
       </Paper>
-      {/* start of dialog */}
-      <Dialog
+
+      <DialogBox
         open={open}
-        onClose={handleClose}
-        aria-labelledby='alert-dialog-title'
-        aria-describedby='alert-dialog-description'
-      >
-        <DialogTitle id='alert-dialog-title'>
-          {`Delete ${selectedRow.name}?`}
-        </DialogTitle>
-        <DialogContent>
-          <DialogContentText id='alert-dialog-description'>
-            Are you sure you want to delete {selectedRow.name}?
-          </DialogContentText>
-        </DialogContent>
-        <DialogActions>
-          <IconButton onClick={handleClose} color='primary'>
-            Disagree
-          </IconButton>
-          <IconButton
-            onClick={() => {
-              handleDelete(selectedRow);
-              handleClose();
-            }}
-            color='primary'
-            autoFocus
-          >
-            Agree
-          </IconButton>
-        </DialogActions>
-      </Dialog>
-      {/* end of dialog */}
+        handleClose={handleClose}
+        selectedRow={selectedRow}
+        handleDelete={handleDelete}
+        number='1'
+      />
+
       <Fab
         color='primary'
         aria-label='add'
