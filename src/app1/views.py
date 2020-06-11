@@ -15,7 +15,7 @@ from django.views.decorators.csrf import csrf_exempt
 from rest_framework.decorators import api_view, permission_classes
 from django.contrib.auth.decorators import login_required, permission_required
 from rest_framework.permissions import IsAuthenticated
-import datetime
+from datetime import datetime, timedelta
 
 
 class User_Delete(generics.GenericAPIView):
@@ -491,16 +491,19 @@ class Expiry(generics.GenericAPIView):
         exp = []
         for p in pr:
             i = p.items_set.all()
-            if i[0].expiry != None:
-                d = i[0].expiry
+            for j in range(0, 4):
+
+                d = datetime.now().date() + timedelta(days=j)
+
                 d1 = i.filter(expiry=d)
                 d2 = len(d1)
-                d3 = (d - datetime.date.today()).days
-                if d3 <= 3:
-                    p2 = {"Product": p.name, "No. of items": d2, "Days left": d3}
+
+                if d2 != 0:
+                    p2 = {"Product": p.name, "No. of items": d2, "Days left": j}
                     exp.append(p2)
-            else:
-                continue
 
         a = json.dumps(exp)
         return HttpResponse(a)
+
+
+### Create a for loop with datetime.now + i and make i =3 so check all dates till next 3 dates
