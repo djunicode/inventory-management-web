@@ -12,6 +12,7 @@ import Login from './Login/Login';
 import NavDrawer from './Drawer/Drawer';
 import Container from './Container/Container';
 import PageNotFound from './PageNotFound';
+import UnAuthorizedAccess from './UnAuthorizedAccess';
 
 const Routes = () => {
   // Using state so that navbar can communicate with drawer
@@ -57,6 +58,7 @@ const Routes = () => {
           />
           <Container tabletOpen={tabletOpen} />
         </PrivateRoute>
+        <Route path='/unauthorized' component={UnAuthorizedAccess} />
         <Route component={PageNotFound} />
       </Switch>
     </Router>

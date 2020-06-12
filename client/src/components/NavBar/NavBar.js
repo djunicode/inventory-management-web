@@ -15,19 +15,14 @@ import ChevronLeftIcon from '@material-ui/icons/ChevronLeft';
 import { useLocation, useHistory } from 'react-router-dom';
 import axios from 'axios';
 import PropTypes from 'prop-types';
+import DialogBox from '../DialogBox/DialogBox';
 
-import Dialog from '@material-ui/core/Dialog';
-import DialogActions from '@material-ui/core/DialogActions';
-import DialogContent from '@material-ui/core/DialogContent';
-import DialogContentText from '@material-ui/core/DialogContentText';
-import DialogTitle from '@material-ui/core/DialogTitle';
-
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles((theme) => ({
   root: {
     flexGrow: 1,
   },
   menuButton: {
-    display: isLoggedIn => (isLoggedIn ? 'block' : 'none'),
+    display: (isLoggedIn) => (isLoggedIn ? 'block' : 'none'),
     marginRight: theme.spacing(2),
   },
   title: {
@@ -139,29 +134,12 @@ function AlertDialog() {
           <Button color='inherit' onClick={handleClickOpen}>
             {isLoggedIn ? 'Logout' : 'Login'}
           </Button>
-          <Dialog
+          <DialogBox
             open={open}
-            onClose={handleClose}
-            aria-labelledby='alert-dialog-title'
-            aria-describedby='alert-dialog-description'
-          >
-            <DialogTitle id='alert-dialog-title'>
-              Are you sure you wish to logout?
-            </DialogTitle>
-            <DialogContent>
-              <DialogContentText id='alert-dialog-description'>
-                If you Agree, you will be logged out from all devices...
-              </DialogContentText>
-            </DialogContent>
-            <DialogActions>
-              <Button onClick={handleClose} color='primary'>
-                Disagree
-              </Button>
-              <Button onClick={handleClick} color='primary' autoFocus>
-                Agree
-              </Button>
-            </DialogActions>
-          </Dialog>
+            handleClose={handleClose}
+            handleClick={handleClick}
+            number='2'
+          />
         </>
       ) : null}
     </div>

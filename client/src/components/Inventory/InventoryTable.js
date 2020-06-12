@@ -15,16 +15,12 @@ import DeleteIcon from '@material-ui/icons/Delete';
 import EditIcon from '@material-ui/icons/Edit';
 import axios from 'axios';
 import { useHistory } from 'react-router-dom';
-import Dialog from '@material-ui/core/Dialog';
-import DialogActions from '@material-ui/core/DialogActions';
-import DialogContent from '@material-ui/core/DialogContent';
-import DialogContentText from '@material-ui/core/DialogContentText';
-import DialogTitle from '@material-ui/core/DialogTitle';
 import MobileEditMenu from '../MobileEditMenu';
 import { SnackContext } from '../SnackBar/SnackContext';
 import Spinner from '../Spinner';
+import DialogBox from '../DialogBox/DialogBox';
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles((theme) => ({
   paper: {
     boxShadow: '4px 4px 20px rgba(0,0,0,0.1)',
     textAlign: 'center',
@@ -96,7 +92,7 @@ export default function InventoryTable() {
       setIsLoading(true);
       const response = await axios.get('/api/productlist/');
       const { data } = response;
-      const list = data.map(val => ({
+      const list = data.map((val) => ({
         name: val.name,
         quantity: val.quantity,
         sellingPrice: val.latest_selling_price,
@@ -120,15 +116,15 @@ export default function InventoryTable() {
   const classes = useStyles();
 
   // handle product delete
-  const handleDelete = async row => {
+  const handleDelete = async (row) => {
     setIsLoading(true);
     const { id } = row;
-    setDeletedRow(prevState => [...prevState, inventoryList.indexOf(row)]);
+    setDeletedRow((prevState) => [...prevState, inventoryList.indexOf(row)]);
     try {
       await axios.delete(`/api/productlist/${id}/`);
 
       // add success snackbar on successful request
-      const { name } = inventoryList.find(val => val.id === id);
+      const { name } = inventoryList.find((val) => val.id === id);
       setIsLoading(false);
       setSnack({
         open: true,
@@ -143,7 +139,7 @@ export default function InventoryTable() {
   };
 
   // handle product edit
-  const handleEdit = row => {
+  const handleEdit = (row) => {
     history.push('/updateproduct', {
       name: row.name,
       sellingPrice: row.sellingPrice,
@@ -212,38 +208,13 @@ export default function InventoryTable() {
           </Table>
         </TableContainer>
       </Paper>
-      {/* start of dialog */}
-      <Dialog
+      <DialogBox
         open={open}
-        onClose={handleClose}
-        aria-labelledby='alert-dialog-title'
-        aria-describedby='alert-dialog-description'
-      >
-        <DialogTitle id='alert-dialog-title'>
-          {`Delete ${selectedRow.name}?`}
-        </DialogTitle>
-        <DialogContent>
-          <DialogContentText id='alert-dialog-description'>
-            Are you sure you want to delete {selectedRow.name}?
-          </DialogContentText>
-        </DialogContent>
-        <DialogActions>
-          <IconButton onClick={handleClose} color='primary'>
-            Disagree
-          </IconButton>
-          <IconButton
-            onClick={() => {
-              handleDelete(selectedRow);
-              handleClose();
-            }}
-            color='primary'
-            autoFocus
-          >
-            Agree
-          </IconButton>
-        </DialogActions>
-      </Dialog>
-      {/* end of dialog */}
+        handleClose={handleClose}
+        selectedRow={selectedRow}
+        handleDelete={handleDelete}
+        number='1'
+      />
     </>
   );
 }
