@@ -26,6 +26,10 @@ const useStyles = makeStyles(theme => ({
       margin: '1rem 2rem',
       width: '100%',
       maxWidth: '20rem',
+      [theme.breakpoints.only('sm')]: {
+        margin: '0.5rem 1rem',
+        maxWidth: '14rem',
+      },
       [theme.breakpoints.only('xs')]: {
         margin: '0.5rem 1rem',
         maxWidth: '12rem',
@@ -101,7 +105,7 @@ const Home = () => {
   return (
     <>
       {salesAreaData.length < 2 ? (
-        <NoData />
+        <NoData setData={setData} />
       ) : (
         <>
           <div className={classes.graph}>

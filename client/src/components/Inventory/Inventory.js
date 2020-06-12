@@ -87,6 +87,9 @@ export default function Inventory() {
         <InventoryTable />
       </TabPanel>
       <TabPanel value={tab} index={1}>
+        <Typography variant='h6' gutterBottom>
+          Items which expire in the next 3 days are displayed here
+        </Typography>
         <ExpiryTable />
       </TabPanel>
     </div>

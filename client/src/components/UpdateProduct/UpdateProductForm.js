@@ -168,7 +168,7 @@ const UpdateProduct = () => {
               id='upperLimit-input'
               type='number'
               name='upperLimit'
-              label='Upper Limit'
+              label='Recommended Limit'
               InputProps={{
                 inputProps: {
                   min: 0,
@@ -184,7 +184,7 @@ const UpdateProduct = () => {
               id='lowerLimit-input'
               type='number'
               name='lowerLimit'
-              label='Lower Limit'
+              label='Critical Limit'
               InputProps={{
                 inputProps: {
                   min: 0,
