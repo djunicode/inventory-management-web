@@ -9,8 +9,9 @@ import {
   TableHead,
   TableRow,
 } from '@material-ui/core';
-import axios from 'axios';
 import Spinner from '../Spinner';
+import { getEndPoint } from '../UtilityFunctions/Request';
+import { useHistory } from 'react-router-dom';
 
 const useStyles = makeStyles(theme => ({
   paper: {
@@ -63,11 +64,12 @@ const TransactionHistory = () => {
   // true when waiting for an response from API
   const [isLoading, setIsLoading] = useState(false);
 
+  const history = useHistory()
   // fetch transaction list from API
   const apiFetch = async () => {
     try {
       setIsLoading(true);
-      const response = await axios.get('/api/bill/');
+      const response = await getEndPoint('/api/bill/',null, history);
       const { data } = response;
       setTransactionList(data);
       setIsLoading(false);

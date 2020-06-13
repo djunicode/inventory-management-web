@@ -1,7 +1,7 @@
 import { useState, useEffect, useContext } from 'react';
 import { useHistory } from 'react-router-dom';
-import axios from 'axios';
 import { SnackContext } from '../SnackBar/SnackContext';
+import {postEndPoint} from '../UtilityFunctions/Request'
 
 // custom hook for form state management
 const useForm = () => {
@@ -88,7 +88,7 @@ const useForm = () => {
   const apiFetch = async formData => {
     try {
       setIsLoading(true);
-      await axios.post('/auth/users/', formData);
+      await postEndPoint('/auth/users/', formData,null,history);
       setIsLoading(false);
 
       // add success snackbar on successful request

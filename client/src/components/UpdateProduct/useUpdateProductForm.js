@@ -1,7 +1,7 @@
 import { useState, useEffect, useContext } from 'react';
 import { useHistory } from 'react-router-dom';
-import axios from 'axios';
 import { SnackContext } from '../SnackBar/SnackContext';
+import {postEndPoint} from '../UtilityFunctions/Request';
 
 // custom hook for form state management
 const useForm = ({ name, sellingPrice, loose, id, upperLimit, lowerLimit }) => {
@@ -87,7 +87,7 @@ const useForm = ({ name, sellingPrice, loose, id, upperLimit, lowerLimit }) => {
   const apiFetch = async formData => {
     try {
       setIsLoading(true);
-      await axios.post(`/api/update/${id}/`, formData);
+      await postEndPoint(`/api/update/${id}/`, formData,null, history);
       setIsLoading(false);
 
       // add success snackbar on successful request

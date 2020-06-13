@@ -22,6 +22,7 @@ import Spinner from '../Spinner';
 import MobileEditMenu from '../MobileEditMenu';
 import { SnackContext } from '../SnackBar/SnackContext';
 import DialogBox from '../DialogBox/DialogBox';
+import { getEndPoint, postEndPoint } from '../UtilityFunctions/Request';
 
 const useStyles = makeStyles((theme) => ({
   paper: {
@@ -103,7 +104,7 @@ export default function Employee() {
   const apiFetch = async () => {
     try {
       setIsLoading(true);
-      const response = await axios.get('/auth/users/');
+      const response = await getEndPoint('/auth/users/',null,history);
       const { data } = response;
       // map genders got from API
       const genderMapper = { M: 'Male', F: 'Female', Other: 'Other' };
@@ -147,7 +148,7 @@ export default function Employee() {
     try {
       const formData = new FormData();
       formData.append('email', email);
-      await axios.post('/auth/user_delete/', formData);
+      await postEndPoint('/auth/user_delete/', formData,null, history);
       setIsLoading(false);
       // add success snackbar on successful request
       setSnack({

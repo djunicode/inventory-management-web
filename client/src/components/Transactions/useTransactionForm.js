@@ -1,7 +1,7 @@
 import { useState, useEffect, useContext } from 'react';
-import axios from 'axios';
-
 import { SnackContext } from '../SnackBar/SnackContext';
+import { getEndPoint,postEndPoint } from '../UtilityFunctions/Request';
+import { useHistory } from 'react-router-dom';
 
 const useForm = type => {
   // list of all products got from API
@@ -79,11 +79,13 @@ const useForm = type => {
     'Select a product to view details',
   ]);
 
+  const history = useHistory()
+
   // fetch the products list from API
   const apiFetch = async () => {
     try {
       setIsLoading(true);
-      const response = await axios.get('/api/productlist/');
+      const response = await getEndPoint('/api/productlist/',null, history);
       const { data } = response;
       const list = data.map(val => ({
         name: val.name,
@@ -111,14 +113,14 @@ const useForm = type => {
     const products = [];
     try {
       if (type === 'Buy') {
-        const response = await axios.post('/api/buy/', formData);
+        const response = await postEndPoint('/api/buy/', formData,null,history);
         const { data } = response;
         console.log('Here is response', data);
         if (data.created) {
           products.push(data);
         }
       } else {
-        const response = await axios.post('/api/sell/', formData);
+        const response = await postEndPoint('/api/sell/', formData,null, history);
         const { data } = response;
         console.log('Here is response', data);
       }

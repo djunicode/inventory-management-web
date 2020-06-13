@@ -11,6 +11,8 @@ import {
 } from '@material-ui/core';
 import axios from 'axios';
 import Spinner from '../Spinner';
+import { getEndPoint } from '../UtilityFunctions/Request';
+import { useHistory } from 'react-router-dom';
 
 const useStyles = makeStyles(theme => ({
   paper: {
@@ -54,10 +56,12 @@ export default function ExpiryTable() {
   // true when waiting for an response from API
   const [isLoading, setIsLoading] = useState(false);
 
+  const history = useHistory()
+
   const apiFetch = async () => {
     try {
       setIsLoading(true);
-      const response = await axios.get('/api/explist/');
+      const response = await getEndPoint('/api/explist/',null, history);
       const { data } = response;
       console.log(data);
       const list = data.map(val => ({
