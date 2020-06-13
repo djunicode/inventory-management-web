@@ -46,14 +46,17 @@ class User(AbstractBaseUser, PermissionsMixin):
     USERNAME_FIELD = "email"
 
     def __str__(self):
-        return self.email
+        return self.first_name
 
 
 class Products(models.Model):
     name = models.CharField(max_length=100)
     quantity = models.IntegerField()
-    avg_cost_price = models.FloatField()
-    loose = models.BooleanField()
+    avg_cost_price = models.FloatField(blank=True, null=True)
+    loose = models.BooleanField(default=False)
+    latest_selling_price = models.IntegerField(blank=True, null=True)
+    upper_limit = models.IntegerField(blank=True, null=True)
+    lower_limit = models.IntegerField(blank=True, null=True)
 
     def __str__(self):
         return self.name
@@ -61,15 +64,16 @@ class Products(models.Model):
 
 class Items(models.Model):
     product = models.ForeignKey(Products, on_delete=models.CASCADE)
-    barcode = models.CharField(max_length=100)
-    expiry = models.DateTimeField()
+    barcode = models.CharField(max_length=100, blank=True, null=True)
+    expiry = models.DateField(default=None, blank=True, null=True)
 
     def __str__(self):
-        return self.product
+        return self.product.name
 
 
 class Bill(models.Model):
-    person = models.CharField(max_length=100)
+    customer = models.CharField(max_length=100)
+    employee = models.ForeignKey(User, on_delete=models.CASCADE, blank=True)
     date_time = models.DateTimeField(auto_now_add=True)
     taxes = models.FloatField()
     choices = (
@@ -80,15 +84,26 @@ class Bill(models.Model):
     in_or_out = models.CharField(max_length=20, choices=choices)
 
     def __str__(self):
-        return self.person
+        return self.customer
 
 
 class Product_Transaction(models.Model):
     product = models.ForeignKey(Products, on_delete=models.CASCADE)
-
+    bill = models.ForeignKey(
+        Bill,
+        on_delete=models.CASCADE,
+        related_name="transaction",
+        blank=True,
+        null=True,
+    )
     quantity = models.IntegerField()
+    date = models.DateField(auto_now_add=True)
     rate = models.FloatField()
-    bill = models.ForeignKey(Bill, on_delete=models.CASCADE)
+    choices = (
+        ("In", "In"),
+        ("Out", "Out"),
+    )
+    in_or_out = models.CharField(max_length=20, choices=choices)
 
     def __str__(self):
-        return self.product
+        return self.product.name
