@@ -10,7 +10,7 @@ import axios from "axios";
         await axios.get(req, config
         ).catch(error => {
             history.push('/unauthorizied')
-            return error.status;
+            return error;
           });
         
         // Return empty array to avoid mapping error
@@ -28,7 +28,7 @@ export async function postEndPoint(req,formData,config,history) {
     // post request
     const response =  await axios.post(req,formData,config).catch(error => {
         history.push('/unauthorizied')
-        return error.status;
+        return error;
       });
     // Return empty array to avoid mapping error
     return response
