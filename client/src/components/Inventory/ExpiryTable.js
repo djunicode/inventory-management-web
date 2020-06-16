@@ -9,7 +9,6 @@ import {
   TableHead,
   TableRow,
 } from '@material-ui/core';
-import axios from 'axios';
 import Spinner from '../Spinner';
 import { getEndPoint } from '../UtilityFunctions/Request';
 import { useHistory } from 'react-router-dom';
