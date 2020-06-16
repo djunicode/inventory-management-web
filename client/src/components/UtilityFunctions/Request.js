@@ -7,7 +7,7 @@ export async function getEndPoint(req,config,history) {
       await axios.get(req, config
       ).catch(error => {
         if(error.status === 401){
-          history.push('/unauthorizied')
+          history.push('/unauthorized')
         }
           return Promise.reject(error);
         });
