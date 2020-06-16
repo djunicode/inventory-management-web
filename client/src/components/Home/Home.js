@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { Typography, Paper, TextField, MenuItem } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
-import axios from 'axios';
 import AreaChart from '../Graphs/AreaChart';
 import BarChart from '../Graphs/BarChart';
 import NoData from './NoData';
+import { getEndPoint } from '../UtilityFunctions/Request';
 
 const useStyles = makeStyles(theme => ({
   heading: {
@@ -49,7 +49,7 @@ const Home = () => {
 
   const apiFetch = async () => {
     try {
-      const response = await axios.get('/api/profit/');
+      const response = await getEndPoint('/api/profit/',null,null);
       setData(response.data);
     } catch (e) {
       console.log(e);

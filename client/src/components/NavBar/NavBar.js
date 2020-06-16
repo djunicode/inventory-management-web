@@ -13,9 +13,9 @@ import {
 import MenuIcon from '@material-ui/icons/Menu';
 import ChevronLeftIcon from '@material-ui/icons/ChevronLeft';
 import { useLocation, useHistory } from 'react-router-dom';
-import axios from 'axios';
 import PropTypes from 'prop-types';
 import DialogBox from '../DialogBox/DialogBox';
+import {postEndPoint} from '../UtilityFunctions/Request'
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -107,7 +107,7 @@ function AlertDialog() {
     if (isLoggedIn) {
       try {
         const data = '';
-        await axios.post('/auth/token/logout', data);
+        await postEndPoint('/auth/token/logout', data,null, history);
         localStorage.removeItem('token');
         localStorage.removeItem('isStaff');
       } catch (error) {

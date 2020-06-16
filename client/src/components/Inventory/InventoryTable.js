@@ -19,6 +19,7 @@ import MobileEditMenu from '../MobileEditMenu';
 import { SnackContext } from '../SnackBar/SnackContext';
 import Spinner from '../Spinner';
 import DialogBox from '../DialogBox/DialogBox';
+import {getEndPoint} from '../UtilityFunctions/Request'
 
 const useStyles = makeStyles((theme) => ({
   paper: {
@@ -90,7 +91,12 @@ export default function InventoryTable() {
   const apiFetch = async () => {
     try {
       setIsLoading(true);
-      const response = await axios.get('/api/productlist/');
+      
+      
+      const response = await getEndPoint('/api/productlist/',null,history); // Use utility function
+
+      //console.log("error",response) check error code here for reference
+
       const { data } = response;
       const list = data.map((val) => ({
         name: val.name,

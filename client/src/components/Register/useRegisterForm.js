@@ -1,7 +1,8 @@
 import { useState, useEffect, useContext } from 'react';
 import { useHistory } from 'react-router-dom';
-import axios from 'axios';
 import { SnackContext } from '../SnackBar/SnackContext';
+import {postEndPoint} from '../UtilityFunctions/Request'
+import axios from "axios"; // Temporary 
 
 // custom hook for form state management
 const useForm = () => {
@@ -88,7 +89,7 @@ const useForm = () => {
   const apiFetch = async formData => {
     try {
       setIsLoading(true);
-      await axios.post('/auth/users/', formData);
+      await axios.post('/auth/users/', formData,null,history); // Temporary
       setIsLoading(false);
 
       // add success snackbar on successful request
@@ -154,7 +155,7 @@ const useForm = () => {
     setIsSubmitting(true);
   };
 
-  // function to handle any change in inputs
+  // function to handle any change in inputshttps://github.com/Preet538-neitzen/inventory-management-web/tree/frontend
   const handleChange = event => {
     // Use event.persist() to stop event pooling done by react
     event.persist();
