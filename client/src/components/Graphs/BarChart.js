@@ -13,7 +13,7 @@ const useStyles = makeStyles(() => ({
   rect: {
     fill: '#64C6F7',
     '&:hover': {
-      fill: '#7B42F6',
+      fill: '#4796bd',
     },
   },
   svg: {
