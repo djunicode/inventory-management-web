@@ -75,7 +75,7 @@ export default function InventoryTable() {
   // dialog box
   const [open, setOpen] = useState(false);
   // row to be selected on clicking the delete icon
-  const [selectedRow, setSelectedRow] = useState([]);
+  const [selectedRow, setSelectedRow] = useState({});
 
   const handleClickOpen = () => {
     setOpen(true);
