@@ -15,14 +15,14 @@ import ChevronLeftIcon from '@material-ui/icons/ChevronLeft';
 import { useLocation, useHistory } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import DialogBox from '../DialogBox/DialogBox';
-import {postEndPoint} from '../UtilityFunctions/Request'
+import { postEndPoint } from '../UtilityFunctions/Request';
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles(theme => ({
   root: {
     flexGrow: 1,
   },
   menuButton: {
-    display: (isLoggedIn) => (isLoggedIn ? 'block' : 'none'),
+    display: isLoggedIn => (isLoggedIn ? 'block' : 'none'),
     marginRight: theme.spacing(2),
   },
   title: {
@@ -107,7 +107,7 @@ function AlertDialog() {
     if (isLoggedIn) {
       try {
         const data = '';
-        await postEndPoint('/auth/token/logout', data,null, history);
+        await postEndPoint('/auth/token/logout', data, null, history);
         localStorage.removeItem('token');
         localStorage.removeItem('isStaff');
       } catch (error) {

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useHistory } from 'react-router-dom';
-import { getEndPoint,postEndPoint } from '../UtilityFunctions/Request';
+import { getEndPoint, postEndPoint } from '../UtilityFunctions/Request';
 
 // custom hook for form state management
 const useForm = () => {
@@ -62,12 +62,17 @@ const useForm = () => {
   const apiFetch = async formData => {
     try {
       setIsLoading(true);
-      const response = await postEndPoint('/auth/token/login/', formData,null,history);
-      
+      const response = await postEndPoint(
+        '/auth/token/login/',
+        formData,
+        null,
+        history
+      );
+
       const { data } = response;
       localStorage.setItem('token', data.auth_token);
       // call API to check if current user is admin
-      const res = await getEndPoint('/auth/users/me/',null, history);
+      const res = await getEndPoint('/auth/users/me/', null, history);
       // add the is_staff variable got fro API to localStorage
       localStorage.setItem('isStaff', res.data.is_staff);
       setIsLoading(false);

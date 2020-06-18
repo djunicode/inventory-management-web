@@ -4,7 +4,7 @@ import { useHistory } from 'react-router-dom';
 import { Button } from '@material-ui/core';
 import illustration from '../images/Authentication.svg';
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles(theme => ({
   container: {
     display: 'flex',
     flexDirection: 'column',

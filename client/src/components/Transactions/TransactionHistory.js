@@ -9,9 +9,9 @@ import {
   TableHead,
   TableRow,
 } from '@material-ui/core';
+import { useHistory } from 'react-router-dom';
 import Spinner from '../Spinner';
 import { getEndPoint } from '../UtilityFunctions/Request';
-import { useHistory } from 'react-router-dom';
 
 const useStyles = makeStyles(theme => ({
   paper: {
@@ -64,12 +64,12 @@ const TransactionHistory = () => {
   // true when waiting for an response from API
   const [isLoading, setIsLoading] = useState(false);
 
-  const history = useHistory()
+  const history = useHistory();
   // fetch transaction list from API
   const apiFetch = async () => {
     try {
       setIsLoading(true);
-      const response = await getEndPoint('/api/bill/',null, history);
+      const response = await getEndPoint('/api/bill/', null, history);
       const { data } = response;
       setTransactionList(data);
       setIsLoading(false);
@@ -80,6 +80,7 @@ const TransactionHistory = () => {
 
   useEffect(() => {
     apiFetch();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const classes = useStyles();
