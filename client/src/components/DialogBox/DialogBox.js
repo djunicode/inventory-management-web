@@ -63,9 +63,15 @@ export default function DialogBox({
 DialogBox.propTypes = {
   open: PropTypes.bool.isRequired,
   handleClose: PropTypes.func.isRequired,
-  handleClick: PropTypes.func.isRequired,
-  handleDelete: PropTypes.func.isRequired,
+  handleClick: PropTypes.func,
+  handleDelete: PropTypes.func,
   // eslint-disable-next-line react/forbid-prop-types
-  selectedRow: PropTypes.object.isRequired,
+  selectedRow: PropTypes.object,
   number: PropTypes.string.isRequired,
+};
+
+DialogBox.defaultProps = {
+  handleDelete: null,
+  handleClick: null,
+  selectedRow: null,
 };
