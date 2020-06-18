@@ -4,7 +4,7 @@ export async function getEndPoint(req, config, history) {
   // get request
 
   const response = await axios.get(req, config).catch(error => {
-    if (error.status === 401) {
+    if (error.response.status === 401) {
       history.push('/unauthorized');
     }
     return Promise.reject(error);
@@ -20,7 +20,7 @@ export async function getEndPoint(req, config, history) {
 export async function postEndPoint(req, formData, config, history) {
   // post request
   const response = await axios.post(req, formData, config).catch(error => {
-    if (error.status === 401) {
+    if (error.response.status === 401) {
       history.push('/unauthorized');
     }
 
