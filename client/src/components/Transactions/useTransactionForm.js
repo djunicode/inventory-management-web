@@ -1,7 +1,7 @@
 import { useState, useEffect, useContext } from 'react';
-import { SnackContext } from '../SnackBar/SnackContext';
-import { getEndPoint,postEndPoint } from '../UtilityFunctions/Request';
 import { useHistory } from 'react-router-dom';
+import { SnackContext } from '../SnackBar/SnackContext';
+import { getEndPoint, postEndPoint } from '../UtilityFunctions/Request';
 
 const useForm = type => {
   // list of all products got from API
@@ -79,13 +79,13 @@ const useForm = type => {
     'Select a product to view details',
   ]);
 
-  const history = useHistory()
+  const history = useHistory();
 
   // fetch the products list from API
   const apiFetch = async () => {
     try {
       setIsLoading(true);
-      const response = await getEndPoint('/api/productlist/',null, history);
+      const response = await getEndPoint('/api/productlist/', null, history);
       const { data } = response;
       const list = data.map(val => ({
         name: val.name,
@@ -104,6 +104,7 @@ const useForm = type => {
 
   useEffect(() => {
     apiFetch();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const { setSnack } = useContext(SnackContext);
@@ -113,14 +114,24 @@ const useForm = type => {
     const products = [];
     try {
       if (type === 'Buy') {
-        const response = await postEndPoint('/api/buy/', formData,null,history);
+        const response = await postEndPoint(
+          '/api/buy/',
+          formData,
+          null,
+          history
+        );
         const { data } = response;
         console.log('Here is response', data);
         if (data.created) {
           products.push(data);
         }
       } else {
-        const response = await postEndPoint('/api/sell/', formData,null, history);
+        const response = await postEndPoint(
+          '/api/sell/',
+          formData,
+          null,
+          history
+        );
         const { data } = response;
         console.log('Here is response', data);
       }
@@ -297,16 +308,14 @@ const useForm = type => {
       const matchedProduct =
         productsList.find(product => product.name === val) || {};
 
-      if (matchedProduct.price) {
-        setValues(prevState => {
-          const temp = [...prevState];
-          temp[index] = {
-            ...temp[index],
-            price: matchedProduct.price,
-          };
-          return temp;
-        });
-      }
+      setValues(prevState => {
+        const temp = [...prevState];
+        temp[index] = {
+          ...temp[index],
+          price: matchedProduct.price || '',
+        };
+        return temp;
+      });
     }
   };
 

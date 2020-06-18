@@ -49,7 +49,7 @@ const Home = () => {
 
   const apiFetch = async () => {
     try {
-      const response = await getEndPoint('/api/profit/',null,null);
+      const response = await getEndPoint('/api/profit/', null, null);
       setData(response.data);
     } catch (e) {
       console.log(e);

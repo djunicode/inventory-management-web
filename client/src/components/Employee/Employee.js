@@ -23,7 +23,7 @@ import { SnackContext } from '../SnackBar/SnackContext';
 import DialogBox from '../DialogBox/DialogBox';
 import { getEndPoint, postEndPoint } from '../UtilityFunctions/Request';
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles(theme => ({
   paper: {
     boxShadow: '4px 4px 20px rgba(0,0,0,0.1)',
     textAlign: 'center',
@@ -86,7 +86,7 @@ export default function Employee() {
   // dialog box
   const [open, setOpen] = useState(false);
   // row to be selected on clicking the delete icon
-  const [selectedRow, setSelectedRow] = useState([]);
+  const [selectedRow, setSelectedRow] = useState({});
 
   const handleClickOpen = () => {
     setOpen(true);
@@ -103,11 +103,11 @@ export default function Employee() {
   const apiFetch = async () => {
     try {
       setIsLoading(true);
-      const response = await getEndPoint('/auth/users/',null,history);
+      const response = await getEndPoint('/auth/users/', null, history);
       const { data } = response;
       // map genders got from API
       const genderMapper = { M: 'Male', F: 'Female', Other: 'Other' };
-      const list = data.map((val) => ({
+      const list = data.map(val => ({
         name: `${val.first_name} ${val.last_name}`,
         age: val.age,
         gender: genderMapper[val.gender],
@@ -123,6 +123,7 @@ export default function Employee() {
   // call API on component load
   useEffect(() => {
     apiFetch();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const classes = useStyles();
@@ -133,21 +134,21 @@ export default function Employee() {
   };
 
   // handle user edit
-  const handleEdit = (row) => {
+  const handleEdit = row => {
     console.log(row);
     // TODO implement this when endpoint is ready
     // open the create user form and pass the data as props
   };
 
   // handle user delete
-  const handleDelete = async (row) => {
+  const handleDelete = async row => {
     setIsLoading(true);
     const { email, name } = row;
-    setDeletedRow((prevState) => [...prevState, employeeList.indexOf(row)]);
+    setDeletedRow(prevState => [...prevState, employeeList.indexOf(row)]);
     try {
       const formData = new FormData();
       formData.append('email', email);
-      await postEndPoint('/auth/user_delete/', formData,null, history);
+      await postEndPoint('/auth/user_delete/', formData, null, history);
       setIsLoading(false);
       // add success snackbar on successful request
       setSnack({
@@ -207,7 +208,10 @@ export default function Employee() {
                     </Hidden>
                     <Hidden smUp>
                       <MobileEditMenu
-                        handleDelete={handleDelete}
+                        handleDelete={() => {
+                          setSelectedRow(row);
+                          handleClickOpen();
+                        }}
                         handleEdit={handleEdit}
                         row={row}
                       />

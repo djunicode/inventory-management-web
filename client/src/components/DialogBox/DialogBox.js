@@ -1,35 +1,43 @@
 import React from 'react';
-import { IconButton } from '@material-ui/core';
+import { Button } from '@material-ui/core';
 import Dialog from '@material-ui/core/Dialog';
 import DialogActions from '@material-ui/core/DialogActions';
 import DialogContent from '@material-ui/core/DialogContent';
 import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogTitle from '@material-ui/core/DialogTitle';
+import { PropTypes } from 'prop-types';
 
-export default function DialogBox(props) {
-  var title = '';
-  var content = '';
-  if (props.number === '1') {
-    title = `Delete ${props.selectedRow.name}?`;
-    content = `Are you sure you want to delete ${props.selectedRow.name}?`;
-  } else if (props.number === '2') {
+export default function DialogBox({
+  open,
+  number,
+  handleClose,
+  selectedRow,
+  handleDelete,
+  handleClick,
+}) {
+  let title = '';
+  let content = '';
+  if (number === '1') {
+    title = `Delete ${selectedRow.name}?`;
+    content = `Are you sure you want to delete ${selectedRow.name}?`;
+  } else if (number === '2') {
     title = 'Are you sure you wish to logout?';
     content = 'If you Agree, you will be logged out from all devices...';
   }
 
   const handleDialog = () => {
-    if (props.number === '1') {
-      props.handleDelete(props.selectedRow);
-      props.handleClose();
-    } else if (props.number === '2') {
-      props.handleClick();
+    if (number === '1') {
+      handleDelete(selectedRow);
+      handleClose();
+    } else if (number === '2') {
+      handleClick();
     }
   };
   return (
     <>
       <Dialog
-        open={props.open}
-        onClose={props.handleClose}
+        open={open}
+        onClose={handleClose}
         aria-labelledby='alert-dialog-title'
         aria-describedby='alert-dialog-description'
       >
@@ -40,18 +48,30 @@ export default function DialogBox(props) {
           </DialogContentText>
         </DialogContent>
         <DialogActions>
-          <IconButton onClick={props.handleClose} color='primary'>
+          <Button onClick={handleClose} color='primary'>
             Disagree
-          </IconButton>
-          <IconButton
-            onClick={() => {
-              handleDialog();
-            }}
-          >
+          </Button>
+          <Button onClick={handleDialog} color='secondary' autoFocus>
             Agree
-          </IconButton>
+          </Button>
         </DialogActions>
       </Dialog>
     </>
   );
 }
+
+DialogBox.propTypes = {
+  open: PropTypes.bool.isRequired,
+  handleClose: PropTypes.func.isRequired,
+  handleClick: PropTypes.func,
+  handleDelete: PropTypes.func,
+  // eslint-disable-next-line react/forbid-prop-types
+  selectedRow: PropTypes.object,
+  number: PropTypes.string.isRequired,
+};
+
+DialogBox.defaultProps = {
+  handleDelete: null,
+  handleClick: null,
+  selectedRow: null,
+};

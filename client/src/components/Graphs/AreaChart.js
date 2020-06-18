@@ -18,7 +18,7 @@ const useStyles = makeStyles(theme => ({
       strokeWidth: '2',
     },
     '&:hover': {
-      fill: '#7B42F6',
+      fill: '#4796bd',
     },
   },
   svg: {
