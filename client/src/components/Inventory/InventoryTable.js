@@ -19,9 +19,9 @@ import MobileEditMenu from '../MobileEditMenu';
 import { SnackContext } from '../SnackBar/SnackContext';
 import Spinner from '../Spinner';
 import DialogBox from '../DialogBox/DialogBox';
-import {getEndPoint} from '../UtilityFunctions/Request'
+import { getEndPoint } from '../UtilityFunctions/Request';
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles(theme => ({
   paper: {
     boxShadow: '4px 4px 20px rgba(0,0,0,0.1)',
     textAlign: 'center',
@@ -91,14 +91,14 @@ export default function InventoryTable() {
   const apiFetch = async () => {
     try {
       setIsLoading(true);
-      
-      
-      const response = await getEndPoint('/api/productlist/',null,history); // Use utility function
 
-      //console.log("error",response) check error code here for reference
+      const response = await getEndPoint('/api/productlist/', null, history);
+      // Use utility function
+
+      // console.log("error",response) check error code here for reference
 
       const { data } = response;
-      const list = data.map((val) => ({
+      const list = data.map(val => ({
         name: val.name,
         quantity: val.quantity,
         sellingPrice: val.latest_selling_price,
@@ -117,20 +117,21 @@ export default function InventoryTable() {
   // call API on component load
   useEffect(() => {
     apiFetch();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const classes = useStyles();
 
   // handle product delete
-  const handleDelete = async (row) => {
+  const handleDelete = async row => {
     setIsLoading(true);
     const { id } = row;
-    setDeletedRow((prevState) => [...prevState, inventoryList.indexOf(row)]);
+    setDeletedRow(prevState => [...prevState, inventoryList.indexOf(row)]);
     try {
       await axios.delete(`/api/productlist/${id}/`);
 
       // add success snackbar on successful request
-      const { name } = inventoryList.find((val) => val.id === id);
+      const { name } = inventoryList.find(val => val.id === id);
       setIsLoading(false);
       setSnack({
         open: true,
@@ -145,7 +146,7 @@ export default function InventoryTable() {
   };
 
   // handle product edit
-  const handleEdit = (row) => {
+  const handleEdit = row => {
     history.push('/updateproduct', {
       name: row.name,
       sellingPrice: row.sellingPrice,
@@ -197,7 +198,10 @@ export default function InventoryTable() {
                     </Hidden>
                     <Hidden smUp>
                       <MobileEditMenu
-                        handleDelete={handleDelete}
+                        handleDelete={() => {
+                          setSelectedRow(row);
+                          handleClickOpen();
+                        }}
                         handleEdit={handleEdit}
                         row={row}
                       />
