@@ -308,16 +308,14 @@ const useForm = type => {
       const matchedProduct =
         productsList.find(product => product.name === val) || {};
 
-      if (matchedProduct.price) {
-        setValues(prevState => {
-          const temp = [...prevState];
-          temp[index] = {
-            ...temp[index],
-            price: matchedProduct.price,
-          };
-          return temp;
-        });
-      }
+      setValues(prevState => {
+        const temp = [...prevState];
+        temp[index] = {
+          ...temp[index],
+          price: matchedProduct.price || '',
+        };
+        return temp;
+      });
     }
   };
 
