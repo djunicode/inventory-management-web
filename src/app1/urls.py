@@ -3,6 +3,7 @@ from django.conf.urls import url
 from django.views.decorators.csrf import csrf_exempt
 from .views import (
     User_Delete,
+    user_update,
     login,
     TransactionListView,
     BillListView,
@@ -19,6 +20,7 @@ urlpatterns = [
     # path("", login, name="login"),
     path("login/", login, name="login"),
     path("auth/user_delete/", csrf_exempt(User_Delete.as_view()), name="user_delete"),
+    path("auth/user_update/", csrf_exempt(user_update), name="user_update"),
     path("auth/", include("djoser.urls")),
     path("auth/", include("djoser.urls.authtoken")),
     url(r"^api/bill/$", BillListView.as_view()),
