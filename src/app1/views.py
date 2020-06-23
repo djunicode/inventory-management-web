@@ -16,6 +16,7 @@ from rest_framework.decorators import api_view, permission_classes
 from django.contrib.auth.decorators import login_required, permission_required
 from rest_framework.permissions import IsAuthenticated
 from datetime import datetime, timedelta
+from rest_framework import filters
 
 
 @api_view(["POST"])
@@ -516,3 +517,10 @@ class Expiry(generics.GenericAPIView):
         a = json.dumps(exp)
         return HttpResponse(a)
         # Create a for loop with datetime.now + i and make i =3 so check all dates till next 3 dates
+
+
+class ProductSearch(generics.ListCreateAPIView):
+    search_fields = ["name"]
+    filter_backends = (filters.SearchFilter,)
+    queryset = Products.objects.all()
+    serializer_class = ProductListSerializer
