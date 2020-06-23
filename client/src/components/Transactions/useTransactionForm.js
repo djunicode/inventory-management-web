@@ -2,12 +2,15 @@ import { useState, useEffect, useContext } from 'react';
 import { useHistory } from 'react-router-dom';
 import { SnackContext } from '../SnackBar/SnackContext';
 import { getEndPoint, postEndPoint } from '../UtilityFunctions/Request';
+import { ExpiryListContext } from '../ExpiryListContext';
 
 const useForm = type => {
   // list of all products got from API
   const [productsList, setProductsList] = useState([]);
   // true when waiting for an response from API
   const [isLoading, setIsLoading] = useState(false);
+
+  const { setUpdate } = useContext(ExpiryListContext);
 
   // function to validate inputs, returns the error statements
   const validateInputs = values => {
@@ -194,6 +197,7 @@ const useForm = type => {
         // post data to server
         console.log(...formData);
         apiPost(formData);
+        setUpdate(prevState => !prevState);
       });
       setIsSubmitting(false);
       // reset inputs
