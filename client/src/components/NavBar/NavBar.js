@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import {
   AppBar,
   Toolbar,
@@ -9,6 +9,7 @@ import {
   makeStyles,
   useMediaQuery,
   useTheme,
+  Badge,
 } from '@material-ui/core';
 import MenuIcon from '@material-ui/icons/Menu';
 import ChevronLeftIcon from '@material-ui/icons/ChevronLeft';
@@ -16,6 +17,7 @@ import { useLocation, useHistory } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import DialogBox from '../DialogBox/DialogBox';
 import { postEndPoint } from '../UtilityFunctions/Request';
+import { ExpiryListContext } from '../ExpiryListContext';
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -33,6 +35,13 @@ const useStyles = makeStyles(theme => ({
     textTransform: 'capitalize',
     fontSize: '1rem',
   },
+  tabBadge: {
+    '& .MuiBadge-badge': {
+      right: '-10%',
+      color: 'black',
+      backgroundColor: '#f2c94c',
+    },
+  },
 }));
 
 const NavBar = ({ mobileOpen, setMobileOpen, tabletOpen, setTabletOpen }) => {
@@ -42,8 +51,11 @@ const NavBar = ({ mobileOpen, setMobileOpen, tabletOpen, setTabletOpen }) => {
   const theme = useTheme();
   // true if in tablet mode
   const tablet = useMediaQuery(theme.breakpoints.only('sm'));
+  const mobile = useMediaQuery(theme.breakpoints.only('xs'));
   const isLoggedIn = location.pathname !== '/login';
   const classes = useStyles(isLoggedIn);
+
+  const { expiryListBadge } = useContext(ExpiryListContext);
 
   // handle opening and closing of drawer
   const handleDrawerToggle = () => {
@@ -65,7 +77,19 @@ const NavBar = ({ mobileOpen, setMobileOpen, tabletOpen, setTabletOpen }) => {
               color='inherit'
               onClick={handleDrawerToggle}
             >
-              {tabletOpen ? <ChevronLeftIcon /> : <MenuIcon />}
+              {tabletOpen ? (
+                <ChevronLeftIcon />
+              ) : (
+                <Badge
+                  badgeContent={expiryListBadge}
+                  color='primary'
+                  overlap='circle'
+                  className={classes.tabBadge}
+                  invisible={!mobile}
+                >
+                  <MenuIcon />
+                </Badge>
+              )}
             </IconButton>
           </Hidden>
           <Typography variant='h6' className={classes.title}>

@@ -199,7 +199,7 @@ const Form = ({ type }) => {
                       }}
                       style={{ width: '100%', maxWidth: '20rem' }}
                       id='productfield-input'
-                      options={productsList.concat({ name: '' })}
+                      options={productsList}
                       getOptionLabel={option => {
                         // e.g value selected with enter, right from the input
                         if (typeof option === 'string') {

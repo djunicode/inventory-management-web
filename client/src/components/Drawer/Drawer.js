@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import {
   Drawer,
   Hidden,
@@ -7,6 +7,9 @@ import {
   ListItemIcon,
   ListItemText,
   IconButton,
+  Badge,
+  useTheme,
+  useMediaQuery,
 } from '@material-ui/core';
 import HomeIcon from '@material-ui/icons/Home';
 import PersonIcon from '@material-ui/icons/Person';
@@ -14,8 +17,10 @@ import ReceiptIcon from '@material-ui/icons/Receipt';
 import ListIcon from '@material-ui/icons/List';
 import ChevronLeftIcon from '@material-ui/icons/ChevronLeft';
 import { makeStyles } from '@material-ui/core/styles';
-import { Link } from 'react-router-dom';
+import { Link, useHistory } from 'react-router-dom';
 import { PropTypes } from 'prop-types';
+import { getEndPoint } from '../UtilityFunctions/Request';
+import { ExpiryListContext } from '../ExpiryListContext';
 
 const drawerWidth = 230;
 
@@ -77,10 +82,28 @@ const useStyles = makeStyles(theme => ({
     justifyContent: 'flex-end',
   },
   toolbar: theme.mixins.toolbar,
+  badge: {
+    '& .MuiBadge-badge': {
+      top: '55%',
+      right: '-15%',
+      color: 'black',
+      backgroundColor: '#f2c94c',
+    },
+  },
+  tabBadge: {
+    '& .MuiBadge-badge': {
+      right: '-10%',
+      color: 'black',
+      backgroundColor: '#f2c94c',
+    },
+  },
 }));
 
 function NavDrawer({ mobileOpen, setMobileOpen, tabletOpen }) {
   const classes = useStyles({ tab: tabletOpen });
+  const theme = useTheme();
+  // true if in tablet mode
+  const tablet = useMediaQuery(theme.breakpoints.only('sm'));
 
   // links and labels for each link in drawer
   const [list, setList] = useState({
@@ -111,6 +134,28 @@ function NavDrawer({ mobileOpen, setMobileOpen, tabletOpen }) {
     }
   }, []);
 
+  const { expiryListBadge, setExpiryListBadge, update } = useContext(
+    ExpiryListContext
+  );
+
+  const history = useHistory();
+
+  const apiFetch = async () => {
+    try {
+      const response = await getEndPoint('/api/explist/', null, history);
+      const { data } = response;
+      setExpiryListBadge(data.length);
+    } catch (e) {
+      console.log(e);
+    }
+  };
+
+  // call API on component load
+  useEffect(() => {
+    apiFetch();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [update]);
+
   const drawer = (
     <div>
       <List>
@@ -123,9 +168,25 @@ function NavDrawer({ mobileOpen, setMobileOpen, tabletOpen }) {
           >
             <ListItem button key={text}>
               <ListItemIcon className={classes.listIcon}>
-                {listIcons[index]}
+                <Badge
+                  badgeContent={expiryListBadge}
+                  color='primary'
+                  overlap='circle'
+                  className={classes.tabBadge}
+                  invisible={!(text === 'Inventory' && !tabletOpen && tablet)}
+                >
+                  {listIcons[index]}
+                </Badge>
               </ListItemIcon>
-              <ListItemText primary={text} className={classes.listText} />
+              <Badge
+                badgeContent={expiryListBadge}
+                color='primary'
+                overlap='circle'
+                className={classes.badge}
+                invisible={text !== 'Inventory'}
+              >
+                <ListItemText primary={text} className={classes.listText} />
+              </Badge>
             </ListItem>
           </Link>
         ))}

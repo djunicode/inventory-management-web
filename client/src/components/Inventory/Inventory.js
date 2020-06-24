@@ -1,10 +1,18 @@
 /* eslint-disable react/jsx-props-no-spreading */
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
-import { Typography, Tab, withStyles, Tabs, Box } from '@material-ui/core/';
+import {
+  Typography,
+  Tab,
+  withStyles,
+  Tabs,
+  Box,
+  Badge,
+} from '@material-ui/core/';
 import { PropTypes } from 'prop-types';
 import InventoryTable from './InventoryTable';
 import ExpiryTable from './ExpiryTable';
+import { ExpiryListContext } from '../ExpiryListContext';
 
 const StyledTabs = withStyles({
   indicator: {
@@ -61,6 +69,14 @@ const useStyles = makeStyles(() => ({
   heading: {
     fontWeight: '700',
   },
+  badge: {
+    '& .MuiBadge-badge': {
+      top: '50%',
+      right: '-12%',
+      color: 'black',
+      backgroundColor: '#f2c94c',
+    },
+  },
 }));
 
 export default function Inventory() {
@@ -68,6 +84,8 @@ export default function Inventory() {
   const [tab, setTab] = useState(0);
 
   const classes = useStyles();
+
+  const { expiryListBadge } = useContext(ExpiryListContext);
 
   // set the tab to new index
   const handleTabChange = (event, newValue) => {
@@ -81,7 +99,20 @@ export default function Inventory() {
       </Typography>
       <StyledTabs value={tab} onChange={handleTabChange}>
         <StyledTab label='All' />
-        <StyledTab label='Near expiry' />
+        <StyledTab
+          style={{ paddingRight: '2rem' }}
+          label={
+            // eslint-disable-next-line react/jsx-wrap-multilines
+            <Badge
+              badgeContent={expiryListBadge}
+              color='primary'
+              overlap='circle'
+              className={classes.badge}
+            >
+              Near expiry
+            </Badge>
+          }
+        />
       </StyledTabs>
       <TabPanel value={tab} index={0}>
         <InventoryTable />

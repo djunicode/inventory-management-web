@@ -13,6 +13,7 @@ import NavDrawer from './Drawer/Drawer';
 import Container from './Container/Container';
 import PageNotFound from './PageNotFound';
 import UnAuthorizedAccess from './UnAuthorizedAccess';
+import ExpiryListContextProvider from './ExpiryListContext';
 
 const Routes = () => {
   // Using state so that navbar can communicate with drawer
@@ -28,39 +29,42 @@ const Routes = () => {
     '/employee',
     '/addemployee',
     '/updateproduct',
+    '/updateemployee',
   ];
 
   return (
     <Router>
-      <Switch>
-        {/* Route handling for login */}
-        <PrivateRoute exact path='/login'>
-          <NavBar
-            mobileOpen={mobileOpen}
-            setMobileOpen={setMobileOpen}
-            tabletOpen={tabletOpen}
-            setTabletOpen={setTabletOpen}
-          />
-          <Login />
-        </PrivateRoute>
-        {/* Route handling for all routes in allRoutes variable */}
-        <PrivateRoute exact path={allRoutes}>
-          <NavBar
-            mobileOpen={mobileOpen}
-            setMobileOpen={setMobileOpen}
-            tabletOpen={tabletOpen}
-            setTabletOpen={setTabletOpen}
-          />
-          <NavDrawer
-            mobileOpen={mobileOpen}
-            setMobileOpen={setMobileOpen}
-            tabletOpen={tabletOpen}
-          />
-          <Container tabletOpen={tabletOpen} />
-        </PrivateRoute>
-        <Route path='/unauthorized' component={UnAuthorizedAccess} />
-        <Route component={PageNotFound} />
-      </Switch>
+      <ExpiryListContextProvider>
+        <Switch>
+          {/* Route handling for login */}
+          <PrivateRoute exact path='/login'>
+            <NavBar
+              mobileOpen={mobileOpen}
+              setMobileOpen={setMobileOpen}
+              tabletOpen={tabletOpen}
+              setTabletOpen={setTabletOpen}
+            />
+            <Login />
+          </PrivateRoute>
+          {/* Route handling for all routes in allRoutes variable */}
+          <PrivateRoute exact path={allRoutes}>
+            <NavBar
+              mobileOpen={mobileOpen}
+              setMobileOpen={setMobileOpen}
+              tabletOpen={tabletOpen}
+              setTabletOpen={setTabletOpen}
+            />
+            <NavDrawer
+              mobileOpen={mobileOpen}
+              setMobileOpen={setMobileOpen}
+              tabletOpen={tabletOpen}
+            />
+            <Container tabletOpen={tabletOpen} />
+          </PrivateRoute>
+          <Route path='/unauthorized' component={UnAuthorizedAccess} />
+          <Route component={PageNotFound} />
+        </Switch>
+      </ExpiryListContextProvider>
     </Router>
   );
 };

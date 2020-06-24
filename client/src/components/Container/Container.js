@@ -10,6 +10,7 @@ import Register from '../Register/Register';
 import UpdateProduct from '../UpdateProduct/UpdateProductForm';
 import SimpleSnackbar from '../SnackBar/Snackbar';
 import SnackContextProvider from '../SnackBar/SnackContext';
+import UpdateEmployee from '../UpdateEmployee/UpdateEmployeeForm';
 
 const drawerWidth = 230;
 
@@ -50,6 +51,9 @@ const Container = ({ tabletOpen }) => {
           </Route>
           <Route path='/updateproduct'>
             <UpdateProduct />
+          </Route>
+          <Route path='/updateemployee'>
+            <UpdateEmployee />
           </Route>
           <AdminRoute path='/addemployee'>
             <Register />

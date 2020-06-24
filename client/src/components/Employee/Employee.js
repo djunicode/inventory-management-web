@@ -108,10 +108,13 @@ export default function Employee() {
       // map genders got from API
       const genderMapper = { M: 'Male', F: 'Female', Other: 'Other' };
       const list = data.map(val => ({
+        firstName: val.first_name,
+        lastName: val.last_name,
         name: `${val.first_name} ${val.last_name}`,
         age: val.age,
         gender: genderMapper[val.gender],
         email: val.email,
+        isStaff: val.is_staff,
       }));
       setEmployeeList(list);
       setIsLoading(false);
@@ -136,8 +139,14 @@ export default function Employee() {
   // handle user edit
   const handleEdit = row => {
     console.log(row);
-    // TODO implement this when endpoint is ready
     // open the create user form and pass the data as props
+    history.push('/updateemployee', {
+      firstName: row.firstName,
+      lastName: row.lastName,
+      age: row.age,
+      isStaff: row.isStaff,
+      email: row.email,
+    });
   };
 
   // handle user delete
