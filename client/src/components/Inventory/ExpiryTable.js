@@ -14,7 +14,7 @@ import { useHistory } from 'react-router-dom';
 import Spinner from '../Spinner';
 import { getEndPoint } from '../UtilityFunctions/Request';
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles(theme => ({
   paper: {
     boxShadow: '4px 4px 20px rgba(0,0,0,0.1)',
     textAlign: 'center',
@@ -60,6 +60,8 @@ export default function ExpiryTable() {
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [count, setCount] = useState(0);
 
+  const history = useHistory();
+
   const handleChangePage = async (event, newPage) => {
     try {
       setIsLoading(true);
@@ -72,7 +74,7 @@ export default function ExpiryTable() {
       const { data } = response;
       setCount(data.count);
       console.log(data);
-      const list = data.map((val) => ({
+      const list = data.results.map(val => ({
         name: val.Product,
         quantity: val['No. of items'],
         daysLeft: val['Days left'],
@@ -84,7 +86,7 @@ export default function ExpiryTable() {
     }
   };
 
-  const handleChangeRowsPerPage = async (event) => {
+  const handleChangeRowsPerPage = async event => {
     try {
       setIsLoading(true);
       setPage(0);
@@ -97,7 +99,7 @@ export default function ExpiryTable() {
       const { data } = response;
       setCount(data.count);
       console.log(data);
-      const list = data.map((val) => ({
+      const list = data.results.map(val => ({
         name: val.Product,
         quantity: val['No. of items'],
         daysLeft: val['Days left'],
@@ -108,8 +110,6 @@ export default function ExpiryTable() {
       console.log(e);
     }
   };
-
-  const history = useHistory();
 
   const apiFetch = async () => {
     try {
@@ -122,7 +122,7 @@ export default function ExpiryTable() {
       const { data } = response;
       setCount(data.count);
       console.log(data);
-      const list = data.map((val) => ({
+      const list = data.results.map(val => ({
         name: val.Product,
         quantity: val['No. of items'],
         daysLeft: val['Days left'],
@@ -156,7 +156,7 @@ export default function ExpiryTable() {
               </TableRow>
             </TableHead>
             <TableBody>
-              {expiryList.map((row) => (
+              {expiryList.map(row => (
                 <TableRow key={row.name} hover>
                   <TableCell>{row.name}</TableCell>
                   <TableCell align='right'>{row.quantity}</TableCell>
