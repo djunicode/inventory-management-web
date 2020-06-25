@@ -6,7 +6,7 @@ import { ExpiryListContext } from '../ExpiryListContext';
 
 const useForm = type => {
   // list of all products got from API
-  const [productsList, setProductsList] = useState([]);
+  const [productsList, setProductsList] = useState([[]]);
   // true when waiting for an response from API
   const [isLoading, setIsLoading] = useState(false);
 
@@ -312,9 +312,10 @@ const useForm = type => {
       ...prevState,
       'Select a product to view details',
     ]);
+    setProductsList(prevState => [...prevState, []]);
   };
 
-  const handleSearch = async (event, newValue) => {
+  const handleSearch = async (event, newValue, index) => {
     try {
       const response = await getEndPoint(
         `/api/productlist/?limit=10&offset=0&search=${newValue}`,
@@ -331,11 +332,13 @@ const useForm = type => {
         lowerLimit: val.lower_limit,
       }));
       setProductsList(prevState => {
-        console.log('here', prevState, newValue);
+        const temp = [...prevState];
+        let val = list;
         if (newValue === '') {
-          return [];
+          val = [];
         }
-        return list;
+        temp[index] = val;
+        return temp;
       });
     } catch (e) {
       console.log(e);

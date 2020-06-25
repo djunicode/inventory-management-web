@@ -151,7 +151,7 @@ const Form = ({ type }) => {
                     <Autocomplete
                       value={value.productName}
                       onInputChange={(event, newValue) => {
-                        handleSearch(event, newValue);
+                        handleSearch(event, newValue, index);
                       }}
                       onChange={(event, newValue) => {
                         handleProductChange(event, newValue, index);
@@ -169,7 +169,7 @@ const Form = ({ type }) => {
                         return filtered;
                       }}
                       id='productfield-input'
-                      options={productsList}
+                      options={productsList[index]}
                       getOptionLabel={option => {
                         // e.g value selected with enter, right from the input
                         if (typeof option === 'string') {
@@ -200,14 +200,14 @@ const Form = ({ type }) => {
                     <Autocomplete
                       value={value.productName}
                       onInputChange={(event, newValue) => {
-                        handleSearch(event, newValue);
+                        handleSearch(event, newValue, index);
                       }}
                       onChange={(event, newValue) => {
                         handleProductChange(event, newValue, index);
                       }}
                       style={{ width: '100%', maxWidth: '20rem' }}
                       id='productfield-input'
-                      options={productsList}
+                      options={productsList[index]}
                       getOptionLabel={option => {
                         // e.g value selected with enter, right from the input
                         if (typeof option === 'string') {
