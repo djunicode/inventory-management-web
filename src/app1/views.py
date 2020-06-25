@@ -234,12 +234,12 @@ class Buy(generics.GenericAPIView):
                     if (request.POST["expiry"] == "") or (
                         request.POST["expiry"] == None
                     ):
-                        for i in range(1, int(request.POST["quantity"]) + 1):
+                        for i in range(0, int(request.POST["quantity"])):
                             itobj = Items(product=re, expiry=None)
 
                             itobj.save()
                     else:
-                        for i in range(1, int(request.POST["quantity"]) + 1):
+                        for i in range(0, int(request.POST["quantity"])):
                             itobj = Items(product=re, expiry=request.POST["expiry"])
                             itobj.save()
 
@@ -274,11 +274,11 @@ class Buy(generics.GenericAPIView):
                 pdt.save()
 
                 if (request.POST["expiry"] == "") or (request.POST["expiry"] == None):
-                    for i in range(1, int(request.POST["quantity"]) + 1):
+                    for i in range(0, int(request.POST["quantity"])):
                         itobj = Items(product=pdt, expiry=None)
                         itobj.save()
                 else:
-                    for i in range(1, int(request.POST["quantity"]) + 1):
+                    for i in range(0, int(request.POST["quantity"])):
                         itobj = Items(product=pdt, expiry=request.POST["expiry"])
                         itobj.save()
 
@@ -351,9 +351,10 @@ class Sell(generics.GenericAPIView):
 
                 # If item is packaged. delete required amount of items from database
                 if re.loose == False:
-                    it = Items.objects.filter(product__name=re.name)
-                    for i in range(0, int(request.POST["quantity"])):
-                        it[i].delete()
+
+                    it = re.items_set.all()[: int(request.POST["quantity"])]
+                    for i in it:
+                        i.delete()
 
                 # Send Required Response
                 tr = Products.objects.get(name=request.POST["name"])
@@ -361,6 +362,8 @@ class Sell(generics.GenericAPIView):
                 dict_obj = model_to_dict(tr)
                 dict_obj.update(created)
                 serialized = json.dumps(dict_obj)
+                if tr.quantity == 0:
+                    tr.delete()
                 return HttpResponse(serialized)
 
             except Products.DoesNotExist:
