@@ -84,32 +84,6 @@ const useForm = type => {
 
   const history = useHistory();
 
-  // fetch the products list from API
-  const apiFetch = async () => {
-    try {
-      setIsLoading(true);
-      const response = await getEndPoint('/api/productlist/', null, history);
-      const { data } = response;
-      const list = data.map(val => ({
-        name: val.name,
-        quantity: val.quantity,
-        price: val.latest_selling_price,
-        id: val.id,
-        upperLimit: val.upper_limit,
-        lowerLimit: val.lower_limit,
-      }));
-      setProductsList(list);
-      setIsLoading(false);
-    } catch (e) {
-      console.log(e);
-    }
-  };
-
-  useEffect(() => {
-    apiFetch();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
   const { setSnack } = useContext(SnackContext);
   // post data to API
   const apiPost = async formData => {
@@ -340,6 +314,34 @@ const useForm = type => {
     ]);
   };
 
+  const handleSearch = async (event, newValue) => {
+    try {
+      const response = await getEndPoint(
+        `/api/productlist/?limit=10&offset=0&search=${newValue}`,
+        null,
+        history
+      );
+      const { data } = response;
+      const list = data.results.map(val => ({
+        name: val.name,
+        quantity: val.quantity,
+        price: val.latest_selling_price,
+        id: val.id,
+        upperLimit: val.upper_limit,
+        lowerLimit: val.lower_limit,
+      }));
+      setProductsList(prevState => {
+        console.log('here', prevState, newValue);
+        if (newValue === '') {
+          return [];
+        }
+        return list;
+      });
+    } catch (e) {
+      console.log(e);
+    }
+  };
+
   return {
     values,
     error,
@@ -350,6 +352,7 @@ const useForm = type => {
     handleProductChange,
     productDetails,
     isLoading,
+    handleSearch,
   };
 };
 

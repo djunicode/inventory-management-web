@@ -144,7 +144,7 @@ function NavDrawer({ mobileOpen, setMobileOpen, tabletOpen }) {
     try {
       const response = await getEndPoint('/api/explist/', null, history);
       const { data } = response;
-      setExpiryListBadge(data.length);
+      setExpiryListBadge(data.count);
     } catch (e) {
       console.log(e);
     }
