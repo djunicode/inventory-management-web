@@ -25,7 +25,7 @@ import { SnackContext } from '../SnackBar/SnackContext';
 import DialogBox from '../DialogBox/DialogBox';
 import { getEndPoint, postEndPoint } from '../UtilityFunctions/Request';
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles(theme => ({
   paper: {
     boxShadow: '4px 4px 20px rgba(0,0,0,0.1)',
     textAlign: 'center',
@@ -94,6 +94,10 @@ export default function Employee() {
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [count, setCount] = useState(0);
 
+  const history = useHistory();
+
+  const { setSnack } = useContext(SnackContext);
+
   const handleChangePage = async (event, newPage) => {
     try {
       setIsLoading(true);
@@ -107,7 +111,7 @@ export default function Employee() {
       setCount(data.count);
       // map genders got from API
       const genderMapper = { M: 'Male', F: 'Female', Other: 'Other' };
-      const list = data.results.map((val) => ({
+      const list = data.results.map(val => ({
         firstName: val.first_name,
         lastName: val.last_name,
         name: `${val.first_name} ${val.last_name}`,
@@ -123,7 +127,7 @@ export default function Employee() {
     }
   };
 
-  const handleChangeRowsPerPage = async (event) => {
+  const handleChangeRowsPerPage = async event => {
     try {
       setIsLoading(true);
       setPage(0);
@@ -138,7 +142,7 @@ export default function Employee() {
       setCount(data.count);
       // map genders got from API
       const genderMapper = { M: 'Male', F: 'Female', Other: 'Other' };
-      const list = data.results.map((val) => ({
+      const list = data.results.map(val => ({
         firstName: val.first_name,
         lastName: val.last_name,
         name: `${val.first_name} ${val.last_name}`,
@@ -162,10 +166,6 @@ export default function Employee() {
     setOpen(false);
   };
 
-  const history = useHistory();
-
-  const { setSnack } = useContext(SnackContext);
-
   const apiFetch = async () => {
     try {
       setIsLoading(true);
@@ -178,7 +178,7 @@ export default function Employee() {
       setCount(data.count);
       // map genders got from API
       const genderMapper = { M: 'Male', F: 'Female', Other: 'Other' };
-      const list = data.results.map((val) => ({
+      const list = data.results.map(val => ({
         firstName: val.first_name,
         lastName: val.last_name,
         name: `${val.first_name} ${val.last_name}`,
@@ -208,7 +208,7 @@ export default function Employee() {
   };
 
   // handle user edit
-  const handleEdit = (row) => {
+  const handleEdit = row => {
     console.log(row);
     // open the create user form and pass the data as props
     history.push('/updateemployee', {
@@ -221,10 +221,10 @@ export default function Employee() {
   };
 
   // handle user delete
-  const handleDelete = async (row) => {
+  const handleDelete = async row => {
     setIsLoading(true);
     const { email, name } = row;
-    setDeletedRow((prevState) => [...prevState, employeeList.indexOf(row)]);
+    setDeletedRow(prevState => [...prevState, employeeList.indexOf(row)]);
     try {
       const formData = new FormData();
       formData.append('email', email);

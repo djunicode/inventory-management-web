@@ -122,6 +122,7 @@ const Form = ({ type }) => {
     handleProductChange,
     productDetails,
     isLoading,
+    handleSearch,
   } = useForm(type);
 
   return (
@@ -149,6 +150,9 @@ const Form = ({ type }) => {
                   {type === 'Buy' ? (
                     <Autocomplete
                       value={value.productName}
+                      onInputChange={(event, newValue) => {
+                        handleSearch(event, newValue, index);
+                      }}
                       onChange={(event, newValue) => {
                         handleProductChange(event, newValue, index);
                       }}
@@ -165,7 +169,7 @@ const Form = ({ type }) => {
                         return filtered;
                       }}
                       id='productfield-input'
-                      options={productsList}
+                      options={productsList[index]}
                       getOptionLabel={option => {
                         // e.g value selected with enter, right from the input
                         if (typeof option === 'string') {
@@ -183,6 +187,7 @@ const Form = ({ type }) => {
                         <TextField
                           // eslint-disable-next-line react/jsx-props-no-spreading
                           {...params}
+                          placeholder='Search...'
                           required
                           label='Product Name'
                           variant='filled'
@@ -194,12 +199,15 @@ const Form = ({ type }) => {
                   ) : (
                     <Autocomplete
                       value={value.productName}
+                      onInputChange={(event, newValue) => {
+                        handleSearch(event, newValue, index);
+                      }}
                       onChange={(event, newValue) => {
                         handleProductChange(event, newValue, index);
                       }}
                       style={{ width: '100%', maxWidth: '20rem' }}
                       id='productfield-input'
-                      options={productsList}
+                      options={productsList[index]}
                       getOptionLabel={option => {
                         // e.g value selected with enter, right from the input
                         if (typeof option === 'string') {
@@ -211,12 +219,17 @@ const Form = ({ type }) => {
                         return option.name;
                       }}
                       getOptionSelected={(option, val) => {
+                        if (val === '') {
+                          return null;
+                        }
                         return option.name === val;
                       }}
+                      freeSolo
                       renderInput={params => (
                         <TextField
                           // eslint-disable-next-line react/jsx-props-no-spreading
                           {...params}
+                          placeholder='Search...'
                           required
                           label='Product Name'
                           variant='filled'
