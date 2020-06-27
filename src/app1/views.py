@@ -18,6 +18,8 @@ from rest_framework.permissions import IsAuthenticated
 from datetime import datetime, timedelta
 from rest_framework import filters
 
+#pagination
+from .pagination import ProjectLimitOffsetPagination
 
 @api_view(["POST"])
 def user_update(request):
@@ -79,6 +81,7 @@ class TransactionListView(generics.ListAPIView):
 
     queryset = Product_Transaction.objects.all()
     serializer_class = TransactionSerializer
+    # pagination_class = ProjectLimitOffsetPagination
 
 
 class BillListView(generics.ListAPIView):
@@ -93,6 +96,7 @@ class ProductListView(generics.ListCreateAPIView):
 
     queryset = Products.objects.all()
     serializer_class = ProductListSerializer
+    pagination_class = ProjectLimitOffsetPagination
 
 
 class ProductDeleteView(generics.DestroyAPIView):
@@ -501,6 +505,7 @@ class Profit(generics.GenericAPIView):
 
 
 class Expiry(generics.GenericAPIView):
+    pagination_class = ProjectLimitOffsetPagination
     def get(self, request, *args, **kwargs):
         pr = Products.objects.all()
         exp = []
