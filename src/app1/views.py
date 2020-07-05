@@ -523,7 +523,7 @@ class Expiry(generics.GenericAPIView):
                     exp.append(p2)
 
         a = json.dumps(exp)
-        return HttpResponse(a)
+        return JsonResponse(a)
         # Create a for loop with datetime.now + i and make i =3 so check all dates till next 3 dates
 
 
