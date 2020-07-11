@@ -18,8 +18,9 @@ from rest_framework.permissions import IsAuthenticated
 from datetime import datetime, timedelta
 from rest_framework import filters
 
-#pagination
+# pagination
 from .pagination import ProjectLimitOffsetPagination
+
 
 @api_view(["POST"])
 def user_update(request):
@@ -110,7 +111,7 @@ class Product_Update(generics.GenericAPIView):
     """ View to Update attributes of a specific product from database using product id (pid) """
 
     def post(self, request, pid, *args, **kwargs):
-        """ 
+        """
         Parameters
         ------------
         product id(pid)
@@ -378,11 +379,11 @@ class Sell(generics.GenericAPIView):
 
 class Profit(generics.GenericAPIView):
     """
-    Profit class 
+    Profit class
     ---------------------
     (GET): Gets data from transactions, and sends a list of items sold in a month, and overall
     ----------------------
-    The GET function takes each product from Product's objects, and runs a search in all the product transactions, 
+    The GET function takes each product from Product's objects, and runs a search in all the product transactions,
     with the field being the product name.
     After this, we run by the transactions month-wise, to get the transactions made in each month
     In each transaction, we check if the type of transaction is 'IN' or 'OUT',
@@ -505,10 +506,13 @@ class Profit(generics.GenericAPIView):
 
 
 class Expiry(generics.GenericAPIView):
-    pagination_class = ProjectLimitOffsetPagination
+    # pagination_class = ProjectLimitOffsetPagination
     def get(self, request, *args, **kwargs):
         pr = Products.objects.all()
-        exp = []
+        limit = int(request.GET.get("limit", -1))
+        offset = int(request.GET.get("offset", -1))
+        a = {}
+        data = []
         for p in pr:
             i = p.items_set.all()
             for j in range(0, 4):
@@ -519,10 +523,22 @@ class Expiry(generics.GenericAPIView):
                 d2 = len(d1)
 
                 if d2 != 0:
-                    p2 = {"Product": p.name, "No. of items": d2, "Days left": j}
-                    exp.append(p2)
+                    p2 = {
+                        "Product": str(p.name),
+                        "No. of items": str(d2),
+                        "Days left": str(j),
+                    }
+                    data.append(p2)
 
-        a = json.dumps(exp)
+        a["count"] = len(data)
+
+        a["results"] = data
+        if limit >= 0 and offset >= 0:
+            if limit + offset < len(data):
+                a["exp"] = data[offset : offset + limit]
+            elif offset < len(data):
+                a["exp"] = data[offset:]
+
         return JsonResponse(a)
         # Create a for loop with datetime.now + i and make i =3 so check all dates till next 3 dates
 
