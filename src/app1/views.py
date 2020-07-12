@@ -94,7 +94,8 @@ class BillListView(generics.ListAPIView):
 
 class ProductListView(generics.ListCreateAPIView):
     """ View to Display all Products """
-
+    search_fields = ["name"]
+    filter_backends = (filters.SearchFilter,)
     queryset = Products.objects.all()
     serializer_class = ProductListSerializer
     pagination_class = ProjectLimitOffsetPagination
