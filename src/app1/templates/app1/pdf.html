@@ -1,0 +1,83 @@
+<html>
+  <style>
+    h1 {
+        text-align: center;
+    }
+    body{
+        padding: 10px;
+        background:#b8f8f84d;
+    }
+    table {
+        width: 100%;
+    }
+
+
+    table.thead{
+        background-color: #e7eff3;
+        font-size: 1.25rem;
+        font-weight: bold;
+        color: #495d69;
+       
+    }
+    table td{
+        font-size: 1.5rem;
+        color: #495d69;
+
+    }
+    .total {
+        background-color: #e7eff3;
+        font-size: 1.25rem;
+        font-weight: bold;
+        color: #495d69;
+    }
+    .row1{
+        background-color:#e8f4f8;
+    }
+    .row2{
+        background-color:#c1e1ec;
+    }
+  </style>
+    <title>Your Bill</title>
+    <body>
+        <h1 style= "font-size: 36px; color:#495d69">Invoice</h1>
+        <p style="color:black; font-size:20px;">
+            <b style = "color:#72bcd4">Invoice no:</b> {{ order.id }}</br>
+            <span class="secondary">
+            <b style="color:#72bcd4">Date and Time of generation:</b> {{ order.datetime }}
+            </span>
+        </p>
+
+        <h2 style= "font-size: 20px;">Bill to</h2>
+        <p style="color:black; font-size:20px;">
+            <b>{{ order.customer_name }}</b> , <br>
+            {{ order.customer_address }}<br>
+            <b style="color:#72bcd4">Ph:</b> {{ order.customer_ph }}<br>
+        </p>
+        <h3 style= "font-size: 20px;">Items bought</h3>
+        <table>
+            <thead>
+                <tr style="background-color: #e7eff3; font-size: 1.25rem; font-weight: bold; color: #495d69;">
+                    <th>Product</th>
+                    <th align="right">Price</th>
+                    <th align="right">Quantity</th>
+                    <th align="right">Cost</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for i in order.entries %}
+                    <tr class="row{% cycle "1" "2" %}">
+                        <td align="center">{{ i.name }}</td>
+                        <td class="num" align="right">{{ i.price }}</td>
+                        <td class="num" align="right">{{ i.quantity }}</td>
+                        <td class="num" align="center">{{ i.total }}</td>
+                    </tr>
+                    
+                {% endfor %}
+                <tr class="total">
+                    <td colspan="3" align = "center"><b >Total</b></td>
+                    <td class="num" align="center">{{ order.total_bill }}</td>
+                </tr>
+            </tbody>
+        </table>
+    </body>
+</html>

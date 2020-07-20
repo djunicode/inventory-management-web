@@ -5,6 +5,7 @@ from django.contrib.auth.models import PermissionsMixin
 from django.conf import settings
 from django.core.validators import RegexValidator
 from datetime import datetime
+from jsonfield import JSONField
 
 
 class UserManager(BaseUserManager):
@@ -82,6 +83,7 @@ class Bill(models.Model):
     )
 
     in_or_out = models.CharField(max_length=20, choices=choices)
+    billdetails = JSONField()
 
     def __str__(self):
         return self.customer

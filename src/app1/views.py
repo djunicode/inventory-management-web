@@ -17,7 +17,10 @@ from django.contrib.auth.decorators import login_required, permission_required
 from rest_framework.permissions import IsAuthenticated
 from datetime import datetime, timedelta
 from rest_framework import filters
+from django.template.loader import render_to_string, get_template
+from .pdf import render_to_pdf
 
+# import weasyprint
 # pagination
 from .pagination import ProjectLimitOffsetPagination
 
@@ -94,6 +97,7 @@ class BillListView(generics.ListAPIView):
 
 class ProductListView(generics.ListCreateAPIView):
     """ View to Display all Products """
+
     search_fields = ["name"]
     filter_backends = (filters.SearchFilter,)
     queryset = Products.objects.all()
@@ -549,3 +553,105 @@ class ProductSearch(generics.ListCreateAPIView):
     filter_backends = (filters.SearchFilter,)
     queryset = Products.objects.all()
     serializer_class = ProductListSerializer
+
+
+class Billing(generics.GenericAPIView):
+    def post(self, request, *args, **kwargs):
+        # checking print statements...
+        print("body is: ", json.loads(request.body))
+        # getting the body of the response, which contains a JSON of the bill items
+        items = json.loads(request.body)
+
+        # hoping we do not get an empty Json
+        if items:
+            order = {}
+            order["total_bill"] = 0  # amount to be paid
+            order["total_items"] = 0  # no of total items bought
+
+            # order["item-names"] = []#list of names of products in the bill
+            # order["item-prices"]=[]#list of prices of each product in the bill
+            # order["item-quantities"] = []#list of quantities of each product
+            # order["item-total-bill"] = []#total bill generated per product
+
+            order["customer_name"] = items["name"]  # name of the customer
+            order["customer_ph"] = items[
+                "phone"
+            ]  # phone number of the customer(string)
+            order["customer_address"] = items["address"]  # address of the customer
+            in_or_out = items[
+                "in_or_out"
+            ]  # who's buying? the shopkeeper(in) or a customer(out)?
+            items = items["order"]  # the dictionary of all the items in the order
+            print(in_or_out)
+            # getting the details of the bill in order, as in the above dictionary
+            count = 0
+            order["entries"] = []
+            for i in items.keys():
+
+                item_total = 0
+                item_total = int(items[i]["price"]) * int(
+                    items[i]["quantity"]
+                )  # total bill, productwise
+                order["entries"].append(
+                    {
+                        "name": items[i]["name"],  # name of product
+                        "quantity": int(
+                            items[i]["quantity"]
+                        ),  # quantity of product bought
+                        "price": int(items[i]["price"]),  # price per item of product
+                        "total": item_total,  # total for that product
+                    }
+                )
+
+                # order["item-names"].append(items[i]["name"])
+                # order["item-quantities"].append(int(items[i]["quantity"]))
+                # order["item-prices"].append(int(items[i]["price"]))
+                # order["item-total-bill"].append(item_total)
+
+                # storing the total amount and quantity in the order
+                order["total_bill"] += item_total
+                order["total_items"] += int(items[i]["quantity"])
+
+            # creating a Bill() instance, and storing and saving objects
+            bill = Bill()
+            bill.customer = order["customer_name"]
+            bill.employee = request.user
+            bill.taxes = (
+                order["total_bill"] * 0.2
+            )  # taking 20% as the taxes,can be upgraded
+            bill.in_or_out = in_or_out.title()
+            bill.billdetails = json.dumps(order)
+            bill.save()
+
+            # bill ID as invoice ID
+            order["id"] = bill.id
+            order["datetime"] = bill.date_time
+            # order["count"] = count
+
+            return JsonResponse(order)
+        else:
+            return HttpResponse("OOOOOOOF!!")
+            # converting to a template and then a pdf
+
+
+class Generate_PDF(generics.GenericAPIView):
+    def get(self, request, bill_id, *args, **kwargs):
+        print("got here", type(bill_id))
+        bill = get_object_or_404(Bill, pk=bill_id)
+        print(bill.id)
+        order = json.loads(bill.billdetails)
+        order["id"] = bill.id
+        order["datetime"] = bill.date_time
+        print(order)
+        template = get_template("app1/pdf.html")
+        html = template.render({"order": order})
+        pdf = render_to_pdf("app1/pdf.html", {"order": order})  # pdf
+
+        if pdf:
+            response = HttpResponse(pdf, content_type="application/pdf")
+            filename = "Invoice_{}.pdf".format(order["id"])
+            content = "inline; filename = %s" % (filename)
+            response["Content-Disposition"] = content
+            return response
+        else:
+            return HttpResponse("Not Found/Error. Please try again")
