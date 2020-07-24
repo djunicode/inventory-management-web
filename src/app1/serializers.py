@@ -9,7 +9,7 @@ class TransactionSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Product_Transaction
-        fields = ["id", "name", "quantity", "rate", "in_or_out"]
+        fields = ["id", "name", "quantity", "rate", "in_or_out", "billdetails"]
 
 
 class BillSerializer(serializers.ModelSerializer):

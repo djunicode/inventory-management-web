@@ -634,24 +634,23 @@ class Billing(generics.GenericAPIView):
             # converting to a template and then a pdf
 
 
-class Generate_PDF(generics.GenericAPIView):
-    def get(self, request, bill_id, *args, **kwargs):
-        print("got here", type(bill_id))
-        bill = get_object_or_404(Bill, pk=bill_id)
-        print(bill.id)
-        order = json.loads(bill.billdetails)
-        order["id"] = bill.id
-        order["datetime"] = bill.date_time
-        print(order)
-        template = get_template("app1/pdf.html")
-        html = template.render({"order": order})
-        pdf = render_to_pdf("app1/pdf.html", {"order": order})  # pdf
+def get_pdf(request, bill_id):
+    print("got here", type(bill_id))
+    bill = get_object_or_404(Bill, pk=bill_id)
+    print(bill.id)
+    order = json.loads(bill.billdetails)
+    order["id"] = bill.id
+    order["datetime"] = bill.date_time
+    print(order)
+    template = get_template("app1/pdf.html")
+    html = template.render({"order": order})
+    pdf = render_to_pdf("app1/pdf.html", {"order": order})  # pdf
 
-        if pdf:
-            response = HttpResponse(pdf, content_type="application/pdf")
-            filename = "Invoice_{}.pdf".format(order["id"])
-            content = "inline; filename = %s" % (filename)
-            response["Content-Disposition"] = content
-            return response
-        else:
-            return HttpResponse("Not Found/Error. Please try again")
+    if pdf:
+        response = HttpResponse(pdf, content_type="application/pdf")
+        filename = "Invoice_{}.pdf".format(order["id"])
+        content = "inline; filename = %s" % (filename)
+        response["Content-Disposition"] = content
+        return response
+    else:
+        return HttpResponse("Not Found/Error. Please try again")

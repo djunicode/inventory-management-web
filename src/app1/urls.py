@@ -15,7 +15,7 @@ from .views import (
     Profit,
     ProductSearch,
     Billing,
-    Generate_PDF,
+    get_pdf,
 )
 
 urlpatterns = [
@@ -35,7 +35,7 @@ urlpatterns = [
     url(r"api/transactions/$", TransactionListView.as_view()),
     url(r"api/explist/", Expiry.as_view()),
     url("api/order/", Billing.as_view()),
-    path("api/pdf/<int:bill_id>", Generate_PDF.as_view()),
+    path("api/pdf/<int:bill_id>", get_pdf),
     # url("api/search/", csrf_exempt(SearchResultsView.as_view())),
     url("api/prodsearch/", ProductSearch.as_view()),
     re_path(r"^(?:.*)/?$", login, name="login"),
