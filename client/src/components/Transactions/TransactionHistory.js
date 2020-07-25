@@ -8,12 +8,14 @@ import {
   TableContainer,
   TableHead,
   TableRow,
+  IconButton,
 } from '@material-ui/core';
 import { useHistory } from 'react-router-dom';
 import Spinner from '../Spinner';
 import { getEndPoint } from '../UtilityFunctions/Request';
+import { ReactComponent as Vector } from '../../images/Vector.svg';
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles((theme) => ({
   paper: {
     boxShadow: '4px 4px 20px rgba(0,0,0,0.1)',
     textAlign: 'center',
@@ -86,14 +88,24 @@ const TransactionHistory = () => {
   const classes = useStyles();
 
   // parse date to proper format
-  const parseDate = date => {
+  const parseDate = (date) => {
     const newDate = new Date(date).toDateString().slice(4);
     return newDate;
   };
 
-  // parse price to proper format
-  const parsePrice = transactions => {
-    return transactions.reduce((acc, obj) => acc + obj.rate * obj.quantity, 0);
+  // parse products to proper format
+  const parseProducts = (entries) => {
+    return entries.reduce((acc, obj) => `${acc} ${obj.name}, `, '');
+  };
+
+  const handleClick = async (id) => {
+    const response = await getEndPoint(`/api/pdf/${id}`, null, history);
+    const url = window.URL.createObjectURL(new Blob([response.data]));
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', `invoice${id}.pdf`);
+    link.click();
+    window.URL.revokeObjectURL(url);
   };
 
   return (
@@ -105,6 +117,7 @@ const TransactionHistory = () => {
             <TableHead>
               <TableRow>
                 <TableCell> ID </TableCell>
+                <TableCell align='center' />
                 <TableCell> Date </TableCell>
                 <TableCell>Products</TableCell>
                 <TableCell>Items</TableCell>
@@ -113,26 +126,23 @@ const TransactionHistory = () => {
               </TableRow>
             </TableHead>
             <TableBody>
-              {transactionList.map(row => (
+              {transactionList.map((row) => (
                 <TableRow key={row.id} hover>
                   <TableCell>{row.id}</TableCell>
+                  <TableCell>
+                    <IconButton onClick={() => handleClick(row.id)}>
+                      <Vector />
+                    </IconButton>
+                  </TableCell>
                   <TableCell>{parseDate(row.date_time)}</TableCell>
                   <TableCell>
-                    {row.transaction.map((val, index) =>
-                      index === row.transaction.length - 1
-                        ? val.name
-                        : `${val.name}, `
-                    )}
+                    {parseProducts(JSON.parse(row.billdetails).entries)}
                   </TableCell>
                   <TableCell>
-                    {row.transaction.map((val, index) =>
-                      index === row.transaction.length - 1
-                        ? val.quantity
-                        : `${val.quantity}, `
-                    )}
+                    {JSON.parse(row.billdetails).total_items}
                   </TableCell>
                   <TableCell align='right'>
-                    {parsePrice(row.transaction)}
+                    {JSON.parse(row.billdetails).total_bill}
                   </TableCell>
                   <TableCell align='center'>
                     {row.in_or_out === 'In' ? 'Buy' : 'Sell'}
