@@ -16,78 +16,123 @@ from rest_framework.decorators import api_view, permission_classes
 from django.contrib.auth.decorators import login_required, permission_required
 from rest_framework.permissions import IsAuthenticated
 from datetime import datetime, timedelta
+from rest_framework import filters
+from django.template.loader import render_to_string, get_template
+from .pdf import render_to_pdf
+
+# import weasyprint
+# pagination
+from .pagination import ProjectLimitOffsetPagination
+
+
+@api_view(["POST"])
+def user_update(request):
+    try:
+        if request.method == "POST":
+            email = request.POST.get("email")
+            user = User.objects.get(email=request.POST.get("email"))
+
+            user.first_name = request.POST.get("first_name", None) or user.first_name
+            user.last_name = request.POST.get("last_name", None) or user.last_name
+            user.age = request.POST.get("age", None) or user.age
+            user.gender = request.POST.get("gender", None) or user.gender
+            user.is_staff = request.POST.get("is_staff", None) or user.is_staff
+            user.is_active = request.POST.get("is_active", None) or user.is_active
+            user.is_superuser = (
+                request.POST.get("is_superuser", None) or user.is_superuser
+            )
+            user.save()
+
+            return JsonResponse(
+                data={"message": "User successfully updated."},
+                status=status.HTTP_200_OK,
+            )
+    except:
+        return JsonResponse(
+            data={"message": "Some error occured. Please contact the administrator."},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        )
 
 
 class User_Delete(generics.GenericAPIView):
     def post(self, request, *args, **kwargs):
-
-        if request.method == "POST":
-            if dj_settings.TOKEN_MODEL:
-                dj_settings.TOKEN_MODEL.objects.filter(
-                    user__email=request.POST.get("email")
-                ).delete()
-            User.objects.get(email=request.POST.get("email")).delete()
-        return HttpResponse("")
+        try:
+            if request.method == "POST":
+                if dj_settings.TOKEN_MODEL:
+                    dj_settings.TOKEN_MODEL.objects.filter(
+                        user__email=request.POST.get("email")
+                    ).delete()
+                User.objects.get(email=request.POST.get("email")).delete()
+                return JsonResponse(
+                    data={"message": "User & Token successfully deleted."},
+                    status=status.HTTP_200_OK,
+                )
+        except:
+            return JsonResponse(
+                data={
+                    "message": "Some error occured. Please contact the administrator."
+                },
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
 
 
 def login(request):
     return render(request, "index.html")
 
 
-""" View to Display all transactions irrespective of Bill """
-
-
 class TransactionListView(generics.ListAPIView):
+    """ View to Display all transactions irrespective of Bill """
+
     queryset = Product_Transaction.objects.all()
     serializer_class = TransactionSerializer
-
-
-""" View to Display all Bills """
+    # pagination_class = ProjectLimitOffsetPagination
 
 
 class BillListView(generics.ListAPIView):
+    """ View to Display all Bills """
+
     queryset = Bill.objects.all()
     serializer_class = BillSerializer
 
 
-""" View to Display all Products """
-
-
 class ProductListView(generics.ListCreateAPIView):
+    """ View to Display all Products """
+
+    search_fields = ["name"]
+    filter_backends = (filters.SearchFilter,)
     queryset = Products.objects.all()
     serializer_class = ProductListSerializer
-
-
-""" View to Delete specific product from database using product id """
+    pagination_class = ProjectLimitOffsetPagination
 
 
 class ProductDeleteView(generics.DestroyAPIView):
+    """ View to Delete specific product from database using product id """
+
     queryset = Products.objects.all()
     serializer_class = ProductListSerializer
 
 
-""" View to Update attributes of a specific product from database using product id (pid) """
-
-
 class Product_Update(generics.GenericAPIView):
+    """ View to Update attributes of a specific product from database using product id (pid) """
+
     def post(self, request, pid, *args, **kwargs):
-        """ Parameters
-            ------------
-            product id(pid)
-            (POST) from user: name , latest selling price and loose (Boolean Value)
-            ------------
+        """
+        Parameters
+        ------------
+        product id(pid)
+        (POST) from user: name , latest selling price and loose (Boolean Value)
+        ------------
 
-            Here, user can change name of product, its latest selling price and make the product loose or not loose(packaged)
-
-            For name change, we get the product using its id, store its name in a variable pname and then change product's name
-            as requested by user
-            Similarly, latest selling price of the product is directly updated.
-
-            For loose, if loose attriibute remains unchanged, then no changes occur
-            However, if loose product is to be made packaged, i.e. loose = False, Items of that particular product are added in the
-            database according to product quantity.
-            If packaged product is to be made loose, items of that particular product are deleted from database.
-            addition and deletion of items is done using the pname variable which stored earlier product name.        """
+        Here, user can change name of product, its latest selling price and make the product loose or not loose(packaged)
+        For name change, we get the product using its id, store its name in a variable pname and then change product's name
+        as requested by user
+        Similarly, latest selling price of the product is directly updated.
+        For loose, if loose attriibute remains unchanged, then no changes occur
+        However, if loose product is to be made packaged, i.e. loose = False, Items of that particular product are added in the
+        database according to product quantity.
+        If packaged product is to be made loose, items of that particular product are deleted from database.
+        addition and deletion of items is done using the pname variable which stored earlier product name.
+        """
 
         if request.method == "POST":
             try:
@@ -143,38 +188,32 @@ class Product_Update(generics.GenericAPIView):
                 return res
 
 
-"""  View to buy Products """
-
-
 class Buy(generics.GenericAPIView):
+    """  View to buy Products """
+
     def post(self, request, *args, **kwargs):
-        """ Parameters
-                ------------
-            (POST) from user: name , avg_cost_price and quantity;
-                ------------
+        """
+        Parameters
+        ------------
+        (POST) from user: name , avg_cost_price and quantity;
+        ------------
 
-                Here, user buys a product. It might be a new product or an existing product. This counts for all IN Transactions.
+        Here, user buys a product. It might be a new product or an existing product. This counts for all IN Transactions.
+        We search for a product using its name.
+        If a Product already exists,
+        Then we recalculate avg_cost_pice of the product using the formula:
+        new avg_cost_price = (current avg_cost_price*current no. of items) + (POSTed avg_cost_price* POSTed no. of items)
+                            -----------------------------------------------------------------------------------------------
+                                                    current no. of items + POSTed no. of items
 
-                We search for a product using its name.
-
-                If a Product already exists,
-                Then we recalculate avg_cost_pice of the product using the formula:
-
-                new avg_cost_price = (current avg_cost_price*current no. of items) + (POSTed avg_cost_price* POSTed no. of items)
-                                    -----------------------------------------------------------------------------------------------
-                                                            current no. of items + POSTed no. of items
-
-                Then we increase the quantity of the product and
-                Then we check if product is loose or not, if not then we add new items of said product to the database accordingly.
-                We save the In transaction.
-
-                If Product doesn't exist, we create a new product using above paramenters keeping deafult value for loose(False) and
-                latest_selling_price (null) and save the transaction.
-
-                If we create a new product, we set the variable created to True and send it along with the response, else it is set to False
-                and then sent
-
-            """
+        Then we increase the quantity of the product and
+        Then we check if product is loose or not, if not then we add new items of said product to the database accordingly.
+        We save the In transaction.
+        If Product doesn't exist, we create a new product using above paramenters keeping deafult value for loose(False) and
+        latest_selling_price (null) and save the transaction.
+        If we create a new product, we set the variable created to True and send it along with the response, else it is set to False
+        and then sent
+        """
 
         if request.POST["name"] == "" or request.POST["name"].isspace() == True:
             res = HttpResponse("Incorrect Name Input")
@@ -184,7 +223,6 @@ class Buy(generics.GenericAPIView):
         else:
             try:
                 # If Product exists
-
                 re = Products.objects.get(name=request.POST["name"])
 
                 # Re Calculate avg_cost_price
@@ -203,18 +241,15 @@ class Buy(generics.GenericAPIView):
                 re.save()
 
                 if re.loose == False:
-
                     if (request.POST["expiry"] == "") or (
                         request.POST["expiry"] == None
                     ):
-                        for i in range(1, int(request.POST["quantity"]) + 1):
+                        for i in range(0, int(request.POST["quantity"])):
                             itobj = Items(product=re, expiry=None)
 
                             itobj.save()
-
                     else:
-
-                        for i in range(1, int(request.POST["quantity"]) + 1):
+                        for i in range(0, int(request.POST["quantity"])):
                             itobj = Items(product=re, expiry=request.POST["expiry"])
                             itobj.save()
 
@@ -242,21 +277,18 @@ class Buy(generics.GenericAPIView):
 
                 avg_cost_price = request.POST["avg_cost_price"]
 
+                # Create new product
                 pdt = Products(name=name, quantity=quant, avg_cost_price=avg_cost_price)
-                # Created new product
 
                 # Added Items as default loose= False
                 pdt.save()
 
                 if (request.POST["expiry"] == "") or (request.POST["expiry"] == None):
-                    for i in range(1, int(request.POST["quantity"]) + 1):
+                    for i in range(0, int(request.POST["quantity"])):
                         itobj = Items(product=pdt, expiry=None)
-
                         itobj.save()
-
                 else:
-
-                    for i in range(1, int(request.POST["quantity"]) + 1):
+                    for i in range(0, int(request.POST["quantity"])):
                         itobj = Items(product=pdt, expiry=request.POST["expiry"])
                         itobj.save()
 
@@ -279,32 +311,26 @@ class Buy(generics.GenericAPIView):
                 return HttpResponse(serialized)
 
 
-""" View to sell products """
-
-
 class Sell(generics.GenericAPIView):
+    """ View to sell products """
+
     def post(self, request, *args, **kwargs):
-        """ Parameters
-            ------------
+        """
+        Parameters
+        ------------
         (POST) from user: name , latest_selling_price and quantity;
-            ------------
+        ------------
 
-            Here, user sells a product. It must be an existing product. This counts for all OUT Transactions.
-
-            We search for a product using its name.
-
-            If a Product does not exist, 404 error is generated
-
-            After finding the product, product quantity is deducted by the required quantity only if there is enough quantity
-            of the product available for selling
-
-            If product is loose, new latest_selling_price of product is saved as given by user;
-
-            else it is not saved as for packaged goods, latest_selling_price is MRP.
-
-            If product is packaged, number of items equal to those sold are deleted from database.
-
-            Transaction is then saved as an OUT transaction and suitable response is returned            """
+        Here, user sells a product. It must be an existing product. This counts for all OUT Transactions.
+        We search for a product using its name.
+        If a Product does not exist, 404 error is generated
+        After finding the product, product quantity is deducted by the required quantity only if there is enough quantity
+        of the product available for selling
+        If product is loose, new latest_selling_price of product is saved as given by user;
+        else it is not saved as for packaged goods, latest_selling_price is MRP.
+        If product is packaged, number of items equal to those sold are deleted from database.
+        Transaction is then saved as an OUT transaction and suitable response is returned
+        """
 
         if request.method == "POST":
             # Retrieve object if it exisits or generate 404
@@ -335,9 +361,10 @@ class Sell(generics.GenericAPIView):
 
                 # If item is packaged. delete required amount of items from database
                 if re.loose == False:
-                    it = Items.objects.filter(product__name=re.name)
-                    for i in range(0, int(request.POST["quantity"])):
-                        it[i].delete()
+
+                    it = re.items_set.all()[: int(request.POST["quantity"])]
+                    for i in it:
+                        i.delete()
 
                 # Send Required Response
                 tr = Products.objects.get(name=request.POST["name"])
@@ -345,6 +372,8 @@ class Sell(generics.GenericAPIView):
                 dict_obj = model_to_dict(tr)
                 dict_obj.update(created)
                 serialized = json.dumps(dict_obj)
+                if tr.quantity == 0:
+                    tr.delete()
                 return HttpResponse(serialized)
 
             except Products.DoesNotExist:
@@ -355,30 +384,27 @@ class Sell(generics.GenericAPIView):
 
 class Profit(generics.GenericAPIView):
     """
-    Profit class 
+    Profit class
     ---------------------
     (GET): Gets data from transactions, and sends a list of items sold in a month, and overall
     ----------------------
-    The GET function takes each product from Product's objects, and runs a search in all the product transactions, 
+    The GET function takes each product from Product's objects, and runs a search in all the product transactions,
     with the field being the product name.
     After this, we run by the transactions month-wise, to get the transactions made in each month
-
     In each transaction, we check if the type of transaction is 'IN' or 'OUT',
     if IN, it means that a product has been bought.
     so the money transactions made are added to cost price, both monthly and overall
     and the quantity of items are added to the 'items bought' counter
-
     else, implying that the product has been sold,
     the money transactions made are added to the selling price, both monthly and overall
     and the quantity of items are added to the 'items bought' counter
-    
+
     returns: A JSON response consisting of the total cost, selling price and quantity of items bought/sold,
     monthly and overall, for each product
 
     """
 
     def get(self, request, *args, **kwargs):
-
         serializer_class = ProfitSerializer
         products = Products.objects.all()
         result = {}
@@ -485,10 +511,13 @@ class Profit(generics.GenericAPIView):
 
 
 class Expiry(generics.GenericAPIView):
+    # pagination_class = ProjectLimitOffsetPagination
     def get(self, request, *args, **kwargs):
-
         pr = Products.objects.all()
-        exp = []
+        limit = int(request.GET.get("limit", -1))
+        offset = int(request.GET.get("offset", -1))
+        a = {}
+        data = []
         for p in pr:
             i = p.items_set.all()
             for j in range(0, 4):
@@ -499,11 +528,152 @@ class Expiry(generics.GenericAPIView):
                 d2 = len(d1)
 
                 if d2 != 0:
-                    p2 = {"Product": p.name, "No. of items": d2, "Days left": j}
-                    exp.append(p2)
+                    p2 = {
+                        "Product": str(p.name),
+                        "No. of items": str(d2),
+                        "Days left": str(j),
+                    }
+                    data.append(p2)
 
-        a = json.dumps(exp)
-        return HttpResponse(a)
+        a["count"] = len(data)
+
+        a["results"] = data
+        if limit >= 0 and offset >= 0:
+            if limit + offset < len(data):
+                a["exp"] = data[offset : offset + limit]
+            elif offset < len(data):
+                a["exp"] = data[offset:]
+
+        return JsonResponse(a)
+        # Create a for loop with datetime.now + i and make i =3 so check all dates till next 3 dates
 
 
-### Create a for loop with datetime.now + i and make i =3 so check all dates till next 3 dates
+class ProductSearch(generics.ListCreateAPIView):
+    search_fields = ["name"]
+    filter_backends = (filters.SearchFilter,)
+    queryset = Products.objects.all()
+    serializer_class = ProductListSerializer
+
+
+class Billing(generics.GenericAPIView):
+    def post(self, request, *args, **kwargs):
+        # checking print statements...
+        print("body is: ", json.loads(request.body))
+        # getting the body of the response, which contains a JSON of the bill items
+        items = json.loads(request.body)
+
+        # hoping we do not get an empty Json
+        if items:
+            order = {}
+            order["total_bill"] = 0  # amount to be paid
+            order["total_items"] = 0  # no of total items bought
+
+            # order["item-names"] = []#list of names of products in the bill
+            # order["item-prices"]=[]#list of prices of each product in the bill
+            # order["item-quantities"] = []#list of quantities of each product
+            # order["item-total-bill"] = []#total bill generated per product
+
+            order["customer_name"] = items["name"]  # name of the customer
+            order["customer_ph"] = items[
+                "phone"
+            ]  # phone number of the customer(string)
+            order["customer_address"] = items["address"]  # address of the customer
+            in_or_out = items[
+                "in_or_out"
+            ]  # who's buying? the shopkeeper(in) or a customer(out)?
+            items = items["order"]  # the dictionary of all the items in the order
+            print(in_or_out)
+            # getting the details of the bill in order, as in the above dictionary
+            count = 0
+            order["entries"] = []
+            for i in items.keys():
+
+                item_total = 0
+                item_total = int(items[i]["price"]) * int(
+                    items[i]["quantity"]
+                )  # total bill, productwise
+                order["entries"].append(
+                    {
+                        "name": items[i]["name"],  # name of product
+                        "quantity": int(
+                            items[i]["quantity"]
+                        ),  # quantity of product bought
+                        "price": int(items[i]["price"]),  # price per item of product
+                        "total": item_total,  # total for that product
+                    }
+                )
+
+                # order["item-names"].append(items[i]["name"])
+                # order["item-quantities"].append(int(items[i]["quantity"]))
+                # order["item-prices"].append(int(items[i]["price"]))
+                # order["item-total-bill"].append(item_total)
+
+                # storing the total amount and quantity in the order
+                order["total_bill"] += item_total
+                order["total_items"] += int(items[i]["quantity"])
+
+            # creating a Bill() instance, and storing and saving objects
+            bill = Bill()
+            bill.customer = order["customer_name"]
+            bill.employee = request.user
+            bill.taxes = (
+                order["total_bill"] * 0.2
+            )  # taking 20% as the taxes,can be upgraded
+            bill.in_or_out = in_or_out.title()
+            bill.billdetails = json.dumps(order)
+            bill.save()
+
+            # bill ID as invoice ID
+            order["id"] = bill.id
+            order["datetime"] = bill.date_time
+            # order["count"] = count
+
+            return JsonResponse(order)
+        else:
+            return HttpResponse("OOOOOOOF!!")
+            # converting to a template and then a pdf
+
+
+class Generate_PDF(generics.GenericAPIView):
+    def get(self, request, bill_id, *args, **kwargs):
+        print("got here", type(bill_id))
+        bill = get_object_or_404(Bill, pk=bill_id)
+        print(bill.id)
+        order = json.loads(bill.billdetails)
+        order["id"] = bill.id
+        order["datetime"] = bill.date_time
+        print(order)
+        template = get_template("app1/pdf.html")
+        html = template.render({"order": order})
+        pdf = render_to_pdf("app1/pdf.html", {"order": order})  # pdf
+
+        if pdf:
+            response = HttpResponse(pdf, content_type="application/pdf")
+            filename = "Invoice_{}.pdf".format(order["id"])
+            content = "inline; filename = %s" % (filename)
+            response["Content-Disposition"] = content
+            return response
+        else:
+            return HttpResponse("Not Found/Error. Please try again")
+
+
+def unauth_pdf(request, bill_id):
+    print("got here", type(bill_id))
+    bill = get_object_or_404(Bill, pk=bill_id)
+    print(bill.id)
+    order = json.loads(bill.billdetails)
+    order["id"] = bill.id
+    order["datetime"] = bill.date_time
+    print(order)
+    template = get_template("app1/pdf.html")
+    html = template.render({"order": order})
+    pdf = render_to_pdf("app1/pdf.html", {"order": order})  # pdf
+
+    if pdf:
+        response = HttpResponse(pdf, content_type="application/pdf")
+        filename = "Invoice_{}.pdf".format(order["id"])
+        content = "inline; filename = %s" % (filename)
+        response["Content-Disposition"] = content
+        return response
+    else:
+        return HttpResponse("Not Found/Error. Please try again")
