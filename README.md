@@ -22,6 +22,28 @@
 
 - React 16.6+
 
+## Features
+
+#### SignUp and Authentication
+
+Signup is defined in such a way that only the owner/manager can add new employees. This can be done in the Employees section of the web-app. It requires first and last name of the employee, their email, age, gender and password to facilitate their login.
+
+#### Graphs
+
+Graphs showing the sales over time, sales per product, profit earned and money spent are visisble on homepage. This gives the owner a good overview of the sales and helps him decide further sales and marketing strategies.
+
+#### Inventory and Expiry tabs
+
+In the Inventory tab, the user can check all products present in the shop, their respective quantity and their price in an elegant tabular format.The Product fields like Selling price, name and the limits can also be updated here.
+
+In the Expiry tab, the user can also see the products which are going to expire within 3 days and thus, help the user take necessary action and avoid unnecessary losses.
+
+#### Transactions and Transaction History
+
+In the Transactions tab, the user can create entries for buying products for the shop and selling products to the customer.
+
+The id, Product transacted, Number of items, their price and the type of Transaction(Buy/Sell) are displayed in the Transaction History tab.
+
 ## Build Instructions
 
 #### Backend
