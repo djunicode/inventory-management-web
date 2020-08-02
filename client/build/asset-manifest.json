@@ -1,0 +1,27 @@
+{
+  "files": {
+    "main.css": "/static/css/main.06cc6fd4.chunk.css",
+    "main.js": "/static/js/main.cc45d319.chunk.js",
+    "main.js.map": "/static/js/main.cc45d319.chunk.js.map",
+    "runtime-main.js": "/static/js/runtime-main.8c40394c.js",
+    "runtime-main.js.map": "/static/js/runtime-main.8c40394c.js.map",
+    "static/js/2.bbb80d0e.chunk.js": "/static/js/2.bbb80d0e.chunk.js",
+    "static/js/2.bbb80d0e.chunk.js.map": "/static/js/2.bbb80d0e.chunk.js.map",
+    "index.html": "/index.html",
+    "precache-manifest.a11cbc3d059db5f78a56f5387e6f241a.js": "/precache-manifest.a11cbc3d059db5f78a56f5387e6f241a.js",
+    "service-worker.js": "/service-worker.js",
+    "static/css/main.06cc6fd4.chunk.css.map": "/static/css/main.06cc6fd4.chunk.css.map",
+    "static/js/2.bbb80d0e.chunk.js.LICENSE.txt": "/static/js/2.bbb80d0e.chunk.js.LICENSE.txt",
+    "static/media/Authentication.svg": "/static/media/Authentication.92768638.svg",
+    "static/media/Graph.svg": "/static/media/Graph.fa22f606.svg",
+    "static/media/Login.svg": "/static/media/Login.b498e69b.svg",
+    "static/media/PageNotFound.svg": "/static/media/PageNotFound.40eebd6e.svg",
+    "static/media/Vector.43e85992.svg": "/static/media/Vector.43e85992.svg"
+  },
+  "entrypoints": [
+    "static/js/runtime-main.8c40394c.js",
+    "static/js/2.bbb80d0e.chunk.js",
+    "static/css/main.06cc6fd4.chunk.css",
+    "static/js/main.cc45d319.chunk.js"
+  ]
+}
