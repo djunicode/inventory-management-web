@@ -44,6 +44,42 @@ In the Transactions tab, the user can create entries for buying products for the
 
 The id, Product transacted, Number of items, their price and the type of Transaction(Buy/Sell) are displayed in the Transaction History tab.
 
+## Screenshots
+
+![Login](https://user-images.githubusercontent.com/48253287/89116465-fe5c8e80-d4b1-11ea-8722-cba0cba60a72.png)
+
+![Graphs](https://user-images.githubusercontent.com/48253287/89116464-fd2b6180-d4b1-11ea-812f-d8b8554663b7.png)
+
+![Inventory](https://user-images.githubusercontent.com/48253287/89116459-f997da80-d4b1-11ea-9f6c-684d86384b7c.png)
+
+![Expiry](https://user-images.githubusercontent.com/48253287/89116460-fac90780-d4b1-11ea-9362-08aa049206bf.png)
+
+![Employee](https://user-images.githubusercontent.com/48253287/89116461-fb619e00-d4b1-11ea-866d-9a58076ec773.png)
+
+![Transaction](https://user-images.githubusercontent.com/48253287/89116462-fc92cb00-d4b1-11ea-8076-f6d3f06273fa.png)
+
+## Team
+
+#### Developers
+
+1. Aryan Chouhan 
+2. Apoorva Ambulgekar 
+3. Govind Thakur 
+4. Sheel Sanghvi 
+5. Jenish Hirpara 
+6. Preet Sanghavi 
+7. Punit Lodha 
+
+#### Mentors
+
+1. Ankit Gupta 
+2. Nirav Jain 
+3. Chinmay Khamkar 
+4. Dhyey Thummar 
+5. Jay Gala 
+6. Aditya Jeswani
+7. Fenil Doshi
+
 ## Build Instructions
 
 #### Backend
